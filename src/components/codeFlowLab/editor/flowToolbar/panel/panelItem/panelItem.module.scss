@@ -1,0 +1,31 @@
+@import '../../../../mixin';
+
+.panel-item {
+  @include flow-item-mixin;
+  cursor: pointer;
+
+  .panel-title {
+    text-transform: capitalize;
+    height: 30px;
+
+    @include flow-item-header;
+
+    span {
+      color: #ffffff;
+    }
+  }
+
+  .panel-desc {
+    padding: 5px;
+    color: #c1c1c1;
+    font-size: 12px;
+    line-height: 22px;
+    font-family: sans-serif;
+  }
+
+  &:hover {
+    .panel-desc {
+      color: #dadada;
+    }
+  }
+}

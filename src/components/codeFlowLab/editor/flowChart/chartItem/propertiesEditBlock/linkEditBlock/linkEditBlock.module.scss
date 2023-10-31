@@ -1,0 +1,12 @@
+.property-wrap {
+  & + .property-wrap {
+    margin-top: 8px;
+  }
+
+  & > p {
+    color: #9a9a9a;
+    font-size: 13px;
+    text-transform: capitalize;
+    margin-bottom: 6px;
+  }
+}

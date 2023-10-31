@@ -1,0 +1,71 @@
+@import '../../../../variables';
+
+.dot {
+  position: relative;
+  display: block;
+  transform: translateY(-50%);
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    transition: 0.3s width, 0.3s height;
+    pointer-events: all;
+    background-color: $other-point-color;
+  }
+
+  &:hover::before {
+    width: 10px;
+    height: 10px;
+  }
+
+  &.function-function {
+    background-color: $other-point-color;
+  }
+
+  &.element-element::before {
+    background-color: $element-point-color;
+  }
+
+  &.span-element::before,
+  &.element-span::before {
+    background-color: $span-point-color;
+  }
+
+  &.element-style::before,
+  &.style-element::before,
+  &.span-style::before {
+    background-color: $style-point-color;
+  }
+
+  &.style-style::before {
+    background-color: $style-style-point-color;
+  }
+
+  &.style-addStyle::before,
+  &.addStyle-style::before,
+  &.removeStyle-style::before,
+  &.toggleStyle-style::before {
+    background-color: $style-addStyle-point-color;
+  }
+
+  &.element-trigger::before,
+  &.span-trigger::before,
+  &.trigger-element::before {
+    background-color: $trigger-point-color;
+  }
+
+  &.trigger-function::before,
+  &.function-trigger::before {
+    background-color: $trigger-function-point-color;
+  }
+
+  &.variable-variable::before {
+    background-color: $variable-point-color;
+  }
+}

@@ -1,0 +1,23 @@
+.canvas-wrap {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  & > canvas,
+  & > div {
+    position: absolute;
+    inset: 0;
+  }
+}
+
+.flow-chart {
+}
+
+.connection-flow-chart {
+  pointer-events: none;
+
+  &.layer-top {
+    z-index: 99999;
+  }
+}

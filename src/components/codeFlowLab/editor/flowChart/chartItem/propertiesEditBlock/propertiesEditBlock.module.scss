@@ -1,0 +1,19 @@
+.property-block-wrap {
+  background-color: #252525;
+  padding: 10px 0;
+
+  .block-el-type {
+    color: #9a9a9a;
+    padding: 0 18px;
+    font-size: 13px;
+    text-transform: capitalize;
+  }
+
+  & > div {
+    padding: 0 10px;
+
+    & > :first-child {
+      margin-top: 8px;
+    }
+  }
+}

@@ -1,0 +1,17 @@
+@import '../variables';
+
+.editor-wrap {
+  position: fixed;
+  top: $editor-header-height;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  min-width: 1300px;
+
+  .canvas-area {
+    width: calc(100% - $viewer-width - $editor-toolbar-width);
+    background-color: #1e1e1e;
+    position: relative;
+  }
+}

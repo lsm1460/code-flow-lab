@@ -1,0 +1,38 @@
+@import '../../../variables';
+
+.toolbar-panel-wrap {
+  position: absolute;
+  width: 250px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  transform: translate(0);
+  transition: 0.3s transform, 2s box-shadow;
+  background-color: rgb(37, 37, 37);
+  box-shadow: 0px 0px 0px rgba(0, 0, 0, 0);
+  z-index: 9999;
+
+  &.active {
+    transform: translate(100%);
+    box-shadow: 5px 3px 5px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.panel-dim {
+  z-index: 9998;
+  pointer-events: none;
+  width: calc(100vw - 375px);
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0);
+  opacity: 0;
+  transition: 0.5s opacity;
+
+  &.active {
+    pointer-events: all;
+    opacity: 0.2;
+  }
+}

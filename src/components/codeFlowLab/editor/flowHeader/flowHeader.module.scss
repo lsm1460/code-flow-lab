@@ -1,0 +1,58 @@
+@import '../../variables';
+
+.header {
+  user-select: none;
+  height: $editor-header-height;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #3c3c3c;
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+
+  .logo {
+    font-size: 13px;
+    color: #ffffff;
+    font-family: sans-serif;
+    font-weight: 900;
+    margin-right: 15px;
+    padding: 3px 7px 5px 15px;
+    border-radius: 3px;
+    background-color: #1e1e1e;
+  }
+
+  .history-buttons {
+    display: flex;
+    align-items: center;
+    height: 100%;
+
+    li {
+      button {
+        background-color: transparent;
+        border: 1px solid transparent;
+        color: #ddd;
+        cursor: pointer;
+        text-align: center;
+        border-radius: 5px;
+        padding: 0 5px 3px;
+
+        i {
+          font-size: 18px;
+          display: block;
+        }
+
+        font-size: 10px;
+
+        &:hover {
+          border: 1px solid #9b9b9b;
+        }
+      }
+
+      & + li {
+        margin-left: 10px;
+      }
+    }
+  }
+}

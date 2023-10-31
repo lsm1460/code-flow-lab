@@ -1,0 +1,76 @@
+@import '../../mixin';
+
+.flow-log-wrap {
+  position: absolute;
+  bottom: 20px;
+  left: 30px;
+  right: 300px;
+  height: 100px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid #555;
+  border-radius: 20px;
+  padding: 10px 15px;
+
+  .flow-log {
+    height: 100%;
+    overflow: auto;
+    @include scroll-bar;
+
+    & > div {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+
+      & > p {
+        font-size: 15px;
+        font-family: sans-serif;
+        color: #c1c1c1;
+        line-height: 20px;
+
+        span {
+          font-size: 13px;
+          color: #088cab;
+          margin-right: 10px;
+          width: 60px;
+          display: inline-block;
+          font-weight: 400;
+        }
+
+        &.system {
+          color: #e7e7e7;
+          font-weight: 700;
+        }
+      }
+    }
+  }
+
+  .delete-button {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    transform: translateX(calc(100% + 10px));
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #e7e7e7;
+    cursor: pointer;
+    font-size: 18px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    transition: 0.3s all;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+
+      color: #ffffff;
+      transform: translateX(calc(100% + 10px)) scale(1.1);
+    }
+
+    &:active {
+      background-color: rgba(255, 255, 255, 0.5);
+      transform: translateX(calc(100% + 10px)) scale(1.1);
+      color: #1e1e1e;
+    }
+  }
+}

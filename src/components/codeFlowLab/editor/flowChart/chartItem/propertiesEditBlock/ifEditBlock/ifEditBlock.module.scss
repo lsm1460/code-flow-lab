@@ -1,0 +1,98 @@
+@import '../../../../../mixin';
+
+.condition-sub-title {
+  color: #9a9a9a;
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
+.condition-title {
+  color: #9a9a9a;
+  font-size: 13px;
+}
+
+.condition-title + .property-wrap {
+  margin-top: 5px;
+}
+
+.property-wrap + .condition-title {
+  margin-top: 15px;
+}
+
+.condition-box {
+  border: 1px solid #2e2e2e;
+  background-color: #1f1f1f;
+  border-radius: 5px;
+  padding: 5px;
+  position: relative;
+
+  + .condition-box {
+    margin-top: 15px;
+  }
+
+  .delete-button {
+    @include delete;
+  }
+
+  &:hover {
+    .delete-button {
+      @include delete-active;
+    }
+  }
+
+  .property-wrap {
+    width: 100%;
+    margin-left: 5px;
+    padding: 0 0 0 8px;
+    pointer-events: none;
+
+    .condition-list {
+      margin-bottom: 15px;
+
+      li {
+        padding-left: 10px;
+        position: relative;
+        height: 25px;
+
+        .item-name {
+          white-space: nowrap;
+          font-size: 13px;
+          color: #a1a1a1;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          font-family: sans-serif;
+          display: inline-block;
+          width: 100px;
+          vertical-align: middle;
+        }
+
+        .logical {
+          border: none;
+          border-radius: 3px;
+          padding: 2px 5px;
+          pointer-events: all;
+          background-color: #2a6bc8;
+          color: #ffffff;
+          font-size: 12px;
+          margin-right: 6px;
+          cursor: pointer;
+          width: 28px;
+          text-align: center;
+
+          &:hover,
+          &:active {
+            background-color: #235397;
+          }
+        }
+      }
+    }
+
+    .function-connector {
+      position: relative;
+    }
+  }
+}
+
+.property-add-button {
+  @include property-add-button;
+}

@@ -1,0 +1,50 @@
+@import '../../../variables';
+@import '../../../mixin';
+
+.options-modal-wrap {
+  position: fixed;
+  top: $editor-header-height + 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 600px;
+  width: 95%;
+  z-index: 99;
+  background-color: #1e1e1e;
+  padding: 15px 10px;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgb(59 59 59);
+
+  .options-container {
+    overflow-y: scroll;
+    margin-top: 10px;
+    width: calc(100% + 10px);
+    padding-right: 10px;
+
+    @include scroll-bar;
+
+    .option {
+      padding: 8px;
+      border-radius: 5px;
+      color: #9a9a9a;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.03);
+      }
+
+      &.active {
+        background-color: rgb(21, 49, 81);
+      }
+    }
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border-radius: 5px;
+    background-color: transparent;
+    color: #9a9a9a;
+    border: 1px solid #3b3b3b;
+  }
+}

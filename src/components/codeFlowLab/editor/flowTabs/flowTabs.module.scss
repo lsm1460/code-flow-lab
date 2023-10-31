@@ -1,0 +1,187 @@
+@import '../../variables';
+@import '../../mixin';
+
+$main-bg-color-light: #1c1c1c;
+$tabs-header-bg-color: #343434;
+$tabs-bg-color: $tabs-header-bg-color;
+$tabs-selected-bg-color: $main-bg-color-light;
+$tabs-hover-bg-color: #464646;
+$tabs-text-color: #7d8388;
+$tabs-hover-text-color: #585c5f;
+$tabs-selected-text-color: #c1c1c1;
+
+.flow-tabs-wrap {
+  width: 100%;
+  height: $editor-tabs-height;
+  overflow: hidden;
+}
+
+.flow-tabs {
+  @include scroll-bar;
+
+  padding-top: 8px;
+  background-color: #2c2e32;
+  width: calc(100% + 5px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: relative;
+
+  &::-webkit-scrollbar-track {
+    position: absolute;
+    bottom: 0;
+  }
+  &::-webkit-scrollbar {
+    height: 3px;
+  }
+
+  button {
+    background-color: transparent;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s background-color;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+
+    &:hover {
+      background-color: #646464;
+    }
+  }
+
+  .scene-list {
+    white-space: nowrap;
+    padding: 0 15px;
+
+    & > div {
+      display: inline-block;
+    }
+
+    .tab {
+      vertical-align: bottom;
+    }
+
+    .tab.tab {
+      background-color: $tabs-bg-color;
+      padding: 3px 5px 5px 10px;
+      display: inline-flex;
+      align-items: center;
+      min-width: 0;
+      width: 130px;
+      border-radius: 10px 10px 0 0;
+      position: relative;
+      z-index: 2;
+      height: 25px;
+      cursor: pointer;
+      color: #c1c1c1;
+      font-size: 13px;
+      font-family: sans-serif;
+      text-transform: capitalize;
+
+      & > button {
+        display: none;
+        width: 15px;
+        height: 15px;
+        margin-left: auto;
+
+        & > i {
+          font-size: 15px;
+        }
+      }
+
+      &:hover > button {
+        color: $tabs-hover-text-color;
+      }
+
+      &.active > button {
+        color: $tabs-selected-text-color;
+      }
+
+      &:hover > button,
+      &.active > button {
+        display: block;
+      }
+
+      &::after,
+      &::before {
+        content: ' ';
+        pointer-events: none;
+        position: absolute;
+        display: block;
+        height: 80%;
+        width: 100%;
+        bottom: -1px;
+        z-index: -1;
+        opacity: 0;
+      }
+
+      &:not(:hover) {
+        box-shadow: -8px 0px 0 -7px rgba(0, 0, 0, 0.25);
+        color: $tabs-text-color;
+      }
+
+      &:hover::before,
+      &.active::before {
+        left: -100%;
+        border-radius: 0 0 10px 0;
+        opacity: 1;
+      }
+      &.active::before,
+      &.active:hover::before {
+        box-shadow: 14px 0.25em 0 -4px $tabs-selected-bg-color;
+      }
+      &:hover::after,
+      &.active::after {
+        right: -100%;
+        border-radius: 0 0 0 10px;
+        opacity: 1;
+      }
+      &.active::after,
+      &.active:hover::after {
+        box-shadow: -14px 0.25em 0 -4px $tabs-selected-bg-color;
+      }
+      &.active:hover,
+      &.active {
+        background-color: $tabs-selected-bg-color;
+        color: $tabs-selected-text-color;
+        z-index: 4;
+      }
+
+      &:hover {
+        background-color: $tabs-hover-bg-color;
+      }
+      &:hover::before {
+        box-shadow: 14px 0.25em 0 -4px $tabs-hover-bg-color;
+        opacity: 1;
+        /* transition: all .2s;
+        */
+      }
+      &:hover::after {
+        box-shadow: -14px 0.25em 0 -4px $tabs-hover-bg-color;
+        /* transition: all .2s;
+        */
+      }
+    }
+
+    .add-scene-wrap {
+      height: 25px;
+      width: 50px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      button {
+        width: 18px;
+        height: 18px;
+        position: relative;
+        top: -2px;
+
+        & > i {
+          font-size: 20px;
+          color: $tabs-selected-text-color;
+        }
+      }
+    }
+  }
+}

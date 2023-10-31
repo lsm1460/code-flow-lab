@@ -1,0 +1,24 @@
+@import '../../../../mixin';
+
+.panel-wrap {
+  padding: 15px 15px;
+  overflow: auto;
+
+  @include scroll-bar;
+
+  .search-input {
+    background-color: #3c3c3c;
+    border: none;
+    display: block;
+    width: 100%;
+    margin-bottom: 15px;
+    padding: 5px;
+    color: #9a9a9a;
+  }
+
+  .panel-item-list {
+    li + li {
+      margin-top: 15px;
+    }
+  }
+}

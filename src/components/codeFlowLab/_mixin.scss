@@ -1,0 +1,151 @@
+@import './variables';
+
+@mixin flow-item-mixin {
+  background-color: #3b3b3b;
+  border-radius: 5px 5px 3px 3px;
+  user-select: none;
+  border: 1px solid transparent;
+  box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.3);
+  opacity: 1;
+  transition: 0.3s transform, 0.3s border, 0.3s opacity;
+
+  &.panel-item:hover {
+    transform: translate(-2px, -2px);
+  }
+}
+
+@mixin flow-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+
+  & > * {
+    color: #ffffff;
+    font-family: sans-serif;
+    font-size: 13px;
+    user-select: none;
+    background-color: transparent;
+    border: none;
+    text-align: center;
+    width: 100%;
+    position: relative;
+  }
+
+  &::before {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    top: 3px;
+    bottom: 3px;
+    border-radius: 3px;
+    display: block;
+    opacity: 0.5;
+    background-color: $other-point-color;
+  }
+
+  &.element::before {
+    background-color: $element-point-color;
+  }
+
+  &.span::before {
+    background-color: $span-point-color;
+  }
+
+  &.style::before {
+    background-color: $style-point-color;
+  }
+
+  &.trigger::before {
+    background-color: $trigger-point-color;
+  }
+
+  &.function::before {
+    background-color: $function-point-color;
+  }
+
+  &.variable::before {
+    background-color: $variable-point-color;
+  }
+}
+
+@mixin delete {
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding: 5px;
+  border: none;
+  transform: translate(8px, -8px) scale(0);
+  gap: 10px;
+  background-color: transparent;
+  z-index: 3;
+
+  i {
+    cursor: pointer;
+    font-size: 10px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    color: #ffffff;
+    border: 1px solid #b8b8b8;
+    background-color: rgb(37, 37, 38);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@mixin delete-active {
+  transition: 0.3s transform cubic-bezier(0.175, 1.885, 0.32, 1.275);
+  visibility: visible;
+  transition-delay: 0.3s;
+  transform: translate(8px, -8px) scale(1);
+}
+
+@mixin scroll-bar {
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+  /* End of added lines */
+
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #464646;
+    transition: 0.3s background-color;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+  }
+}
+
+@mixin property-add-button {
+  width: 22px;
+  height: 22px;
+  margin: 15px auto 0;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  background-color: #3b3b3b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(1);
+  transition: 0.3s background-color, 0.8s transform cubic-bezier(0.175, 1.885, 0.32, 1.275);
+
+  &:hover {
+    background-color: #ffffff;
+    transform: scale(1.2);
+  }
+
+  i {
+    color: #9a9a9a;
+    font-size: 18px;
+  }
+}

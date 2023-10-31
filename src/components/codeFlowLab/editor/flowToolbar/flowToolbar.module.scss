@@ -1,0 +1,106 @@
+@import '../../variables';
+
+.toolbar {
+  user-select: none;
+  width: $editor-toolbar-width;
+  position: relative;
+
+  & > ul {
+    background-color: #333333;
+    width: 100%;
+    height: 100%;
+    padding: 15px 3px;
+    margin: 0;
+    position: relative;
+    z-index: 10000;
+
+    & > li {
+      button {
+        background-color: transparent;
+        border: 1px solid transparent;
+        text-align: center;
+        font-size: 11px;
+        font-family: sans-serif;
+        display: block;
+        width: 100%;
+        color: rgb(154, 154, 154);
+        border-radius: 5px;
+        padding: 10px 0 7px;
+        cursor: pointer;
+
+        &::before {
+          content: '';
+          width: 20px;
+          height: 20px;
+          margin: 0 auto 6px;
+          border-radius: 50%;
+          display: block;
+          transition: 0.3s transform cubic-bezier(0.175, 1.885, 0.32, 1.275);
+        }
+      }
+
+      &.element {
+        button::before {
+          content: '';
+          background-color: $element-point-color;
+        }
+      }
+
+      &.style {
+        button::before {
+          content: '';
+          background-color: $style-point-color;
+        }
+      }
+
+      &.trigger {
+        button::before {
+          content: '';
+          background-color: $trigger-point-color;
+        }
+      }
+
+      &.function {
+        button::before {
+          content: '';
+          background-color: $function-point-color;
+        }
+      }
+
+      &.variable {
+        button::before {
+          content: '';
+          background-color: $variable-point-color;
+        }
+      }
+
+      &.note {
+        button::before {
+          content: '';
+          background-color: $note-point-color;
+        }
+      }
+
+      & + li {
+        margin-top: 12px;
+      }
+
+      &:hover button {
+        border: 1px solid #9b9b9b;
+      }
+
+      &.active button {
+        border: 1px solid #ffffff;
+      }
+
+      &:hover button,
+      &.active button {
+        color: #ffffff;
+
+        &::before {
+          transform: scale(1.1);
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+$option-color: #9a9a9a;
+$option-arrow-size: 4px;
+
+.select-container {
+  position: relative;
+  color: $option-color;
+  font-size: 13px;
+
+  .selected-option {
+    padding: 8px;
+    position: relative;
+
+    &:after {
+      content: '';
+      width: 0;
+      height: 0;
+      border-left: $option-arrow-size solid transparent;
+      border-right: $option-arrow-size solid transparent;
+      border-top: $option-arrow-size solid $option-color;
+      position: absolute;
+      top: 11px;
+      right: 8px;
+    }
+  }
+}

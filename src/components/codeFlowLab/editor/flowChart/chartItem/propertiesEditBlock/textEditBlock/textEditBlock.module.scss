@@ -1,0 +1,48 @@
+@import '../../../../../variables';
+
+.text-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  & > label {
+    color: #9a9a9a;
+    font-size: 13px;
+    padding-left: 15px;
+
+    & + .text-input {
+      width: 50px;
+      border-radius: 20px;
+    }
+  }
+
+  .text-input {
+    padding: 3px 5px 5px;
+    background-color: #3c3c3c;
+    color: #cccccc;
+    border: none;
+    font-size: 15px;
+    width: 100%;
+
+    &:read-only {
+      text-decoration: line-through;
+      color: #5b5b5b;
+      outline: none;
+    }
+
+    &[type='number'] {
+      text-align: right;
+      padding: 3px 15px 5px;
+
+      &::-webkit-inner-spin-button,
+      &::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+      }
+    }
+  }
+
+  & + .text-input-wrap {
+    margin-top: 8px;
+  }
+}

@@ -1,0 +1,27 @@
+.property-wrap {
+  text-align: center;
+
+  & + .property-wrap {
+    margin-top: 8px;
+  }
+
+  .logical {
+    margin-bottom: 8px;
+    border: none;
+    border-radius: 3px;
+    padding: 2px 5px;
+    pointer-events: all;
+    background-color: #2a6bc8;
+    color: #ffffff;
+    font-size: 12px;
+    margin-right: 6px;
+    cursor: pointer;
+    width: 28px;
+    text-align: center;
+
+    &:hover,
+    &:active {
+      background-color: #235397;
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "presets": ["@babel/env"],
+  "plugins": [
+    "@babel/syntax-dynamic-import",
+    [
+      "lodash",
+      {
+        "id": ["lodash"]
+      }
+    ],
+    [
+      "module-resolver",
+      {
+        "root": ["./"],
+        "alias": {
+          "@": "./src"
+        }
+      }
+    ]
+  ]
+}

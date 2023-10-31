@@ -1,0 +1,46 @@
+@import '../../../../../mixin';
+
+.condition-sub-title {
+  color: #9a9a9a;
+  font-size: 13px;
+  text-transform: capitalize;
+  position: relative;
+}
+
+.condition-box {
+  border: 1px solid #2e2e2e;
+  background-color: #1f1f1f;
+  border-radius: 5px;
+  padding: 5px;
+  margin-bottom: 6px;
+
+  .property-wrap {
+    width: 100%;
+    margin-left: 5px;
+    pointer-events: none;
+  }
+}
+
+.operator-wrap {
+  text-align: center;
+
+  .logical {
+    margin-bottom: 8px;
+    border: none;
+    border-radius: 3px;
+    padding: 2px 5px;
+    pointer-events: all;
+    background-color: #2a6bc8;
+    color: #ffffff;
+    font-size: 12px;
+    margin-right: 6px;
+    cursor: pointer;
+    width: 28px;
+    text-align: center;
+
+    &:hover,
+    &:active {
+      background-color: #235397;
+    }
+  }
+}

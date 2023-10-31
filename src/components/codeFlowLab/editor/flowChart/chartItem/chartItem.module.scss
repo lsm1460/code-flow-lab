@@ -1,0 +1,136 @@
+@import '../../../variables';
+@import '../../../mixin';
+
+.chart-item {
+  position: absolute;
+  user-select: none;
+  @include flow-item-mixin;
+
+  &.selected {
+    border: 1px solid $other-point-color;
+    z-index: 999 !important;
+
+    &.element {
+      border: 1px solid $element-point-color;
+    }
+
+    &.span {
+      border: 1px solid $span-point-color;
+    }
+
+    &.style {
+      border: 1px solid $style-point-color;
+    }
+
+    &.trigger {
+      border: 1px solid $trigger-point-color;
+    }
+  }
+
+  &.delete {
+    opacity: 0;
+    transform: scale(0.1);
+  }
+
+  .delete-button {
+    @include delete;
+  }
+
+  &:hover .delete-button,
+  &.selected .delete-button {
+    @include delete-active;
+  }
+
+  .item-point {
+    position: absolute;
+    height: 28px;
+    left: 3px;
+    right: 3px;
+    top: 3px;
+    border-radius: 3px;
+    display: block;
+    opacity: 0.3;
+  }
+
+  .item-header {
+    position: relative;
+    @include flow-item-header;
+
+    .drag-handle {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      z-index: 1;
+
+      & > i {
+        display: block;
+        color: #2c2c2c;
+        font-size: 16px;
+      }
+
+      &:active {
+        cursor: grabbing;
+      }
+    }
+  }
+
+  .point-list-wrap {
+    display: flex;
+    padding-bottom: 15px;
+
+    .point-list {
+      margin: 0;
+      width: calc(50% - 20px);
+
+      &.right {
+        margin-left: auto;
+        align-items: flex-end;
+
+        li {
+          justify-content: flex-end;
+
+          .label {
+            text-align: right;
+          }
+        }
+      }
+
+      li {
+        margin: 0;
+        position: relative;
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+
+        &:first-child {
+          margin-top: 0 !important;
+        }
+
+        .label {
+          position: absolute;
+          width: 100%;
+          top: 0;
+          transform: translateY(-50%);
+          white-space: nowrap;
+          font-size: 13px;
+          color: #a1a1a1;
+          overflow: hidden;
+          text-overflow: ellipsis;
+
+          &.left {
+            left: 18px;
+          }
+
+          &.right {
+            right: 18px;
+          }
+        }
+      }
+    }
+  }
+}

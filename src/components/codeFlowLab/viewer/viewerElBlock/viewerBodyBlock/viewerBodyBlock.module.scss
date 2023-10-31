@@ -1,0 +1,7 @@
+@import '../../../variables';
+
+.viewer-wrap {
+  background-color: #ffffff;
+  width: $viewer-width;
+  overflow: auto;
+}

@@ -1,0 +1,89 @@
+@import '../../../../../mixin';
+
+.property-block {
+  border-radius: 7px;
+  background-color: #3b3b3b;
+  position: relative;
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
+  top: 0;
+  left: 0;
+  transition: 0.3s transform;
+
+  & + .property-block {
+    margin-top: 15px;
+  }
+
+  .delete-button {
+    @include delete;
+  }
+
+  &:hover {
+    .delete-button {
+      @include delete-active;
+    }
+  }
+
+  .property-header {
+    color: #9a9a9a;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    height: 38px;
+    background-color: #333333;
+    border-bottom: 1px solid #555;
+    border-radius: 7px 7px 0 0;
+
+    & > div {
+      width: 100%;
+      background-color: transparent;
+      border: none;
+
+      & > div:first-child > div:first-child {
+        color: inherit;
+      }
+    }
+
+    span {
+      display: none;
+    }
+
+    p {
+      padding: 2px 8px;
+    }
+  }
+
+  .value-input {
+    background-color: transparent;
+    border: none;
+    width: 100%;
+    color: #9a9a9a;
+    font-size: 13px;
+    height: 32px;
+
+    & > div:nth-child(2) {
+      width: 100%;
+      background-color: transparent;
+      border: none;
+
+      & > div:first-child > div:first-child {
+        color: inherit;
+      }
+    }
+
+    span {
+      display: none;
+    }
+  }
+
+  input.value-input {
+    padding: 2px 8px;
+    -moz-appearance: textfield !important;
+    margin: 0;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+}
