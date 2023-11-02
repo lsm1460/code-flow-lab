@@ -1,33 +1,35 @@
-const _file = require("./file");
+const _file = require('./file');
 
 const menuTemplate = [
   {
-    label: "",
-    submenu: [ 
-      { 
-        label: "About Code Flow Lab" 
-      }
-    ] 
+    label: '',
+    submenu: [
+      {
+        label: 'About Code Flow Lab',
+      },
+    ],
   },
   {
-    label: "File",
-    submenu: [ 
-      { 
-        label: "Open" 
+    label: 'File',
+    submenu: [
+      {
+        label: 'Open...',
+        accelerator: 'CommandOrControl+O',
+        click: () => _file.openProject(),
       },
       {
-        type: 'separator'
+        type: 'separator',
       },
-      { 
-        label: "Save",
+      {
+        label: 'Save',
         accelerator: 'CommandOrControl+S',
-        click: () => _file.saveProject(mainWindow.webContents)
+        click: () => _file.saveProject(mainWindow.webContents),
       },
-    ] 
+    ],
   },
-] 
+];
 
 module.exports = {
   menuTemplate,
-    ..._file,
-  };
+  ..._file,
+};

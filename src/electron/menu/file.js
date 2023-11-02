@@ -1,28 +1,65 @@
-const { dialog, ipcMain } = require("electron");
-const fs = require("fs");
-const { 
-  REQUEST_SAVE_PROJECT,
-  SAVE_FILE,
-} = require('../../consts/channel'); 
+const { dialog, ipcMain } = require('electron');
+const fs = require('fs');
+const JSZip = require('jszip');
+const { REQUEST_SAVE_PROJECT, SAVE_FILE } = require('../../consts/channel');
+
+const openProject = async () => {
+  const { canceled, filePaths } = await dialog.showOpenDialog();
+
+  if (canceled) {
+    return;
+  }
+
+  const _extension = filePaths[0].split('.').pop();
+
+  if (_extension !== 'cdfl') {
+    return;
+  }
+
+  const _pathArray = filePaths[0].split('/');
+  _pathArray.pop();
+  const _path = _pathArray.join('/');
+
+  fs.readFile(_path, async (err, data) => {
+    if (!err) {
+      const zip = new JSZip();
+
+      const contents = await zip.loadAsync(data);
+
+      Object.keys(contents.files).forEach((filename) => {
+        const content = zip.file(filename).async('nodebuffer');
+
+        const dest = _path + filename;
+        fs.writeFileSync(dest, content);
+      });
+    }
+  });
+};
 
 const saveProject = async (_web) => {
-  const saveFile = _filePath => {
+  const saveFile = (_filePath) => {
     _web.send(REQUEST_SAVE_PROJECT, null);
 
-    ipcMain.on(SAVE_FILE, (event, _contents) => {
-      console.log(_filePath, _contents);
-      // TODO: 이미지와 json을 말아서 zip파일로 묶은 후 저장!
+    ipcMain.on(SAVE_FILE, async (event, _contents) => {
+      // TODO: 이미지까지 묶은 후 저장!
 
-      // fs.writeFile(_filePath, contents, err => {
-      //   if (err) {
-      //     alert("An error ocurred saving the file :" + err.message);
-      //     return;
-      //   }
-      //   console.log("saved");
-      // });
+      const zip = new JSZip();
+      zip.file('data.json', JSON.stringify(_contents));
+
+      const _buffer = await zip.generateAsync({ type: 'nodebuffer' });
+
+      fs.writeFile(`${_filePath}.cdfl`, _buffer, (_err) => {
+        if (_err) {
+          console.log('make error..');
+          //tasks to perform in case of error
+
+          return;
+        }
+
+        // TODO: webd으로 저장 완료보내야 함
+      });
     });
   };
-
 
   const { filePath, canceled } = await dialog.showSaveDialog();
 
@@ -36,5 +73,6 @@ const saveProject = async (_web) => {
 };
 
 module.exports = {
-  saveProject
+  openProject,
+  saveProject,
 };
