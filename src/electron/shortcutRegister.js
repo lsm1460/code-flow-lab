@@ -1,9 +1,10 @@
 const { globalShortcut } = require('electron');
-const { openProject, saveProject } = require('./menu');
+const { createProject, openProject, saveProject } = require('./menu');
 
-const registeShortcut = (_web) => {
-  globalShortcut.register('CommandOrControl+O', () => openProject(_web));
-  globalShortcut.register('CommandOrControl+S', () => saveProject(_web));
+const registeShortcut = (_mainWindow) => {
+  globalShortcut.register('CommandOrControl+N', () => createProject(_mainWindow));
+  globalShortcut.register('CommandOrControl+O', () => openProject(_mainWindow));
+  globalShortcut.register('CommandOrControl+S', () => saveProject(_mainWindow));
 };
 
 module.exports = registeShortcut;

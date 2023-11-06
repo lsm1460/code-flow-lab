@@ -7,6 +7,7 @@ import {
 } from './actions';
 import { Operation, SagaOperationParam } from './types';
 
+import { SET_SAVED } from '@/consts/channel.js';
 import { ConnectPoint } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
 import { getSceneId } from '@/utils/content';
@@ -39,6 +40,10 @@ function* handleSetDocumentValue({ payload }: SagaOperationParam) {
 }
 
 function* handleEmitValue({ payload }: SagaOperationParam) {
+  const { ipcRenderer } = window.require('electron');
+
+  ipcRenderer.send(SET_SAVED);
+
   addHistory(payload);
 }
 

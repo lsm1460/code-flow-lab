@@ -1,9 +1,31 @@
 const { dialog, ipcMain } = require('electron');
 const fs = require('fs');
 const JSZip = require('jszip');
-const { REQUEST_SAVE_PROJECT, SAVE_FILE } = require('../../consts/channel');
+const { REQUEST_PROJECT, SAVE_FILE, SET_DOCUMENT, CREATE_DOCUMENT } = require('../../consts/channel');
 
-const openProject = async () => {
+const createProject = (_mainWindow) => {
+  if (!global.isSaved) {
+    dialog
+      .showMessageBox(_mainWindow, {
+        type: 'question',
+        title: 'Confirmation',
+        message: '변경 사항이 저장되지 않았습니다. \n새 프로젝트를 진행하시겠습니까? ',
+        buttons: ['Yes', 'No'],
+      })
+      .then((result) => {
+        if (result.response === 0) {
+          global.projectPath = '';
+          global.isSaved = true;
+
+          _mainWindow.webContents.send(CREATE_DOCUMENT, null);
+        }
+      });
+
+    return;
+  }
+};
+
+const openProject = async (_mainWindow) => {
   const { canceled, filePaths } = await dialog.showOpenDialog();
 
   if (canceled) {
@@ -17,34 +39,58 @@ const openProject = async () => {
   }
 
   const _pathArray = filePaths[0].split('/');
-  _pathArray.pop();
+  const _fileName = _pathArray.pop().split('.')[0];
+
+  _pathArray.push(`.${_fileName}`);
   const _path = _pathArray.join('/');
 
-  fs.readFile(_path, async (err, data) => {
-    if (!err) {
-      const zip = new JSZip();
+  fs.mkdir(_path, { recursive: true }, (err) => {
+    if (err) throw err;
+  });
 
-      const contents = await zip.loadAsync(data);
-
-      Object.keys(contents.files).forEach((filename) => {
-        const content = zip.file(filename).async('nodebuffer');
-
-        const dest = _path + filename;
-        fs.writeFileSync(dest, content);
-      });
+  fs.readFile(filePaths[0], async (err, data) => {
+    if (err) {
+      throw err;
     }
+
+    const zip = new JSZip();
+
+    const contents = await zip.loadAsync(data);
+
+    for (let filename in contents.files) {
+      const zipFile = zip.file(filename);
+
+      const dest = `${_path}/${filename}`;
+
+      if (zipFile) {
+        const content = await zipFile.async('nodebuffer');
+
+        fs.writeFileSync(dest, content);
+      } else {
+        fs.mkdir(dest, { recursive: true }, (err) => {
+          if (err) throw err;
+        });
+      }
+    }
+
+    const _documetn = JSON.parse(fs.readFileSync(`${_path}/data.json`, 'utf8'));
+
+    global.projectPath = _path;
+    _mainWindow.webContents.send(SET_DOCUMENT, { path: _path, document: _documetn });
   });
 };
 
-const saveProject = async (_web) => {
+const saveProject = async (_mainWindow) => {
   const saveFile = (_filePath) => {
-    _web.send(REQUEST_SAVE_PROJECT, null);
+    _mainWindow.webContents.send(REQUEST_PROJECT, null);
 
     ipcMain.on(SAVE_FILE, async (event, _contents) => {
       // TODO: 이미지까지 묶은 후 저장!
 
       const zip = new JSZip();
       zip.file('data.json', JSON.stringify(_contents));
+
+      zip.folder('images').file('hello.txt', 'Hello World\n');
 
       const _buffer = await zip.generateAsync({ type: 'nodebuffer' });
 
@@ -56,23 +102,30 @@ const saveProject = async (_web) => {
           return;
         }
 
+        global.isSaved = true;
+        global.projectPath = _filePath;
         // TODO: webd으로 저장 완료보내야 함
       });
     });
   };
 
-  const { filePath, canceled } = await dialog.showSaveDialog();
-
-  if (!canceled) {
-    if (filePath) {
-      saveFile(filePath);
-    } else {
-      console.log('no file name..');
-    }
+  if (global.projectPath) {
+    saveFile(global.projectPath);
+  } else {
+    dialog.showSaveDialog().then(({ filePath, canceled }) => {
+      if (!canceled) {
+        if (filePath) {
+          saveFile(filePath);
+        } else {
+          console.log('no file name..');
+        }
+      }
+    });
   }
 };
 
 module.exports = {
+  createProject,
   openProject,
   saveProject,
 };
