@@ -17,6 +17,7 @@ export const RESET_OPTION_MODAL_INFO = 'document/RESET_OPTION_MODAL_INFO';
 export const SET_ADDED_STYLES = 'document/SET_ADDED_STYLES';
 export const SET_REMOVE_STYLES = 'document/SET_REMOVE_STYLES';
 export const SET_TOGGLE_STYLES = 'document/SET_TOGGLE_STYLES';
+export const SET_IS_SAVE_STATE = 'document/SET_IS_SAVE_STATE';
 
 export const setDocumentAction = createAction(SET_DOCUMENT)<CodeFlowChartDoc>();
 export const setDocumentValueAction = createAction(SET_DOCUMENT_VALUE)<Operation | Operation[]>();
@@ -32,3 +33,4 @@ export const resetOptionModalInfoAction = createAction(RESET_OPTION_MODAL_INFO)(
 export const setAddedStylesAction = createAction(SET_ADDED_STYLES)<{ id: string; style: CSSProperties }>();
 export const setRemoveStylesAction = createAction(SET_REMOVE_STYLES)<{ id: string; style: CSSProperties }>();
 export const setToggleStylesAction = createAction(SET_TOGGLE_STYLES)<{ id: string; style: CSSProperties }>();
+export const setIsSaveStateAction = createAction(SET_IS_SAVE_STATE)<boolean>();

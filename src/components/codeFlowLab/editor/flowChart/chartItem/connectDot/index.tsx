@@ -1,6 +1,6 @@
 import { CONNECT_POINT_CLASS } from '@/consts/codeFlowLab/items';
 import { ChartItemType } from '@/consts/types/codeFlowLab';
-import { MouseEventHandler } from 'react';
+import { CSSProperties, MouseEventHandler } from 'react';
 
 import classNames from 'classnames/bind';
 import styles from './connectDot.module.scss';
@@ -16,6 +16,7 @@ interface Props {
   targetType: ChartItemType;
   connectParentId?: string;
   isSlave?: boolean;
+  style?: CSSProperties;
 }
 function ConnectDot({
   parentId,
@@ -26,6 +27,7 @@ function ConnectDot({
   connectParentId,
   isSlave,
   targetType,
+  style,
   handlePointConnectStart,
 }: Props) {
   return (
@@ -44,6 +46,7 @@ function ConnectDot({
       {...(isSlave && {
         'data-is-slave': 1,
       })}
+      style={style}
       onMouseDown={handlePointConnectStart}
     />
   );

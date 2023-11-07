@@ -1,35 +1,87 @@
 const { dialog, ipcMain } = require('electron');
 const fs = require('fs');
 const JSZip = require('jszip');
-const { REQUEST_PROJECT, SAVE_FILE, SET_DOCUMENT, CREATE_DOCUMENT } = require('../../consts/channel');
+const {
+  REQUEST_PROJECT,
+  SAVE_FILE,
+  SET_DOCUMENT,
+  CREATE_DOCUMENT,
+  REQUEST_SAVED,
+  CHECK_SAVED,
+} = require('../../consts/channel');
 
-const createProject = (_mainWindow) => {
-  if (!global.isSaved) {
-    dialog
-      .showMessageBox(_mainWindow, {
-        type: 'question',
-        title: 'Confirmation',
-        message: '변경 사항이 저장되지 않았습니다. \n새 프로젝트를 진행하시겠습니까? ',
-        buttons: ['Yes', 'No'],
-      })
-      .then((result) => {
-        if (result.response === 0) {
-          global.projectPath = '';
-          global.isSaved = true;
+const checkSaved = (_mainWindow) =>
+  new Promise((resolve) => {
+    ipcMain.once(CHECK_SAVED, async (event, _isSaved) => {
+      resolve(_isSaved);
+    });
 
-          _mainWindow.webContents.send(CREATE_DOCUMENT, null);
-        }
-      });
+    _mainWindow.webContents.send(REQUEST_SAVED, null);
+  });
 
+const removeProjectFile = () => {
+  if (!global.projectPath.path) {
     return;
+  }
+
+  fs.rmSync(`${global.projectPath.path}/.${global.projectPath.fileName}`, { recursive: true, force: true });
+};
+
+const createProject = async (_mainWindow) => {
+  if (global.isOpenDialog) {
+    return;
+  }
+
+  const isSaved = await checkSaved(_mainWindow);
+
+  let resetFlag = true;
+
+  if (!isSaved) {
+    const options = {
+      type: 'question',
+      buttons: ['Cancel', 'Yes'],
+      title: 'Question',
+      message: '새 프로젝트를 생성하시겠습니까?',
+      detail: '저장되지 않은 내용은 지워집니다.',
+    };
+
+    global.isOpenDialog = true;
+
+    const { response } = await dialog.showMessageBox(null, options);
+
+    global.isOpenDialog = false;
+
+    if (response === 0) {
+      resetFlag = false;
+    }
+  }
+
+  if (resetFlag) {
+    _mainWindow.webContents.send(CREATE_DOCUMENT, null);
+
+    if (global.projectPath.path) {
+      removeProjectFile();
+    }
   }
 };
 
 const openProject = async (_mainWindow) => {
+  if (global.isOpenDialog) {
+    return;
+  }
+
+  global.isOpenDialog = true;
+
   const { canceled, filePaths } = await dialog.showOpenDialog();
+
+  global.isOpenDialog = false;
 
   if (canceled) {
     return;
+  }
+
+  if (global.projectPath.path) {
+    removeProjectFile();
   }
 
   const _extension = filePaths[0].split('.').pop();
@@ -41,8 +93,8 @@ const openProject = async (_mainWindow) => {
   const _pathArray = filePaths[0].split('/');
   const _fileName = _pathArray.pop().split('.')[0];
 
-  _pathArray.push(`.${_fileName}`);
-  const _path = _pathArray.join('/');
+  const clonedFolderPath = [..._pathArray, `.${_fileName}`];
+  const _path = clonedFolderPath.join('/');
 
   fs.mkdir(_path, { recursive: true }, (err) => {
     if (err) throw err;
@@ -75,56 +127,76 @@ const openProject = async (_mainWindow) => {
 
     const _documetn = JSON.parse(fs.readFileSync(`${_path}/data.json`, 'utf8'));
 
-    global.projectPath = _path;
-    _mainWindow.webContents.send(SET_DOCUMENT, { path: _path, document: _documetn });
+    global.projectPath = { path: _pathArray.join('/'), fileName: _fileName };
+
+    console.log('is in open..', global.projectPath);
+    _mainWindow.webContents.send(SET_DOCUMENT, _documetn);
   });
 };
 
-const saveProject = async (_mainWindow) => {
-  const saveFile = (_filePath) => {
-    _mainWindow.webContents.send(REQUEST_PROJECT, null);
+const saveProject = (_mainWindow) => {
+  return new Promise((resolve, reject) => {
+    if (global.isOpenDialog) {
+      return;
+    }
 
-    ipcMain.on(SAVE_FILE, async (event, _contents) => {
-      // TODO: 이미지까지 묶은 후 저장!
+    const saveFile = (_filePath) => {
+      _mainWindow.webContents.send(REQUEST_PROJECT, null);
 
-      const zip = new JSZip();
-      zip.file('data.json', JSON.stringify(_contents));
+      ipcMain.once(SAVE_FILE, async (event, _contents) => {
+        // TODO: 이미지까지 묶은 후 저장!
 
-      zip.folder('images').file('hello.txt', 'Hello World\n');
+        const zip = new JSZip();
+        zip.file('data.json', JSON.stringify(_contents));
 
-      const _buffer = await zip.generateAsync({ type: 'nodebuffer' });
+        zip.folder('images').file('hello.txt', 'Hello World\n');
 
-      fs.writeFile(`${_filePath}.cdfl`, _buffer, (_err) => {
-        if (_err) {
-          console.log('make error..');
-          //tasks to perform in case of error
+        const _buffer = await zip.generateAsync({ type: 'nodebuffer' });
 
-          return;
-        }
+        fs.writeFile(`${_filePath}.cdfl`, _buffer, (_err) => {
+          if (_err) {
+            console.log('make error..');
+            //tasks to perform in case of error
 
-        global.isSaved = true;
-        global.projectPath = _filePath;
-        // TODO: webd으로 저장 완료보내야 함
+            return;
+          }
+
+          const _pathArray = _filePath.split('/');
+          const fileName = _pathArray.pop();
+
+          global.projectPath = {
+            path: _pathArray.join('/'),
+            fileName,
+          };
+
+          resolve(true);
+        });
       });
-    });
-  };
+    };
 
-  if (global.projectPath) {
-    saveFile(global.projectPath);
-  } else {
-    dialog.showSaveDialog().then(({ filePath, canceled }) => {
-      if (!canceled) {
-        if (filePath) {
-          saveFile(filePath);
-        } else {
-          console.log('no file name..');
+    if (global.projectPath.path) {
+      saveFile(`${global.projectPath.path}/${global.projectPath.fileName}`);
+    } else {
+      global.isOpenDialog = true;
+
+      dialog.showSaveDialog().then(({ filePath, canceled }) => {
+        global.isOpenDialog = false;
+
+        if (!canceled) {
+          if (filePath) {
+            saveFile(filePath);
+          } else {
+            reject('no file name..');
+          }
         }
-      }
-    });
-  }
+      });
+    }
+  });
 };
 
 module.exports = {
+  checkSaved,
+  removeProjectFile,
   createProject,
   openProject,
   saveProject,

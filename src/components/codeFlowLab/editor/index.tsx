@@ -34,17 +34,21 @@ function CodeFlowLabEditor() {
 
   const [moveItemInfo, setMoveItemInfo] = useState<{ ids: string[]; deltaX: number; deltaY: number }>(null);
 
-  const { selectedSceneId, chartItems, sceneItemIds, itemsPos, isModalOpen } = useSelector((state: RootState) => {
-    const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
+  const { openTime, selectedSceneId, chartItems, sceneItemIds, itemsPos, isModalOpen } = useSelector(
+    (state: RootState) => {
+      const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
 
-    return {
-      chartItems: state.contentDocument.items,
-      itemsPos: state.contentDocument.itemsPos,
-      selectedSceneId,
-      sceneItemIds: state.contentDocument.scene[selectedSceneId]?.itemIds || [],
-      isModalOpen: !!state.selectModal,
-    };
-  }, shallowEqual);
+      return {
+        openTime: state.openTime,
+        chartItems: state.contentDocument.items,
+        itemsPos: state.contentDocument.itemsPos,
+        selectedSceneId,
+        sceneItemIds: state.contentDocument.scene[selectedSceneId]?.itemIds || [],
+        isModalOpen: !!state.selectModal,
+      };
+    },
+    shallowEqual
+  );
 
   const selectedChartItem = useMemo(() => getChartItem(sceneItemIds, chartItems), [chartItems, sceneItemIds]);
 
@@ -54,7 +58,7 @@ function CodeFlowLabEditor() {
     dispatch(
       setFlowLogAction({ date: new Date(), text: '코드 플로우 랩에 오신 여러분을 환영합니다.', type: 'system' })
     );
-  }, []);
+  }, [openTime]);
 
   useEffect(() => {
     if (moveItemInfo && (moveItemInfo.deltaX || moveItemInfo.deltaY)) {

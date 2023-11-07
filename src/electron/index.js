@@ -1,9 +1,9 @@
-const { app, BrowserWindow, screen, Menu, ipcMain } = require('electron');
+const { app, BrowserWindow, screen, Menu, dialog } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
 const { getMenuTemplate } = require('./menu');
 const registeShortcut = require('./shortcutRegister');
-const { SET_SAVED, GET_SAVED } = require('../consts/channel');
+const { removeProjectFile, checkSaved, saveProject } = require('./menu/file');
 
 let mainWindow;
 
@@ -24,8 +24,11 @@ function createWindow() {
     },
   });
 
-  global.isSaved = true;
-  global.projectPath = '';
+  global.isOpenDialog = false;
+  global.projectPath = {
+    path: '',
+    fileName: '',
+  };
 
   mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
 
@@ -45,20 +48,50 @@ function createWindow() {
   mainWindow.setResizable(true);
 
   mainWindow.on('close', (_event) => {
-    if (!global.isSaved) {
-      _event.preventDefault();
-    }
+    _event.preventDefault();
+
+    checkSaved(mainWindow).then(async (_isSaved) => {
+      if (_isSaved) {
+        mainWindow.destroy();
+      } else {
+        const options = {
+          type: 'question',
+          buttons: ['Cancel', 'Yes', 'No'],
+          title: 'Question',
+          message: '종료하기 전 프로젝트를 저장하시겠습니까?',
+          detail: '저장되지 않은 내용은 지워집니다.',
+        };
+
+        global.isOpenDialog = true;
+
+        const { response } = await dialog.showMessageBox(null, options);
+
+        global.isOpenDialog = false;
+
+        if (response === 0) {
+          // 취소
+        } else if (response === 1) {
+          // 저장 후 종료
+          const res = await saveProject(mainWindow);
+          console.log('saved..', res);
+          mainWindow.destroy();
+        } else if (response === 2) {
+          // 그냥 종료
+          mainWindow.destroy();
+        }
+      }
+    });
   });
 
   mainWindow.on('closed', () => {
     mainWindow = null;
+
+    if (global.projectPath.path) {
+      removeProjectFile();
+    }
   });
 
   mainWindow.focus();
-
-  ipcMain.on(SET_SAVED, (event) => {
-    global.isSaved = false;
-  });
 }
 
 app.whenReady().then(() => {

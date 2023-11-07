@@ -13,6 +13,8 @@ export type DocumentState = {
   flowLogList: FlowLog[];
   selectModal: SelectModal;
   addedStyles: { [_id: string]: CSSProperties };
+  isSaved: boolean;
+  openTime: number;
 };
 
 export interface Operation {

@@ -14,6 +14,7 @@ import {
   SET_DOCUMENT,
   SET_DOCUMENT_VALUE,
   SET_FLOW_LOG,
+  SET_IS_SAVE_STATE,
   SET_OPTION_MODAL_INFO,
   SET_REMOVE_STYLES,
   SET_SCENE_ORDER,
@@ -50,12 +51,16 @@ const initialState: DocumentState = {
   flowLogList: [],
   selectModal: null,
   addedStyles: {},
+  isSaved: true,
+  openTime: new Date().getTime(),
 };
 
 const documentReducer = createReducer<DocumentState, DocumentAction>(initialState, {
   [SET_DOCUMENT]: (state, { payload }) => ({
     ...state,
     contentDocument: payload,
+    isSaved: true,
+    openTime: new Date().getTime(),
   }),
   [SET_DOCUMENT_VALUE]: (state) => state,
   [EMIT_DOCUMENT_VALUE]: (state, { payload }) => {
@@ -77,9 +82,13 @@ const documentReducer = createReducer<DocumentState, DocumentAction>(initialStat
     return {
       ...state,
       contentDocument: newDocument,
+      isSaved: false,
     };
   },
-  [RESET_DOCUMENT_VALUE]: (state) => initialState,
+  [RESET_DOCUMENT_VALUE]: (state) => ({
+    ...initialState,
+    openTime: new Date().getTime(),
+  }),
   [SET_DELETE_TARGET_ID_LIST]: (state) => state,
   [SET_DELETE_ANIMATION_ID_LIST]: (state, { payload }) => ({ ...state, deleteTargetIdList: payload }),
   [SET_SCENE_ORDER]: (state, { payload: _order }) => ({ ...state, sceneOrder: _order }),
@@ -163,6 +172,7 @@ const documentReducer = createReducer<DocumentState, DocumentAction>(initialStat
       };
     }
   },
+  [SET_IS_SAVE_STATE]: (state, { payload }) => ({ ...state, isSaved: payload }),
 });
 
 export default documentReducer;

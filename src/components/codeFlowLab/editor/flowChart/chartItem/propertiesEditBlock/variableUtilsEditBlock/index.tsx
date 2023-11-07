@@ -36,6 +36,11 @@ function VariableUtilsEditBlock({ id, text, connectionVariables, handlePointConn
                 connectParentId={connectionVariables[0]?.connectParentId}
                 handlePointConnectStart={handlePointConnectStart}
                 isSlave
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: '50%',
+                }}
               />
             </p>
           </div>
