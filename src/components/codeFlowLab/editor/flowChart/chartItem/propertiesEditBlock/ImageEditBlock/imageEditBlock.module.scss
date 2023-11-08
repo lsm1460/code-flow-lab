@@ -1,0 +1,46 @@
+.property-wrap {
+  & + .property-wrap {
+    margin-top: 8px;
+  }
+
+  & > p {
+    color: #9a9a9a;
+    font-size: 13px;
+    text-transform: capitalize;
+    margin-bottom: 6px;
+  }
+
+  & > label {
+    cursor: pointer;
+    display: flex;
+    aspect-ratio: 1;
+    border-radius: 5px;
+    border: 1px solid #4e4e4e;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    transition: 0.3s background-color;
+
+    input {
+      display: none;
+    }
+
+    span {
+      font-size: 80px;
+      color: #c9c9c9;
+    }
+
+    &:hover {
+      background-color: #404040;
+    }
+
+    img {
+      width: 100%;
+      display: block;
+      max-width: 176px;
+      aspect-ratio: 1;
+      object-fit: contain;
+      background-color: #4e4e4e;
+    }
+  }
+}

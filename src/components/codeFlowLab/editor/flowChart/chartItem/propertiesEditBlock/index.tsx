@@ -15,6 +15,7 @@ import VariableUtilsEditBlock from './variableUtilsEditBlock';
 
 import classNames from 'classnames/bind';
 import styles from './propertiesEditBlock.module.scss';
+import ImageEditBlock from './ImageEditBlock';
 const cx = classNames.bind(styles);
 
 interface Props {
@@ -125,7 +126,8 @@ function PropertiesEditBlock({ chartItem, handlePointConnectStart }: Props) {
             handlePointConnectStart={handlePointConnectStart}
           />
         );
-
+      case ChartItemType.image:
+        return <ImageEditBlock id={chartItem.id} src={chartItem.src} />;
       default:
         return <></>;
     }

@@ -39,6 +39,7 @@ import ViewerInputBlock from './viewerInputBlock';
 import ViewerLinkBlock from './viewerLinkBlock';
 import ViewerParagraphBlock from './viewerParagraphBlock';
 import ViewerSpanBlock from './viewerSpanBlock';
+import ViewerImageBlock from './viewerImageBlock';
 interface Props {
   viewerItem: ViewerItem;
   variables: {
@@ -283,6 +284,7 @@ function ViewerElBlock({ viewerItem, variables }: Props) {
           [ChartItemType.span]: <ViewerSpanBlock {...childProps} />,
           [ChartItemType.link]: <ViewerLinkBlock {...childProps} />,
           [ChartItemType.input]: <ViewerInputBlock {...childProps} />,
+          [ChartItemType.image]: <ViewerImageBlock {...childProps} />,
         }[viewerItem.elType]
       }
     </>

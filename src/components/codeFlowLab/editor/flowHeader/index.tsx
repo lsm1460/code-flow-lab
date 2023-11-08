@@ -1,21 +1,25 @@
 import { RootState } from '@/reducers';
 import { setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
 import { getHistory, getNextHistory, getPrevHistory } from '@/utils/history';
+import classNames from 'classnames/bind';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-
-import classNames from 'classnames/bind';
 import styles from './flowHeader.module.scss';
+import useIpcManager from '../../useIpcManager';
 const cx = classNames.bind(styles);
 
 function FlowHeader() {
   const dispatch = useDispatch();
+  const { sendDocumentForSave: handleSaveButton } = useIpcManager(false);
 
   const [historyNow, setHistoryNow] = useState(0);
   const [history, setHistory] = useState([]);
 
-  const flowDoc = useSelector((state: RootState) => state.contentDocument, shallowEqual);
+  const { flowDoc, isSaved } = useSelector(
+    (state: RootState) => ({ flowDoc: state.contentDocument, isSaved: state.isSaved }),
+    shallowEqual
+  );
 
   useEffect(() => {
     const { now, history } = getHistory();
@@ -53,6 +57,9 @@ function FlowHeader() {
           </button>
         </li>
       </ul>
+      <button className={cx('save-btn', { 'need-save': !isSaved })} onClick={handleSaveButton}>
+        {isSaved ? 'saved ✅' : 'need save ❗️'}
+      </button>
     </header>
   );
 }

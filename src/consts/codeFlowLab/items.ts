@@ -345,6 +345,9 @@ export const FLOW_ITEM_ADDITIONAL_INFO = {
     placeholder: '',
     text: '',
   },
+  [ChartItemType.image]: {
+    src: '',
+  },
 };
 
 export const CONNECT_POINT_START = 15;

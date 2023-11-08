@@ -57,9 +57,8 @@ const initialState: DocumentState = {
 
 const documentReducer = createReducer<DocumentState, DocumentAction>(initialState, {
   [SET_DOCUMENT]: (state, { payload }) => ({
-    ...state,
+    ...initialState,
     contentDocument: payload,
-    isSaved: true,
     openTime: new Date().getTime(),
   }),
   [SET_DOCUMENT_VALUE]: (state) => state,

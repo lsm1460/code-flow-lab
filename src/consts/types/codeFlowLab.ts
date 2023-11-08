@@ -198,6 +198,11 @@ export interface ChartInputItem extends ChartItem {
   text: string;
 }
 
+export interface ChartImageItem extends ChartItem {
+  elType: ChartItemType.image;
+  src: string;
+}
+
 export type ChartItems =
   | ChartBodyItem
   | ChartButtonItem
@@ -222,7 +227,8 @@ export type ChartItems =
   | ChartMovePrevSceneItem
   | ChartSceneOrderItem
   | ChartLinkItem
-  | ChartInputItem;
+  | ChartInputItem
+  | ChartImageItem;
 
 export type ChartUtilsItems = ChartSizeItem | ChartIncludesItem | ChartIndexOfItem;
 

@@ -1,9 +1,10 @@
-const { app, BrowserWindow, screen, Menu, dialog } = require('electron');
+const { app, BrowserWindow, screen, Menu, dialog, protocol, net } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
 const { getMenuTemplate } = require('./menu');
 const registeShortcut = require('./shortcutRegister');
-const { removeProjectFile, checkSaved, saveProject } = require('./menu/file');
+const { removeProjectFile, checkSaved, saveProject, registSaveChannel } = require('./menu/file');
+const CUSTOM_PROTOCOL = require('../consts/protocol');
 
 let mainWindow;
 
@@ -101,7 +102,16 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 
+  registSaveChannel(mainWindow);
   registeShortcut(mainWindow);
+
+  protocol.handle(
+    CUSTOM_PROTOCOL,
+    (_req) => net.fetch(`file://${new URL(_req.url).pathname}`),
+    (error) => {
+      if (error) console.error('프로토콜 등록 실패');
+    }
+  );
 });
 
 app.on('window-all-closed', () => {
