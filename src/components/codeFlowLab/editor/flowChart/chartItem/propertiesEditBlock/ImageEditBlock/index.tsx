@@ -15,7 +15,6 @@ interface Props {
   src: string;
 }
 function ImageEditBlock({ id, src }: Props) {
-  console.log('src', src);
   const dispatch = useDispatch();
 
   const handleChangeImageSrc: React.ChangeEventHandler<HTMLInputElement> = (event) => {

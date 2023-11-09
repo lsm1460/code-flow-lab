@@ -1,9 +1,10 @@
-const { app, BrowserWindow, screen, Menu, dialog, protocol, net } = require('electron');
+const { app, BrowserWindow, screen, Menu, dialog, protocol, net, globalShortcut } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
 const { getMenuTemplate } = require('./menu');
+const { registViwerChannelFunc } = require('./viewerRegister');
 const registeShortcut = require('./shortcutRegister');
-const { removeProjectFile, checkSaved, saveProject, registSaveChannel } = require('./menu/file');
+const { removeProjectFile, checkSaved, saveProject, registFileChannel } = require('./menu/file');
 const CUSTOM_PROTOCOL = require('../consts/protocol');
 
 let mainWindow;
@@ -17,11 +18,14 @@ function createWindow() {
     minWidth: 900,
     minHeight: 600,
     show: false,
+    titleBarStyle: 'hidden',
+    trafficLightPosition: { x: 10, y: 16 },
     webPreferences: {
       enableRemoteModule: true,
       devTools: isDev,
-      contextIsolation: false,
+      contextIsolation: true,
       nodeIntegration: true,
+      preload: path.join(__dirname, './preload.js'),
     },
   });
 
@@ -41,7 +45,7 @@ function createWindow() {
     mainWindow.show();
   });
 
-  const menuTemplate = getMenuTemplate(mainWindow);
+  const menuTemplate = getMenuTemplate(mainWindow, app);
 
   const menu = Menu.buildFromTemplate(menuTemplate);
   Menu.setApplicationMenu(menu);
@@ -53,7 +57,8 @@ function createWindow() {
 
     checkSaved(mainWindow).then(async (_isSaved) => {
       if (_isSaved) {
-        mainWindow.destroy();
+        mainWindow.hide();
+        mainWindow = null;
       } else {
         const options = {
           type: 'question',
@@ -74,11 +79,12 @@ function createWindow() {
         } else if (response === 1) {
           // 저장 후 종료
           const res = await saveProject(mainWindow);
-          console.log('saved..', res);
-          mainWindow.destroy();
+          mainWindow.hide();
+          mainWindow = null;
         } else if (response === 2) {
           // 그냥 종료
-          mainWindow.destroy();
+          mainWindow.hide();
+          mainWindow = null;
         }
       }
     });
@@ -92,6 +98,14 @@ function createWindow() {
     }
   });
 
+  registFileChannel(mainWindow);
+  registViwerChannelFunc(mainWindow);
+  registeShortcut(mainWindow);
+
+  globalShortcut.register('CommandOrControl+Q', () => {
+    app.exit();
+  });
+
   mainWindow.focus();
 }
 
@@ -99,11 +113,10 @@ app.whenReady().then(() => {
   createWindow();
 
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
   });
-
-  registSaveChannel(mainWindow);
-  registeShortcut(mainWindow);
 
   protocol.handle(
     CUSTOM_PROTOCOL,

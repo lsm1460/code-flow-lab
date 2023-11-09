@@ -1,5 +1,6 @@
+import useIpcManager from '@/components/codeFlowLab/useIpcManager';
 import { ChartLinkItem, TriggerProps, ViewerItem } from '@/consts/types/codeFlowLab';
-import { CSSProperties, RefObject } from 'react';
+import { CSSProperties, RefObject, useEffect } from 'react';
 import ViewerElBlock from '..';
 
 interface LinkViewerItem extends ViewerItem {
@@ -16,6 +17,22 @@ interface Props {
   addedStyle: CSSProperties;
 }
 function ViewerLinkBlock({ elRef, viewerItem, triggerProps, variables, addedStyle }: Props) {
+  const { sendOpenBrowser } = useIpcManager(false);
+
+  useEffect(() => {
+    const handleLink = (_event: MouseEvent) => {
+      _event.preventDefault();
+
+      viewerItem.link && sendOpenBrowser(viewerItem.link);
+    };
+
+    elRef.current.addEventListener('click', handleLink);
+
+    return () => {
+      elRef.current.removeEventListener('click', handleLink);
+    };
+  }, [elRef, viewerItem.link]);
+
   return (
     <a
       ref={elRef}

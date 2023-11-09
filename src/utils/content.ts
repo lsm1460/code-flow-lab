@@ -178,7 +178,6 @@ export const getVariables = (
       __text = searched[_textId];
     }
 
-    console.log('__var', __var);
     switch (_item.elType) {
       case ChartItemType.size:
         return getSize(`${__var}`, _targetId, __text);

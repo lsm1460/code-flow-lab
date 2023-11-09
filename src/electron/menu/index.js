@@ -1,12 +1,22 @@
 const _file = require('./file');
+const _edit = require('./edit');
 
-const getMenuTemplate = (_mainWindow) => {
+const getMenuTemplate = (_mainWindow, _app) => {
   return [
     {
       label: '',
       submenu: [
         {
           label: 'About Code Flow Lab',
+        },
+        {
+          type: 'separator',
+        },
+        {
+          label: 'Quit Code Flow Lab',
+          click: () => {
+            _app.exit();
+          },
         },
       ],
     },
@@ -31,6 +41,29 @@ const getMenuTemplate = (_mainWindow) => {
           accelerator: 'CommandOrControl+S',
           click: () => _file.saveProject(_mainWindow),
         },
+        {
+          type: 'separator',
+        },
+        {
+          label: 'Close Window',
+          accelerator: 'Shift+CommandOrControl+W',
+          click: () => _file.closeWindow(_mainWindow),
+        },
+      ],
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        {
+          label: 'Undo',
+          accelerator: 'CommandOrControl+Z',
+          click: () => _edit.requestUndo(_mainWindow),
+        },
+        {
+          label: 'Redo',
+          accelerator: 'Shift+CommandOrControl+Z',
+          click: () => _edit.requestRedo(_mainWindow),
+        },
       ],
     },
   ];
@@ -39,4 +72,5 @@ const getMenuTemplate = (_mainWindow) => {
 module.exports = {
   getMenuTemplate,
   ..._file,
+  ..._edit,
 };

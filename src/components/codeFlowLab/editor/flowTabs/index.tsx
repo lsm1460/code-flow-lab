@@ -147,7 +147,6 @@ function FlowTabs() {
 
     dispatch(setDocumentValueAction(operations));
 
-    console.log();
     dispatch(setSceneOrderAction(changedTabOrder + 1));
   };
 

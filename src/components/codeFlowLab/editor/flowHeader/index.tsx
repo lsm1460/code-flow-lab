@@ -1,3 +1,4 @@
+import { REQUEST_UNDO, REQUEST_REDO } from '@/consts/channel.js';
 import { RootState } from '@/reducers';
 import { setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
 import { getHistory, getNextHistory, getPrevHistory } from '@/utils/history';
@@ -5,8 +6,8 @@ import classNames from 'classnames/bind';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import styles from './flowHeader.module.scss';
 import useIpcManager from '../../useIpcManager';
+import styles from './flowHeader.module.scss';
 const cx = classNames.bind(styles);
 
 function FlowHeader() {
@@ -20,6 +21,18 @@ function FlowHeader() {
     (state: RootState) => ({ flowDoc: state.contentDocument, isSaved: state.isSaved }),
     shallowEqual
   );
+
+  useEffect(() => {
+    const { ipcRenderer } = window.electron;
+
+    ipcRenderer.on(REQUEST_UNDO, (e, msg) => {
+      prev();
+    });
+
+    ipcRenderer.on(REQUEST_REDO, (e, document) => {
+      next();
+    });
+  }, []);
 
   useEffect(() => {
     const { now, history } = getHistory();
@@ -41,7 +54,7 @@ function FlowHeader() {
   };
 
   return (
-    <header className={cx('header')}>
+    <header className={cx('header', { mac: window.electron.isMac })}>
       <span className={cx('logo')}>CODE_FLOW_LAB。</span>
       <ul className={cx('history-buttons')}>
         <li className={historyNow < 0 ? cx('disable') : ''}>

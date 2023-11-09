@@ -2,11 +2,13 @@ import { store } from '@/App';
 import {
   CHECK_SAVED,
   CREATE_DOCUMENT,
+  OPEN_BROWSER,
+  OPEN_PROJECT,
   REQUEST_PROJECT,
+  REQUEST_SAVE,
   REQUEST_SAVE_STATE,
   SAVE_FILE,
   SET_DOCUMENT,
-  REQUEST_SAVE,
 } from '@/consts/channel.js';
 import { RootState } from '@/reducers';
 import {
@@ -19,11 +21,7 @@ import { useDispatch } from 'react-redux';
 const useIpcManager = (_ableReceive: boolean = true) => {
   const dispatch = useDispatch();
 
-  const { ipcRenderer } = window.require('electron');
-
-  const sendDocumentForSave = () => {
-    ipcRenderer.send(REQUEST_SAVE);
-  };
+  const { ipcRenderer } = window.electron;
 
   if (_ableReceive) {
     ipcRenderer.on(REQUEST_PROJECT, (e, msg) => {
@@ -48,8 +46,22 @@ const useIpcManager = (_ableReceive: boolean = true) => {
     });
   }
 
+  const sendDocumentForSave = () => {
+    ipcRenderer.send(REQUEST_SAVE);
+  };
+
+  const sendOpenBrowser = (_link) => {
+    ipcRenderer.send(OPEN_BROWSER, _link);
+  };
+
+  const sendOpenProject = (_path) => {
+    ipcRenderer.send(OPEN_PROJECT, _path);
+  };
+
   return {
     sendDocumentForSave,
+    sendOpenBrowser,
+    sendOpenProject,
   };
 };
 

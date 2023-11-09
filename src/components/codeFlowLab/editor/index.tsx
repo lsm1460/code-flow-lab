@@ -21,7 +21,6 @@ import FlowTabs from './flowTabs';
 import FlowToolbar from './flowToolbar';
 import FlowZoom from './flowZoom';
 import FlowOptionModal from './modal/flowOptionModal';
-
 import classNames from 'classnames/bind';
 import styles from './editor.module.scss';
 const cx = classNames.bind(styles);

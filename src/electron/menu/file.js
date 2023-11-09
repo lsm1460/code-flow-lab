@@ -12,6 +12,7 @@ const {
   REQUEST_SAVE_STATE,
   CHECK_SAVED,
   REQUEST_SAVE,
+  OPEN_PROJECT,
 } = require('../../consts/channel');
 
 const checkSaved = (_mainWindow) =>
@@ -69,7 +70,7 @@ const createProject = async (_mainWindow) => {
   }
 };
 
-const openProject = async (_mainWindow) => {
+const openProject = async (_mainWindow, _filePath) => {
   if (global.isOpenDialog) {
     return;
   }
@@ -96,27 +97,31 @@ const openProject = async (_mainWindow) => {
     }
   }
 
-  global.isOpenDialog = true;
+  if (!_filePath) {
+    global.isOpenDialog = true;
 
-  const { canceled, filePaths } = await dialog.showOpenDialog();
+    const { canceled, filePaths } = await dialog.showOpenDialog({ filters: [{ name: 'all', extensions: ['cdfl'] }] });
 
-  global.isOpenDialog = false;
+    global.isOpenDialog = false;
 
-  if (canceled) {
-    return;
+    if (canceled) {
+      return;
+    }
+
+    _filePath = filePaths[0];
   }
 
   if (global.projectPath.path) {
     removeProjectFile();
   }
 
-  const _extension = filePaths[0].split('.').pop();
+  const _extension = _filePath.split('.').pop();
 
   if (_extension !== 'cdfl') {
     return;
   }
 
-  const _pathArray = filePaths[0].split('/');
+  const _pathArray = _filePath.split('/');
   const _fileName = _pathArray.pop().split('.')[0];
 
   const clonedFolderPath = [..._pathArray, `.${_fileName}`];
@@ -126,7 +131,7 @@ const openProject = async (_mainWindow) => {
     if (err) throw err;
   });
 
-  fs.readFile(filePaths[0], async (err, data) => {
+  fs.readFile(_filePath, async (err, data) => {
     if (err) {
       throw err;
     }
@@ -246,9 +251,17 @@ const saveProject = (_mainWindow) => {
   });
 };
 
-const registSaveChannel = (_mainWindow) => {
+const closeWindow = (_mainWindow) => {
+  _mainWindow.close();
+};
+
+const registFileChannel = (_mainWindow) => {
   ipcMain.on(REQUEST_SAVE, () => {
     saveProject(_mainWindow);
+  });
+
+  ipcMain.on(OPEN_PROJECT, (_event, _path) => {
+    openProject(_mainWindow, _path);
   });
 };
 
@@ -258,5 +271,6 @@ module.exports = {
   createProject,
   openProject,
   saveProject,
-  registSaveChannel,
+  registFileChannel,
+  closeWindow,
 };
