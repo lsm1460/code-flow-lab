@@ -64,6 +64,24 @@ const getMenuTemplate = (_mainWindow, _app) => {
           accelerator: 'Shift+CommandOrControl+Z',
           click: () => _edit.requestRedo(_mainWindow),
         },
+        {
+          type: 'separator',
+        },
+        {
+          label: 'Cut',
+          accelerator: 'CommandOrControl+X',
+          click: () => _edit.requestCut(_mainWindow),
+        },
+        {
+          label: 'Copy',
+          accelerator: 'CommandOrControl+C',
+          click: () => _edit.requestCopy(_mainWindow),
+        },
+        {
+          label: 'Paste',
+          accelerator: 'CommandOrControl+V',
+          click: () => _edit.requestPaste(_mainWindow),
+        },
       ],
     },
   ];

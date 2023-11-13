@@ -3,9 +3,11 @@ const path = require('path');
 const isDev = require('electron-is-dev');
 const { getMenuTemplate } = require('./menu');
 const { registViwerChannelFunc } = require('./viewerRegister');
-const registeShortcut = require('./shortcutRegister');
+const registShortcut = require('./shortcutRegister');
 const { removeProjectFile, checkSaved, saveProject, registFileChannel } = require('./menu/file');
 const CUSTOM_PROTOCOL = require('../consts/protocol');
+const registRightClick = require('./rightClickRegister');
+require('dotenv/config');
 
 let mainWindow;
 
@@ -100,7 +102,8 @@ function createWindow() {
 
   registFileChannel(mainWindow);
   registViwerChannelFunc(mainWindow);
-  registeShortcut(mainWindow);
+  registShortcut(mainWindow);
+  registRightClick(mainWindow);
 
   globalShortcut.register('CommandOrControl+Q', () => {
     app.exit();

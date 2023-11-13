@@ -146,6 +146,27 @@ export const getConnectSizeByType = (
   });
 };
 
+export const getNewPos = (
+  itemsPos: CodeFlowChartDoc['itemsPos'],
+  sceneId: string,
+  _pos: { left: number; top: number }
+) => {
+  let isMatchFlag = false;
+
+  for (let _origin of Object.values(itemsPos)) {
+    if (_origin[sceneId]?.left === _pos.left && _origin[sceneId]?.top === _pos.top) {
+      isMatchFlag = true;
+      break;
+    }
+  }
+
+  if (isMatchFlag) {
+    return getNewPos(itemsPos, sceneId, { left: _pos.left + 10, top: _pos.top + 10 });
+  } else {
+    return _pos;
+  }
+};
+
 export const makeNewItem = (
   zoomArea: HTMLElement,
   chartItems: CodeFlowChartDoc['items'],
@@ -168,12 +189,7 @@ export const makeNewItem = (
     top: height / parseFloat(scale) / 2 - parseFloat(transY),
   };
 
-  if (lastEl && itemsPos[lastEl.id][sceneId].left === _pos.left && itemsPos[lastEl.id][sceneId].top === _pos.top) {
-    _pos = {
-      left: _pos.left + 10,
-      top: _pos.top + 10,
-    };
-  }
+  _pos = getNewPos(itemsPos, sceneId, _pos);
 
   return [
     {

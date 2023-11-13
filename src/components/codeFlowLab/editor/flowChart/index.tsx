@@ -1,17 +1,17 @@
+import { REQUEST_COPY, REQUEST_CUT, REQUEST_PASTE, SEND_COPY_OBJECTS } from '@/consts/channel.js';
 import { CHART_SCRIPT_ITEMS, CONNECT_POINT_CLASS } from '@/consts/codeFlowLab/items';
 import { ChartItemType, ChartItems, ConnectPoint, PointPos } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
-import { setDeleteTargetIdListAction } from '@/reducers/contentWizard/mainDocument';
-import { getChartItem, getSceneId } from '@/utils/content';
+import { Operation, setDeleteTargetIdListAction, setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
+import { getChartItem, getRandomId, getSceneId } from '@/utils/content';
+import classNames from 'classnames/bind';
 import _ from 'lodash';
 import { MouseEventHandler, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { ConnectPoints, MoveItems } from '..';
 import ChartItem from './chartItem';
-import { doPolygonsIntersect, getBlockType, getCanvasLineColor, getRectPoints } from './utils';
-
-import classNames from 'classnames/bind';
 import styles from './flowChart.module.scss';
+import { doPolygonsIntersect, getBlockType, getCanvasLineColor, getNewPos, getRectPoints } from './utils';
 const cx = classNames.bind(styles);
 
 type PathInfo = { pos: string; prev: string; prevList: string[] };
@@ -24,6 +24,8 @@ interface Props {
   transY?: number;
 }
 function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
+  const { ipcRenderer } = window.electron;
+
   const dispatch = useDispatch();
 
   const flowChartRef = useRef<HTMLDivElement>(null);
@@ -115,7 +117,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
       },
     }));
 
-    return Object.values(adjustedMovePosItems).sort((_before, _after) => _after.zIndex - _before.zIndex);
+    return Object.values(adjustedMovePosItems);
   }, [selectedChartItem, scale, multiSelectedItemList, selectedItemId, itemsPos]);
 
   useEffect(() => {
@@ -217,6 +219,118 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
   }, [multiSelectedItemList]);
 
   useEffect(() => {
+    // cut, copy
+    const handleRequestCopy = () => {
+      ipcRenderer.send(SEND_COPY_OBJECTS, {
+        items: _.pickBy(
+          selectedChartItem,
+          (_item) => multiSelectedIdListClone.current.includes(_item.id) && _item.elType !== ChartItemType.body
+        ),
+        pos: _.mapValues(
+          _.pickBy(itemsPos, (_pos, _itemId) => multiSelectedIdListClone.current.includes(_itemId)),
+          (_pos) => _pos[selectedSceneId]
+        ),
+      });
+    };
+
+    const handleRequestCut = () => {
+      handleRequestCopy();
+
+      deleteItems(null, multiSelectedIdListClone.current);
+    };
+
+    ipcRenderer.on(REQUEST_CUT, handleRequestCut);
+    ipcRenderer.on(REQUEST_COPY, handleRequestCopy);
+
+    return () => {
+      ipcRenderer.removeAllListeners(REQUEST_CUT);
+      ipcRenderer.removeAllListeners(REQUEST_COPY);
+    };
+  }, [selectedChartItem, selectedSceneId]);
+
+  useEffect(() => {
+    // paste
+    const handleRequestPaste = (e, { items, pos }) => {
+      console.log('itemsPos', itemsPos);
+      const sceneItemSize = Object.keys(getChartItem(sceneItemIds, chartItems)).length;
+
+      const copiedIdList = Object.keys(items);
+      const changedIds = _.mapValues(_.mapKeys(copiedIdList), () => getRandomId());
+
+      const operations = Object.values(items).reduce<Operation[]>(
+        (_acc, _cur: ChartItems, _index) => {
+          const newItemId = changedIds[_cur.id];
+
+          let _val;
+
+          return _acc.map((_op) => {
+            if (_op.key === 'items') {
+              let connectionIds = _.mapValues(_cur.connectionIds, (_pointList, _dir) =>
+                _pointList
+                  .map(
+                    (_point) =>
+                      changedIds[_point.connectParentId] && {
+                        ..._point,
+                        parentId: newItemId,
+                        connectParentId: changedIds[_point.connectParentId],
+                      }
+                  )
+                  .filter((_point) => _point)
+              );
+
+              _val = {
+                ..._op.value,
+                [newItemId]: {
+                  ..._cur,
+                  id: newItemId,
+                  connectionIds,
+                  zIndex: sceneItemSize + _index + 1,
+                },
+              };
+            } else if (_op.key === 'itemsPos') {
+              _val = {
+                ..._op.value,
+                [newItemId]: {
+                  [selectedSceneId]: getNewPos(itemsPos, selectedSceneId, pos[_cur.id]),
+                },
+              };
+            } else {
+              _val = [..._op.value, newItemId];
+            }
+
+            return { ..._op, value: _val };
+          });
+        },
+        [
+          {
+            key: 'items',
+            value: {
+              ...chartItems,
+            },
+          },
+          {
+            key: `itemsPos`,
+            value: {
+              ...itemsPos,
+            },
+          },
+          {
+            key: `scene.${selectedSceneId}.itemIds`,
+            value: [...sceneItemIds],
+          },
+        ]
+      );
+
+      dispatch(setDocumentValueAction(operations));
+    };
+
+    ipcRenderer.on(REQUEST_PASTE, handleRequestPaste);
+    return () => {
+      ipcRenderer.removeAllListeners(REQUEST_PASTE);
+    };
+  }, [chartItems, itemsPos, selectedSceneId]);
+
+  useEffect(() => {
     if (selectedItemId.current) {
       totalDelta.current = {
         x: totalDelta.current.x + itemMoveDelta.x / scale,
@@ -259,9 +373,11 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
     }
   }, [pointMove, selectedConnectionPoint, lineCanvasCtx, lineCanvasRef, selectedChartItem, scale]);
 
-  const deleteItems = (_event: KeyboardEvent) => {
-    if (_event.code === 'Delete') {
-      const deleteTargetIdList = Object.keys(multiSelectedItemList).filter(
+  const deleteItems = (_event: KeyboardEvent, _targetIdList: string[] = null) => {
+    if (_event?.code === 'Delete' || _targetIdList) {
+      _targetIdList = _targetIdList || Object.keys(multiSelectedItemList);
+
+      const deleteTargetIdList = _targetIdList.filter(
         (_itemId) => selectedChartItem[_itemId].elType !== ChartItemType.body
       );
 
