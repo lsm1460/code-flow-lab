@@ -44,7 +44,6 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
 
   const { selectedSceneId, chartItems, sceneItemIds, itemsPos } = useSelector((state: RootState) => {
     const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
-
     return {
       selectedSceneId,
       chartItems: state.contentDocument.items,
@@ -285,6 +284,18 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
                   id: newItemId,
                   connectionIds,
                   zIndex: sceneItemSize + _index + 1,
+                  ...(_cur.connectionVariables && {
+                    connectionVariables: _cur.connectionVariables
+                      .map(
+                        (_point) =>
+                          changedIds[_point.connectParentId] && {
+                            ..._point,
+                            parentId: newItemId,
+                            connectParentId: changedIds[_point.connectParentId],
+                          }
+                      )
+                      .filter((_point) => _point),
+                  }),
                 },
               };
             } else if (_op.key === 'itemsPos') {
@@ -549,15 +560,21 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
   const getSelectedItemIds = () => {
     let _idList = [];
 
-    if (chartItemWrapRef.current && multiSelectBoxStartPos.current && multiSelectBoxEndPos.current) {
+    if (chartItemWrapRef.current && multiSelectBoxStartPos.current) {
       const children = Array.from(chartItemWrapRef.current.children);
 
-      const selectBox = [
-        { x: multiSelectBoxStartPos.current[0], y: multiSelectBoxStartPos.current[1] },
-        { x: multiSelectBoxEndPos.current[0], y: multiSelectBoxStartPos.current[1] },
-        { x: multiSelectBoxEndPos.current[0], y: multiSelectBoxEndPos.current[1] },
-        { x: multiSelectBoxStartPos.current[0], y: multiSelectBoxEndPos.current[1] },
-      ];
+      let selectBox = [];
+
+      if (multiSelectBoxEndPos.current) {
+        selectBox = [
+          { x: multiSelectBoxStartPos.current[0], y: multiSelectBoxStartPos.current[1] },
+          { x: multiSelectBoxEndPos.current[0], y: multiSelectBoxStartPos.current[1] },
+          { x: multiSelectBoxEndPos.current[0], y: multiSelectBoxEndPos.current[1] },
+          { x: multiSelectBoxStartPos.current[0], y: multiSelectBoxEndPos.current[1] },
+        ];
+      } else {
+        selectBox = [{ x: multiSelectBoxStartPos.current[0], y: multiSelectBoxStartPos.current[1] }];
+      }
 
       children.forEach((_el) => {
         const _htmlEl = _el as HTMLElement;
@@ -570,6 +587,21 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
           _idList.push(_htmlEl.dataset.id);
         }
       });
+    }
+
+    if (!multiSelectBoxEndPos.current) {
+      _idList = _idList.reduce((_acc, _itemId) => {
+        const curZIndex = parseInt(document.querySelector<HTMLElement>(`[data-id=${_itemId}]`).style['z-index'] || '0');
+        const accZIndex = _acc[0]
+          ? parseInt(document.querySelector<HTMLElement>(`[data-id=${_acc[0]}]`).style['z-index'] || '0')
+          : 0;
+
+        if (accZIndex < curZIndex) {
+          return [_itemId];
+        } else {
+          return _acc;
+        }
+      }, []);
     }
 
     return _idList;
@@ -651,7 +683,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
       const { x: convertedX, y: convertedY } = convertClientPosToLocalPos({ x: _event.clientX, y: _event.clientY });
 
       multiSelectBoxStartPos.current = [convertedX, convertedY];
-      multiSelectBoxEndPos.current = [convertedX, convertedY];
+      // multiSelectBoxEndPos.current = [convertedX, convertedY];
 
       document.addEventListener('mousemove', handleMouseMoveMultiSelect);
       document.addEventListener('mouseup', handleMouseUpMultiSelect);
@@ -685,6 +717,10 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
 
   const handleMouseMoveMultiSelect = (_event: MouseEvent) => {
     if (multiSelectBoxStartPos) {
+      const { x: convertedX, y: convertedY } = convertClientPosToLocalPos({ x: _event.clientX, y: _event.clientY });
+
+      multiSelectBoxEndPos.current = [convertedX, convertedY];
+
       lineCanvasCtx.clearRect(0, 0, lineCanvasRef.current.width, lineCanvasRef.current.height);
 
       const _multiSelectEndPos = [

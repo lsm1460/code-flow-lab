@@ -90,11 +90,21 @@ function FlowTabs() {
       return;
     }
 
-    const deleteItemIdList = flowScene[_sceneId].itemIds.filter(
-      (_itemId) =>
-        flowItems[_itemId].elType !== ChartItemType.variable ||
-        (flowItems[_itemId].elType === ChartItemType.variable && (flowItems[_itemId] as ChartVariableItem).sceneId)
-    );
+    const deleteItemIdList = flowScene[_sceneId].itemIds.filter((_itemId) => {
+      if (flowItems[_itemId].elType === ChartItemType.variable) {
+        const count = Object.values(flowScene).reduce((_acc, _cur) => {
+          if (_cur.itemIds.includes(_itemId)) {
+            return ++_acc;
+          }
+
+          return _acc;
+        }, 0);
+
+        return count === 1;
+      }
+
+      return true;
+    });
 
     let newItemPoses = _.pickBy(flowItemsPos, (_pos, _itemId) => !deleteItemIdList.includes(_itemId));
     newItemPoses = _.mapValues(newItemPoses, (_pos) => _.pickBy(_pos, (__pos, __sceneId) => __sceneId !== _sceneId));
