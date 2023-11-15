@@ -28,10 +28,12 @@ export const CHART_SCRIPT_ITEMS = [
 
 export const CHART_VARIABLE_ITEMS = [
   ChartItemType.variable,
+  ChartItemType.array,
   ChartItemType.condition,
   ChartItemType.size,
   ChartItemType.includes,
   ChartItemType.indexOf,
+  ChartItemType.get,
   ChartItemType.sceneOrder,
 ];
 
@@ -150,6 +152,13 @@ export const FLOW_CHART_ITEMS_STYLE: {
       right: [],
     },
   },
+  [ChartItemType.array]: {
+    width: 200,
+    connectionTypeList: {
+      left: [ChartItemType.variable],
+      right: [],
+    },
+  },
   [ChartItemType.if]: {
     width: 200,
     connectionTypeList: {
@@ -179,6 +188,13 @@ export const FLOW_CHART_ITEMS_STYLE: {
     },
   },
   [ChartItemType.indexOf]: {
+    width: 200,
+    connectionTypeList: {
+      left: [ChartItemType.variable],
+      right: [],
+    },
+  },
+  [ChartItemType.get]: {
     width: 200,
     connectionTypeList: {
       left: [ChartItemType.variable],
@@ -296,6 +312,10 @@ export const FLOW_ITEM_ADDITIONAL_INFO = {
     var: '',
     sceneId: '',
   },
+  [ChartItemType.array]: {
+    list: [],
+    sceneId: '',
+  },
   [ChartItemType.if]: {
     connectionVariables: [],
     conditions: {},
@@ -308,6 +328,10 @@ export const FLOW_ITEM_ADDITIONAL_INFO = {
   [ChartItemType.size]: {
     connectionVariables: [],
     text: '',
+  },
+  [ChartItemType.get]: {
+    connectionVariables: [],
+    text: 0,
   },
   [ChartItemType.includes]: {
     connectionVariables: [],

@@ -1,3 +1,4 @@
+import { SCROLL_CLASS_PREFIX } from '@/consts/codeFlowLab/items';
 import { ChartItemType, ConnectPoint } from '@/consts/types/codeFlowLab';
 import { setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
 import { useDebounceSubmitText } from '@/utils/content';
@@ -69,7 +70,7 @@ function TextEditBlock({ id, text, propertyKey, pointInfo, label, inputType = 't
       {label && <label htmlFor={`${id}-input-${propertyKey}`}>{label}</label>}
       <input
         id={`${id}-input-${propertyKey}`}
-        className={cx('text-input')}
+        className={cx('text-input', SCROLL_CLASS_PREFIX)}
         value={selectedText}
         onChange={handleTitleInput}
         placeholder="insert something.."

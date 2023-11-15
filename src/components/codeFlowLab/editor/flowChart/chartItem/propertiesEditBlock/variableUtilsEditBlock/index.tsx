@@ -11,7 +11,7 @@ const cx = classNames.bind(styles);
 
 interface Props {
   id: string;
-  text: string;
+  text: string | number;
   connectionVariables: ConnectPoint[];
   handlePointConnectStart: MouseEventHandler<HTMLElement>;
 }
@@ -50,6 +50,7 @@ function VariableUtilsEditBlock({ id, text, connectionVariables, handlePointConn
         id={id}
         text={text}
         propertyKey="text"
+        inputType={typeof text === 'string' ? 'text' : 'number'}
         pointInfo={{
           pointIndex: 1,
           connectPoint: connectionVariables[1],

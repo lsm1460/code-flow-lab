@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 
 import { CHART_VARIABLE_ITEMS, CUSTOM_TRIGGER_TYPE } from '@/consts/codeFlowLab/items';
 import {
+  ChartArrayItem,
   ChartItemType,
   ChartUtilsItems,
   ChartVariableItem,
@@ -48,12 +49,17 @@ export const makeNewDocument: makeNewDocument = ({ document: _document, keys: _k
 
   if (_.isArray(_document)) {
     mapFunction = _.map;
+
+    const targetSize = Number(_keys[_keys.length - 1]) + 1;
+    if (_document.length < Number(_keys[_keys.length - 1]) + 1) {
+      _document = [..._document, ...new Array(targetSize - _document.length).fill(undefined)];
+    }
   } else {
     mapFunction = _.mapValues;
   }
 
   return mapFunction(_document, (prop, propKey) => {
-    if (_keys.length > 1 && propKey + '' === _keys[0] + '') {
+    if (_keys.length > 1 && `${propKey}` === `${_keys[0]}`) {
       _keys.shift();
 
       return makeNewDocument({
@@ -61,7 +67,8 @@ export const makeNewDocument: makeNewDocument = ({ document: _document, keys: _k
         keys: _keys,
         value: _value,
       });
-    } else if (_keys.length === 1 && propKey + '' === _keys[0] + '') {
+    } else if (_keys.length === 1 && `${propKey}` === `${_keys[0]}`) {
+      _value === '1234' && console.log(_value);
       return _value;
     }
 
@@ -80,7 +87,7 @@ export const getChartItem = (sceneItemIdList: string[], chartItem: CodeFlowChart
   return _.pickBy(chartItem, (_item) => (sceneItemIdList || []).includes(_item.id));
 };
 
-export const useDebounceSubmitText = (_dispatchKey, _debounceCallbak = undefined, isNumber = false) => {
+export const useDebounceSubmitText = (_dispatchKey, isNumber = false) => {
   const [dispatchKey, setDispatchKey] = useState(_dispatchKey);
   const dispatch = useDispatch();
 
@@ -96,8 +103,6 @@ export const useDebounceSubmitText = (_dispatchKey, _debounceCallbak = undefined
           value: _text,
         })
       );
-
-      _debounceCallbak && _debounceCallbak(_text);
     }, 800),
     []
   );
@@ -109,10 +114,14 @@ export const getRandomId = (_length = 8) => {
   return 'fI_' + nanoid(_length);
 };
 
-const getSize = (_target: string, _id: string, _key: string) => {
-  if (_key) {
+const getSize = (_target: number | string | string[], _id: string, _key: string) => {
+  _target = typeof _target === 'number' ? `${_target}` : _target;
+
+  if (_key && typeof _target === 'string') {
     const rgxp = new RegExp(_key, 'g');
     return (_target.match(rgxp) || []).length;
+  } else if (_key) {
+    return (_target as string[]).filter((_item) => _item === _key).length;
   } else {
     return _target.length;
   }
@@ -147,6 +156,8 @@ export const getVariables = (
     if (!searched[_targetId]) {
       if (_items[_targetId].elType === ChartItemType.sceneOrder) {
         __var = `${_sceneOrder}`;
+      } else if (_items[_targetId].elType === ChartItemType.array) {
+        __var = (_items[_targetId] as ChartArrayItem).list;
       } else if (_items[_targetId].elType !== ChartItemType.variable) {
         __var = searchUtilsVariableLoop(_items, _items[_targetId] as ChartUtilsItems, _sceneOrder);
 
@@ -171,6 +182,20 @@ export const getVariables = (
           ...searched,
           [_textId]: __text,
         };
+      } else if (_textId && _items[_textId].elType === ChartItemType.variable) {
+        __text = (_items[_textId] as ChartVariableItem).var;
+
+        searched = {
+          ...searched,
+          [_textId]: __text,
+        };
+      } else if (_textId && _items[_textId].elType === ChartItemType.array) {
+        __text = (_items[_textId] as ChartArrayItem).list;
+
+        searched = {
+          ...searched,
+          [_textId]: __text,
+        };
       } else {
         __text = _item.text;
       }
@@ -179,8 +204,11 @@ export const getVariables = (
     }
 
     switch (_item.elType) {
+      case ChartItemType.get:
+        console.log('__text', __text);
+        return __var[__text];
       case ChartItemType.size:
-        return getSize(`${__var}`, _targetId, __text);
+        return getSize(__var, _targetId, __text);
       case ChartItemType.includes:
         return `${__var}`.includes(__text) ? 1 : 0;
       case ChartItemType.indexOf:
@@ -192,7 +220,7 @@ export const getVariables = (
   };
 
   const _variableItemList = _.pickBy(_items, (_item) => {
-    if (_item.elType === ChartItemType.variable) {
+    if (_item.elType === ChartItemType.variable || _item.elType === ChartItemType.array) {
       return _item.sceneId === _sceneId || !_item.sceneId;
     } else if (sceneItemIdList.includes(_item.id) && CHART_VARIABLE_ITEMS.includes(_item.elType)) {
       return true;
@@ -205,6 +233,8 @@ export const getVariables = (
     switch (_item.elType) {
       case ChartItemType.variable:
         return _item.var;
+      case ChartItemType.array:
+        return _item.list;
 
       case ChartItemType.condition:
         const __code = _item.textList.reduce((_acc, _cur, _index) => {
@@ -234,6 +264,7 @@ export const getVariables = (
       case ChartItemType.size:
       case ChartItemType.includes:
       case ChartItemType.indexOf:
+      case ChartItemType.get:
         return searchUtilsVariableLoop(_items, _item, _sceneOrder);
       case ChartItemType.sceneOrder:
         return `${_sceneOrder}`;

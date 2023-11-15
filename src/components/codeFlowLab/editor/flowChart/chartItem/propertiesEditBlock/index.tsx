@@ -1,21 +1,21 @@
 import { ChartItemType, ChartItems } from '@/consts/types/codeFlowLab';
+import classNames from 'classnames/bind';
 import { MouseEventHandler } from 'react';
+import ImageEditBlock from './ImageEditBlock';
 import InputEditBlock from './InputEditBlock';
+import ArrayEditBlock from './arrayEditBlock';
 import ChangeValueEditBlock from './changeValueEditBlock';
 import ConditionEditBlock from './conditionEditBlock';
 import IdSelectBlock from './idSelectBlock';
 import IfEditBlock from './ifEditBlock';
 import LinkEditBlock from './linkEditBlock';
 import LoopEditBlock from './loopEditBlock';
+import styles from './propertiesEditBlock.module.scss';
 import StyleEditBlock from './styleEditBlock';
 import TextEditBlock from './textEditBlock';
 import TriggerEditBlock from './triggerEditBlock';
 import VariableEditBlock from './variableEditBlock';
 import VariableUtilsEditBlock from './variableUtilsEditBlock';
-
-import classNames from 'classnames/bind';
-import styles from './propertiesEditBlock.module.scss';
-import ImageEditBlock from './ImageEditBlock';
 const cx = classNames.bind(styles);
 
 interface Props {
@@ -45,6 +45,8 @@ function PropertiesEditBlock({ chartItem, handlePointConnectStart }: Props) {
         );
       case ChartItemType.variable:
         return <VariableEditBlock id={chartItem.id} isGlobal={!chartItem.sceneId} variable={chartItem.var} />;
+      case ChartItemType.array:
+        return <ArrayEditBlock id={chartItem.id} isGlobal={!chartItem.sceneId} list={chartItem.list} />;
       case ChartItemType.loop:
         return (
           <LoopEditBlock
@@ -76,6 +78,7 @@ function PropertiesEditBlock({ chartItem, handlePointConnectStart }: Props) {
       case ChartItemType.size:
       case ChartItemType.includes:
       case ChartItemType.indexOf:
+      case ChartItemType.get:
         return (
           <VariableUtilsEditBlock
             id={chartItem.id}

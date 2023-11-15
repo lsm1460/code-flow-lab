@@ -7,7 +7,7 @@
   @include flow-item-mixin;
 
   &.selected {
-    border: 1px solid $other-point-color;
+    border: 1px solid $other-point-color !important;
     z-index: 999 !important;
 
     &.element {

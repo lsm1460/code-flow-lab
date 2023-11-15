@@ -250,7 +250,6 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
   useEffect(() => {
     // paste
     const handleRequestPaste = (e, { items, pos }) => {
-      console.log('itemsPos', itemsPos);
       const sceneItemSize = Object.keys(getChartItem(sceneItemIds, chartItems)).length;
 
       const copiedIdList = Object.keys(items);

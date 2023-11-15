@@ -32,6 +32,8 @@ export enum ChartItemType {
   sceneOrder = 'sceneOrder',
   link = 'link',
   input = 'input',
+  array = 'array',
+  get = 'get',
 }
 
 interface FlowScene {
@@ -132,6 +134,11 @@ export interface ChartSizeItem extends ChartItem {
   text: string;
 }
 
+export interface ChartGetItem extends ChartItem {
+  elType: ChartItemType.get;
+  text: number;
+}
+
 export interface ChartIncludesItem extends ChartItem {
   elType: ChartItemType.includes;
   text: string;
@@ -203,6 +210,12 @@ export interface ChartImageItem extends ChartItem {
   src: string;
 }
 
+export interface ChartArrayItem extends ChartItem {
+  elType: ChartItemType.array;
+  sceneId: string;
+  list: string[];
+}
+
 export type ChartItems =
   | ChartBodyItem
   | ChartButtonItem
@@ -228,9 +241,11 @@ export type ChartItems =
   | ChartSceneOrderItem
   | ChartLinkItem
   | ChartInputItem
-  | ChartImageItem;
+  | ChartImageItem
+  | ChartArrayItem
+  | ChartGetItem;
 
-export type ChartUtilsItems = ChartSizeItem | ChartIncludesItem | ChartIndexOfItem;
+export type ChartUtilsItems = ChartSizeItem | ChartIncludesItem | ChartIndexOfItem | ChartGetItem;
 
 export interface CodeFlowChartDoc {
   items: {

@@ -25,6 +25,8 @@ function FlowChartViewer({}: Props) {
     [sceneId, chartItems, sceneOrder]
   );
 
+  console.log('variables', variables);
+
   const selectedChartItem = useMemo(() => getChartItem(sceneItemIds, chartItems), [chartItems, sceneItemIds]);
 
   const makeStylePropReduce = (_acc = {}, _curPoint: ConnectPoint) => {
