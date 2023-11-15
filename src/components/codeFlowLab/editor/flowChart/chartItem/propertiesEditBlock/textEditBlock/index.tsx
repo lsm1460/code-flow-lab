@@ -21,8 +21,9 @@ interface Props {
   };
   label?: string;
   inputType?: 'text' | 'number';
+  isReadOnly?: boolean;
 }
-function TextEditBlock({ id, text, propertyKey, pointInfo, label, inputType = 'text' }: Props) {
+function TextEditBlock({ id, text, propertyKey, pointInfo, label, inputType = 'text', isReadOnly }: Props) {
   const dispatch = useDispatch();
 
   const [isTyping, setIsTyping] = useState(false);
@@ -79,7 +80,7 @@ function TextEditBlock({ id, text, propertyKey, pointInfo, label, inputType = 't
 
           emitText(_event.target.value);
         }}
-        readOnly={!!pointInfo?.connectPoint}
+        readOnly={isReadOnly || !!pointInfo?.connectPoint}
         type={inputType}
       />
 

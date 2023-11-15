@@ -27,7 +27,6 @@ import {
   setToggleStylesAction,
 } from '@/reducers/contentWizard/mainDocument';
 import { getElementTrigger } from '@/utils/content';
-import dayjs from 'dayjs';
 import _ from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useIsVisible } from 'react-is-visible';
@@ -35,18 +34,23 @@ import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import ViewerBodyBlock from './viewerBodyBlock';
 import ViewerButtonBlock from './viewerButtonBlock';
 import ViewerDivBlock from './viewerDivBlock';
+import ViewerImageBlock from './viewerImageBlock';
 import ViewerInputBlock from './viewerInputBlock';
 import ViewerLinkBlock from './viewerLinkBlock';
+import ViewerListBlock from './viewerListBlock';
 import ViewerParagraphBlock from './viewerParagraphBlock';
 import ViewerSpanBlock from './viewerSpanBlock';
-import ViewerImageBlock from './viewerImageBlock';
+import ViewerListItemBlock from './viewerListItemBlock';
 interface Props {
   viewerItem: ViewerItem;
   variables: {
     [x: string]: any;
   };
+  mapItem?: {
+    [id: string]: number;
+  };
 }
-function ViewerElBlock({ viewerItem, variables }: Props) {
+function ViewerElBlock({ viewerItem, variables, mapItem }: Props) {
   const dispatch = useDispatch();
 
   const { addedStyle, sceneOrder, scene } = useSelector(
@@ -129,6 +133,8 @@ function ViewerElBlock({ viewerItem, variables }: Props) {
     }
 
     _result = new Function(`let a = ${_targetVar}; return a ${_scriptBlock.operator} ${_var}`)();
+
+    variables[_varId] = _result;
 
     dispatch(
       setDocumentValueAction({
@@ -271,6 +277,7 @@ function ViewerElBlock({ viewerItem, variables }: Props) {
     viewerItem,
     variables,
     addedStyle,
+    mapItem,
   };
 
   return (
@@ -285,6 +292,8 @@ function ViewerElBlock({ viewerItem, variables }: Props) {
           [ChartItemType.link]: <ViewerLinkBlock {...childProps} />,
           [ChartItemType.input]: <ViewerInputBlock {...childProps} />,
           [ChartItemType.image]: <ViewerImageBlock {...childProps} />,
+          [ChartItemType.list]: <ViewerListBlock {...childProps} />,
+          [ChartItemType.listEl]: <ViewerListItemBlock {...childProps} />,
         }[viewerItem.elType]
       }
     </>

@@ -68,7 +68,6 @@ export const makeNewDocument: makeNewDocument = ({ document: _document, keys: _k
         value: _value,
       });
     } else if (_keys.length === 1 && `${propKey}` === `${_keys[0]}`) {
-      _value === '1234' && console.log(_value);
       return _value;
     }
 
@@ -205,7 +204,6 @@ export const getVariables = (
 
     switch (_item.elType) {
       case ChartItemType.get:
-        console.log('__text', __text);
         return __var[__text];
       case ChartItemType.size:
         return getSize(__var, _targetId, __text);

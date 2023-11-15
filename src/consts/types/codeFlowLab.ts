@@ -34,6 +34,8 @@ export enum ChartItemType {
   input = 'input',
   array = 'array',
   get = 'get',
+  list = 'list',
+  listEl = 'list item',
 }
 
 interface FlowScene {
@@ -216,6 +218,17 @@ export interface ChartArrayItem extends ChartItem {
   list: string[];
 }
 
+export interface ChartListItem extends ChartItem {
+  elType: ChartItemType.list;
+  size: number;
+}
+
+export interface ChartListElItem extends ChartItem {
+  elType: ChartItemType.listEl;
+  elId: string;
+  useIndex: boolean;
+}
+
 export type ChartItems =
   | ChartBodyItem
   | ChartButtonItem
@@ -243,7 +256,9 @@ export type ChartItems =
   | ChartInputItem
   | ChartImageItem
   | ChartArrayItem
-  | ChartGetItem;
+  | ChartGetItem
+  | ChartListItem
+  | ChartListElItem;
 
 export type ChartUtilsItems = ChartSizeItem | ChartIncludesItem | ChartIndexOfItem | ChartGetItem;
 

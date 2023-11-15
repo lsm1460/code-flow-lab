@@ -6,12 +6,14 @@ import _ from 'lodash';
 import { useMemo } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import PropertyBlock from '../propertyBlock';
+import { ChartItemType } from '@/consts/types/codeFlowLab';
 
 interface Props {
   id: string;
   elId: string;
+  targetElTypeList?: ChartItemType[];
 }
-function IdSelectBlock({ id, elId }: Props) {
+function IdSelectBlock({ id, elId, targetElTypeList }: Props) {
   const dispatch = useDispatch();
 
   const { chartItems, sceneItemIds } = useSelector((state: RootState) => {
@@ -27,7 +29,12 @@ function IdSelectBlock({ id, elId }: Props) {
 
   const valueList = useMemo(() => {
     const selectedChartItem = getChartItem(sceneItemIds, chartItems);
-    const elChartItem = _.pickBy(selectedChartItem, (_item) => CHART_ELEMENT_ITEMS.includes(_item.elType));
+    const elChartItem = _.pickBy(selectedChartItem, (_item) => {
+      const flag1 = CHART_ELEMENT_ITEMS.includes(_item.elType);
+      const flag2 = (targetElTypeList || [_item.elType]).includes(_item.elType);
+
+      return flag1 && flag2;
+    });
 
     return _.map(elChartItem, (_item) => ({ value: _item.id, label: _item.name }));
   }, [chartItems, sceneItemIds]);

@@ -10,12 +10,13 @@ interface Props {
     [x: string]: any;
   };
   addedStyle: CSSProperties;
+  mapItem;
 }
-function ViewerDivBlock({ elRef, viewerItem, triggerProps, variables, addedStyle }: Props) {
+function ViewerDivBlock({ elRef, viewerItem, triggerProps, variables, addedStyle, mapItem }: Props) {
   return (
     <div ref={elRef} style={{ ...viewerItem.styles, ...addedStyle }} {...triggerProps}>
       {viewerItem.children.map((_item) => (
-        <ViewerElBlock key={_item.id} viewerItem={_item} variables={variables} />
+        <ViewerElBlock key={_item.id} viewerItem={_item} variables={variables} mapItem={mapItem} />
       ))}
     </div>
   );

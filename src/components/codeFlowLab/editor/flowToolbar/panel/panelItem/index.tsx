@@ -60,6 +60,9 @@ function PanelItem({ itemType }: Props) {
     [ChartItemType.sceneOrder]: '현재 장면의 순서를 반환합니다.',
     [ChartItemType.link]: '기입된 링크의 페이지를 오픈합니다.',
     [ChartItemType.input]: '사용자가 기입할 수 있는 입력란을 제공합니다. variable블록의 값을 변경할 수 있습니다.',
+    [ChartItemType.list]: '하위 엘리먼트를 지정된 횟수 만큼 생성합니다.',
+    [ChartItemType.listEl]:
+      '리스트 블럭의 하위로 연결될 된다면 리스트 블럭으로부터 받아온 Array의 값 또는 index를 표시합니다.',
   };
 
   const handleMakeItem = () => {

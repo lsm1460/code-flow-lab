@@ -9,6 +9,8 @@ export const CHART_ELEMENT_ITEMS = [
   ChartItemType.image,
   ChartItemType.link,
   ChartItemType.input,
+  ChartItemType.list,
+  ChartItemType.listEl,
 ];
 
 export const CHART_SCRIPT_ITEMS = [
@@ -37,6 +39,8 @@ export const CHART_VARIABLE_ITEMS = [
   ChartItemType.sceneOrder,
 ];
 
+export const CHART_TEXT_ITEMS = [ChartItemType.span, ChartItemType.listEl];
+
 export const FLOW_CHART_ITEMS_STYLE: {
   [_key in ChartItemType]: {
     width: number;
@@ -64,6 +68,20 @@ export const FLOW_CHART_ITEMS_STYLE: {
     connectionTypeList: {
       left: [ChartItemType.el],
       right: [ChartItemType.el, ChartItemType.style, ChartItemType.trigger],
+    },
+  },
+  [ChartItemType.list]: {
+    width: 200,
+    connectionTypeList: {
+      left: [ChartItemType.el],
+      right: [ChartItemType.el, ChartItemType.style, ChartItemType.trigger],
+    },
+  },
+  [ChartItemType.listEl]: {
+    width: 200,
+    connectionTypeList: {
+      left: [ChartItemType.el],
+      right: [ChartItemType.style, ChartItemType.trigger],
     },
   },
   [ChartItemType.paragraph]: {
@@ -371,6 +389,14 @@ export const FLOW_ITEM_ADDITIONAL_INFO = {
   },
   [ChartItemType.image]: {
     src: '',
+  },
+  [ChartItemType.list]: {
+    connectionVariables: [],
+    size: 2,
+  },
+  [ChartItemType.listEl]: {
+    elId: '',
+    useIndex: true,
   },
 };
 

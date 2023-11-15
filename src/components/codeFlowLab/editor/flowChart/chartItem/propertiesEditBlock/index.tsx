@@ -16,6 +16,8 @@ import TextEditBlock from './textEditBlock';
 import TriggerEditBlock from './triggerEditBlock';
 import VariableEditBlock from './variableEditBlock';
 import VariableUtilsEditBlock from './variableUtilsEditBlock';
+import ListEditBlock from './listEditBlock';
+import ListElEditBlock from './listElEditBlock';
 const cx = classNames.bind(styles);
 
 interface Props {
@@ -131,6 +133,17 @@ function PropertiesEditBlock({ chartItem, handlePointConnectStart }: Props) {
         );
       case ChartItemType.image:
         return <ImageEditBlock id={chartItem.id} src={chartItem.src} />;
+      case ChartItemType.list:
+        return (
+          <ListEditBlock
+            id={chartItem.id}
+            size={chartItem.size}
+            connectionVariables={chartItem.connectionVariables}
+            handlePointConnectStart={handlePointConnectStart}
+          />
+        );
+      case ChartItemType.listEl:
+        return <ListElEditBlock id={chartItem.id} elId={chartItem.elId} useIndex={chartItem.useIndex} />;
       default:
         return <></>;
     }

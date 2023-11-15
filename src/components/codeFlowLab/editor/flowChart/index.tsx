@@ -1,5 +1,10 @@
 import { REQUEST_COPY, REQUEST_CUT, REQUEST_PASTE, SEND_COPY_OBJECTS } from '@/consts/channel.js';
-import { CHART_SCRIPT_ITEMS, CONNECT_POINT_CLASS } from '@/consts/codeFlowLab/items';
+import {
+  CHART_ELEMENT_ITEMS,
+  CHART_SCRIPT_ITEMS,
+  CHART_TEXT_ITEMS,
+  CONNECT_POINT_CLASS,
+} from '@/consts/codeFlowLab/items';
 import { ChartItemType, ChartItems, ConnectPoint, PointPos } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
 import { Operation, setDeleteTargetIdListAction, setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
@@ -546,6 +551,10 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
       (originConnectType === ChartItemType.style && targetConnectType === ChartItemType.style)
     ) {
       return true;
+    }
+
+    if (_.intersection([originConnectType, targetConnectType], CHART_TEXT_ITEMS).length > 0) {
+      return _.intersection([_elType, _targetType], CHART_TEXT_ITEMS).length > 0;
     }
 
     // 시작점의 가능 타입과 타겟 블럭이 같고,
