@@ -1,10 +1,8 @@
-import { ChartListElItem, ChartSpanItem, TriggerProps, ViewerItem } from '@/consts/types/codeFlowLab';
-import _ from 'lodash';
+import { ChartListElItem, TriggerProps, ViewerItem } from '@/consts/types/codeFlowLab';
 import { CSSProperties, RefObject, useMemo } from 'react';
 
 interface SpanViewerItem extends ViewerItem {
   elId?: ChartListElItem['elId'];
-  useIndex?: ChartListElItem['useIndex'];
 }
 
 interface Props {
@@ -13,11 +11,11 @@ interface Props {
   triggerProps: TriggerProps;
   addedStyle: CSSProperties;
   mapItem?: {
-    [id: string]: number;
+    [id: string]: number | string;
   };
 }
 function ViewerListItemBlock({ elRef, viewerItem, triggerProps, addedStyle, mapItem }: Props) {
-  const textVariable = useMemo(() => mapItem?.[viewerItem.elId]?.[viewerItem.useIndex ? 1 : 0], [mapItem, viewerItem]);
+  const textVariable = useMemo(() => mapItem?.[viewerItem.elId], [mapItem, viewerItem]);
 
   return (
     <span ref={elRef} style={{ ...viewerItem.styles, ...addedStyle }} {...triggerProps}>

@@ -80,7 +80,7 @@ export const FLOW_CHART_ITEMS_STYLE: {
   [ChartItemType.listEl]: {
     width: 200,
     connectionTypeList: {
-      left: [ChartItemType.el],
+      left: [ChartItemType.el, ChartItemType.variable],
       right: [ChartItemType.style, ChartItemType.trigger],
     },
   },
@@ -393,10 +393,10 @@ export const FLOW_ITEM_ADDITIONAL_INFO = {
   [ChartItemType.list]: {
     connectionVariables: [],
     size: 2,
+    useIndex: true,
   },
   [ChartItemType.listEl]: {
     elId: '',
-    useIndex: true,
   },
 };
 

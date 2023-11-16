@@ -221,12 +221,12 @@ export interface ChartArrayItem extends ChartItem {
 export interface ChartListItem extends ChartItem {
   elType: ChartItemType.list;
   size: number;
+  useIndex: boolean;
 }
 
 export interface ChartListElItem extends ChartItem {
   elType: ChartItemType.listEl;
   elId: string;
-  useIndex: boolean;
 }
 
 export type ChartItems =

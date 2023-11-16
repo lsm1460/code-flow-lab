@@ -10,6 +10,8 @@ const getConnectionIds = (_connectionIds: ChartItem['connectionIds'], _aPos: Poi
       {
         parentId: _aPos.parentId,
         connectParentId: _bPos.parentId,
+        index: _aPos.index,
+        connectType: _aPos.connectType,
       },
     ],
   };
@@ -37,6 +39,8 @@ const getChangeConnectIds = (
       {
         parentId: _aPos.parentId,
         connectParentId: _bPos.parentId,
+        index: _aPos.index,
+        connectType: _aPos.connectType,
       },
     ],
   };

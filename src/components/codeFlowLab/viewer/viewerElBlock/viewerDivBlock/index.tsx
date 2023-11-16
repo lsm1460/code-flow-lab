@@ -6,17 +6,14 @@ interface Props {
   elRef: RefObject<HTMLDivElement>;
   viewerItem: ViewerItem;
   triggerProps: TriggerProps;
-  variables: {
-    [x: string]: any;
-  };
   addedStyle: CSSProperties;
   mapItem;
 }
-function ViewerDivBlock({ elRef, viewerItem, triggerProps, variables, addedStyle, mapItem }: Props) {
+function ViewerDivBlock({ elRef, viewerItem, triggerProps, addedStyle, mapItem }: Props) {
   return (
     <div ref={elRef} style={{ ...viewerItem.styles, ...addedStyle }} {...triggerProps}>
       {viewerItem.children.map((_item) => (
-        <ViewerElBlock key={_item.id} viewerItem={_item} variables={variables} mapItem={mapItem} />
+        <ViewerElBlock key={_item.id} viewerItem={_item} mapItem={mapItem} />
       ))}
     </div>
   );

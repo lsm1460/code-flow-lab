@@ -11,13 +11,10 @@ interface Props {
   elRef: RefObject<HTMLAnchorElement>;
   viewerItem: LinkViewerItem;
   triggerProps: TriggerProps;
-  variables: {
-    [x: string]: any;
-  };
   addedStyle: CSSProperties;
   mapItem;
 }
-function ViewerLinkBlock({ elRef, viewerItem, triggerProps, variables, addedStyle, mapItem }: Props) {
+function ViewerLinkBlock({ elRef, viewerItem, triggerProps, addedStyle, mapItem }: Props) {
   const { sendOpenBrowser } = useIpcManager(false);
 
   useEffect(() => {
@@ -43,7 +40,7 @@ function ViewerLinkBlock({ elRef, viewerItem, triggerProps, variables, addedStyl
       target="_blank"
     >
       {viewerItem.children.map((_item) => (
-        <ViewerElBlock key={_item.id} viewerItem={_item} variables={variables} mapItem={mapItem} />
+        <ViewerElBlock key={_item.id} viewerItem={_item} mapItem={mapItem} />
       ))}
     </a>
   );

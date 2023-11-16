@@ -76,7 +76,7 @@ function ChartItem({ chartItems, itemInfo, isSelected, handleItemMoveStart, hand
 
       const typeGroup = _.groupBy(_connectedSceneItemIdList, (_point) => {
         // 일반적으로는 그룹 별로 묶지만, 변수의 경우 다양한 블록들과 그룹지어 연결하지 않기 때문에 분기처리 추가
-        if (checkVariableBlock(itemInfo.elType)) {
+        if (_point.connectType === ChartItemType.variable) {
           return ChartItemType.variable;
         }
 
@@ -89,7 +89,7 @@ function ChartItem({ chartItems, itemInfo, isSelected, handleItemMoveStart, hand
             let _pointSize = connectSizeByType[_x][getBlockType(_type, checkDeep)] || 0;
 
             // 일반적으로는 그룹 별로 묶인 수 + 1로 연결점의 수 정의되지만, 변수의 경우 다양한 블록들과 그룹지어 연결하지 않기 때문에 분기처리 추가
-            if (checkVariableBlock(itemInfo.elType)) {
+            if (_type === ChartItemType.variable) {
               _pointSize = (Object.values(connectSizeByType[_x]) as number[]).reduce((_acc, _cur) => _acc + _cur, 0);
             }
 

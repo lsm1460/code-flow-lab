@@ -1,9 +1,11 @@
 import { ChartListItem, TriggerProps, ViewerItem } from '@/consts/types/codeFlowLab';
 import React, { CSSProperties, RefObject, useMemo } from 'react';
 import ViewerElBlock from '..';
+import _ from 'lodash';
 
 interface ListViewerItem extends ViewerItem {
   size?: ChartListItem['size'];
+  useIndex?: ChartListItem['useIndex'];
 }
 
 interface Props {
@@ -17,10 +19,14 @@ interface Props {
   mapItem;
 }
 function ViewerListBlock({ elRef, viewerItem, triggerProps, variables, addedStyle, mapItem }: Props) {
-  const arrayVariable = useMemo(
-    () => variables[viewerItem.connectionVariables[0]?.connectParentId],
-    [variables, viewerItem]
-  );
+  const arrayVariable = useMemo(() => {
+    const __var = variables[viewerItem.connectionVariables[0]?.connectParentId];
+    if (__var !== undefined && !_.isArray(__var)) {
+      return (__var || '').split('');
+    } else {
+      return __var;
+    }
+  }, [variables, viewerItem]);
 
   return (
     <div ref={elRef} style={{ ...viewerItem.styles, ...addedStyle }} {...triggerProps}>
@@ -30,8 +36,7 @@ function ViewerListBlock({ elRef, viewerItem, triggerProps, variables, addedStyl
             <ViewerElBlock
               key={_item.id}
               viewerItem={_item}
-              variables={variables}
-              mapItem={{ ...mapItem, [viewerItem.id]: [_var, _index] }}
+              mapItem={{ ...mapItem, [viewerItem.id]: viewerItem.useIndex ? _index : _var }}
             />
           ))}
         </React.Fragment>

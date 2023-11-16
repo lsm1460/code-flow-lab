@@ -26,7 +26,7 @@ import {
   setSceneOrderAction,
   setToggleStylesAction,
 } from '@/reducers/contentWizard/mainDocument';
-import { getElementTrigger } from '@/utils/content';
+import { getElementTrigger, makeVariables } from '@/utils/content';
 import _ from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useIsVisible } from 'react-is-visible';
@@ -38,29 +38,53 @@ import ViewerImageBlock from './viewerImageBlock';
 import ViewerInputBlock from './viewerInputBlock';
 import ViewerLinkBlock from './viewerLinkBlock';
 import ViewerListBlock from './viewerListBlock';
+import ViewerListItemBlock from './viewerListItemBlock';
 import ViewerParagraphBlock from './viewerParagraphBlock';
 import ViewerSpanBlock from './viewerSpanBlock';
-import ViewerListItemBlock from './viewerListItemBlock';
 interface Props {
   viewerItem: ViewerItem;
-  variables: {
-    [x: string]: any;
-  };
   mapItem?: {
-    [id: string]: number;
+    [id: string]: number | string;
   };
 }
-function ViewerElBlock({ viewerItem, variables, mapItem }: Props) {
+function ViewerElBlock({ viewerItem, mapItem }: Props) {
   const dispatch = useDispatch();
 
-  const { addedStyle, sceneOrder, scene } = useSelector(
+  const { items, addedStyle, sceneOrder, scene } = useSelector(
     (state: RootState) => ({
+      items: state.contentDocument.items,
       addedStyle: state.addedStyles[viewerItem.id] || {},
       sceneOrder: state.sceneOrder,
       scene: state.contentDocument.scene,
     }),
     shallowEqual
   );
+
+  const variables = useMemo(() => {
+    if (viewerItem.connectionVariables?.length || viewerItem.triggers.length) {
+      return makeVariables(viewerItem, items, sceneOrder, mapItem);
+    }
+
+    return {};
+  }, [items, viewerItem, mapItem]);
+
+  const triggerProps: TriggerProps = useMemo(
+    () =>
+      viewerItem.triggers.reduce(
+        (_acc, _cur: ScriptTriggerItem) => ({
+          ..._acc,
+          [TriggerName[_cur.triggerType]]: () => {
+            for (let scriptBlock of _cur.script) {
+              executeScriptBlock(scriptBlock);
+            }
+          },
+        }),
+        {}
+      ),
+    [viewerItem]
+  );
+
+  const elementTriggerProps = useMemo(() => getElementTrigger(triggerProps), [triggerProps]);
 
   const executeConditionScript = (_scriptBlock: ScriptIfItem) => {
     const __code = _scriptBlock.connectionVariables
@@ -228,24 +252,6 @@ function ViewerElBlock({ viewerItem, variables, mapItem }: Props) {
     }
   };
 
-  const triggerProps: TriggerProps = useMemo(
-    () =>
-      viewerItem.triggers.reduce(
-        (_acc, _cur: ScriptTriggerItem) => ({
-          ..._acc,
-          [TriggerName[_cur.triggerType]]: () => {
-            for (let scriptBlock of _cur.script) {
-              executeScriptBlock(scriptBlock);
-            }
-          },
-        }),
-        {}
-      ),
-    [viewerItem]
-  );
-
-  const elementTriggerProps = useMemo(() => getElementTrigger(triggerProps), [triggerProps]);
-
   const elementRef = useRef(null);
   const isVisible = useIsVisible(elementRef);
 
@@ -275,7 +281,6 @@ function ViewerElBlock({ viewerItem, variables, mapItem }: Props) {
     elRef: elementRef,
     triggerProps: elementTriggerProps,
     viewerItem,
-    variables,
     addedStyle,
     mapItem,
   };
@@ -288,11 +293,11 @@ function ViewerElBlock({ viewerItem, variables, mapItem }: Props) {
           [ChartItemType.div]: <ViewerDivBlock {...childProps} />,
           [ChartItemType.button]: <ViewerButtonBlock {...childProps} />,
           [ChartItemType.paragraph]: <ViewerParagraphBlock {...childProps} />,
-          [ChartItemType.span]: <ViewerSpanBlock {...childProps} />,
+          [ChartItemType.span]: <ViewerSpanBlock {...childProps} variables={variables} />,
           [ChartItemType.link]: <ViewerLinkBlock {...childProps} />,
-          [ChartItemType.input]: <ViewerInputBlock {...childProps} />,
+          [ChartItemType.input]: <ViewerInputBlock {...childProps} variables={variables} />,
           [ChartItemType.image]: <ViewerImageBlock {...childProps} />,
-          [ChartItemType.list]: <ViewerListBlock {...childProps} />,
+          [ChartItemType.list]: <ViewerListBlock {...childProps} variables={variables} />,
           [ChartItemType.listEl]: <ViewerListItemBlock {...childProps} />,
         }[viewerItem.elType]
       }

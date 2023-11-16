@@ -138,12 +138,13 @@ function PropertiesEditBlock({ chartItem, handlePointConnectStart }: Props) {
           <ListEditBlock
             id={chartItem.id}
             size={chartItem.size}
+            useIndex={chartItem.useIndex}
             connectionVariables={chartItem.connectionVariables}
             handlePointConnectStart={handlePointConnectStart}
           />
         );
       case ChartItemType.listEl:
-        return <ListElEditBlock id={chartItem.id} elId={chartItem.elId} useIndex={chartItem.useIndex} />;
+        return <ListElEditBlock id={chartItem.id} elId={chartItem.elId} />;
       default:
         return <></>;
     }

@@ -65,7 +65,8 @@
     background-color: $trigger-function-point-color;
   }
 
-  &.variable-variable::before {
+  &.variable-variable::before,
+  &.span-variable::before {
     background-color: $variable-point-color;
   }
 }

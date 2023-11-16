@@ -84,7 +84,7 @@ function FlowChartViewer({}: Props) {
     return makeViewerDocument(selectedChartItem[rootId]);
   }, [selectedChartItem, sceneOrder]);
 
-  return <ViewerElBlock viewerItem={templateDocument} variables={variables} />;
+  return <ViewerElBlock viewerItem={templateDocument} />;
 }
 
 export default React.memo(FlowChartViewer);

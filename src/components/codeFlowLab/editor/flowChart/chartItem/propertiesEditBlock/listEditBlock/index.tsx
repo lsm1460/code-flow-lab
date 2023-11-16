@@ -1,22 +1,41 @@
 import { ChartItemType, ConnectPoint } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
-import { MouseEventHandler } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
+import { MouseEventHandler, useEffect } from 'react';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import ConnectDot from '../../connectDot';
 import TextEditBlock from '../textEditBlock';
 
 import classNames from 'classnames/bind';
 import styles from './listEditBlock.module.scss';
+import { Operation, setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
+import ToggleEditBlock from '../toggleEditBlock';
 const cx = classNames.bind(styles);
 
 interface Props {
   id: string;
   size: number;
+  useIndex: boolean;
   connectionVariables: ConnectPoint[];
   handlePointConnectStart: MouseEventHandler<HTMLElement>;
 }
-function ListEditBlock({ id, size, connectionVariables, handlePointConnectStart }: Props) {
+function ListEditBlock({ id, size, useIndex, connectionVariables, handlePointConnectStart }: Props) {
+  const dispatch = useDispatch();
+
   const chartItems = useSelector((state: RootState) => state.contentDocument.items, shallowEqual);
+
+  const toggleCallback = (_toggle: boolean) => {
+    const operations: Operation[] = [{ key: `items.${id}.useIndex`, value: _toggle }];
+
+    dispatch(setDocumentValueAction(operations));
+  };
+
+  useEffect(() => {
+    if (!useIndex && !connectionVariables[0]) {
+      const operations: Operation[] = [{ key: `items.${id}.useIndex`, value: true, isSkip: true }];
+
+      dispatch(setDocumentValueAction(operations));
+    }
+  }, [connectionVariables, useIndex]);
 
   return (
     <div>
@@ -45,7 +64,11 @@ function ListEditBlock({ id, size, connectionVariables, handlePointConnectStart 
             </p>
           </div>
         </div>
+        <div className={cx('toggle-wrap', { active: !!connectionVariables[0] })}>
+          <ToggleEditBlock label="use index in list item" toggleCallback={toggleCallback} onoff={useIndex} />
+        </div>
       </div>
+
       <TextEditBlock
         id={id}
         text={size}

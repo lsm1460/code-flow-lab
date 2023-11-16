@@ -13,12 +13,9 @@ interface Props {
   elRef: RefObject<HTMLDivElement>;
   viewerItem: ViewerItem;
   triggerProps: TriggerProps;
-  variables: {
-    [x: string]: any;
-  };
   addedStyle: CSSProperties;
 }
-function ViewerBodyBlock({ elRef, viewerItem, triggerProps, variables }: Props) {
+function ViewerBodyBlock({ elRef, viewerItem, triggerProps }: Props) {
   const addedStyle = useSelector(
     (state: RootState) => state.addedStyles[`${ROOT_BLOCK_ID}-${state.sceneOrder}`],
     shallowEqual
@@ -27,7 +24,7 @@ function ViewerBodyBlock({ elRef, viewerItem, triggerProps, variables }: Props) 
   return (
     <div ref={elRef} className={cx('viewer-wrap')} style={{ ...viewerItem.styles, ...addedStyle }} {...triggerProps}>
       {viewerItem.children.map((_item) => (
-        <ViewerElBlock key={_item.id} viewerItem={_item} variables={variables} />
+        <ViewerElBlock key={_item.id} viewerItem={_item} />
       ))}
     </div>
   );
