@@ -34,11 +34,15 @@
 
     &[type='number'] {
       text-align: right;
-      padding: 3px 15px 5px;
+      padding: 3px 15px 5px 5px;
 
       &::-webkit-inner-spin-button,
       &::-webkit-outer-spin-button {
         -webkit-appearance: none;
+      }
+
+      &::placeholder {
+        text-align: left;
       }
     }
   }

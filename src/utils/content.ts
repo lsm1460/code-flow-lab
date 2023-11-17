@@ -150,7 +150,9 @@ export const makeVariables = (
   let _variableItemList: CodeFlowChartDoc['items'] = {};
 
   const searchUtilsVariableLoop = (_items: CodeFlowChartDoc['items'], _item: ChartUtilsItems, _sceneOrder: number) => {
-    if (!_item.connectionVariables?.[0] && _item.elType !== ChartItemType.condition) {
+    const isSkipCheckVar = [ChartItemType.condition, ChartItemType.calculator].includes(_item.elType);
+
+    if (!_item.connectionVariables?.[0] && !isSkipCheckVar) {
       return undefined;
     }
 
@@ -161,10 +163,7 @@ export const makeVariables = (
     const _targetId = _item.connectionVariables[0]?.connectParentId;
     const _textId = _item.connectionVariables[1]?.connectParentId;
 
-    if (
-      ![...CHART_VARIABLE_ITEMS, ChartItemType.listEl].includes(_items[_targetId]?.elType) &&
-      _item.elType !== ChartItemType.condition
-    ) {
+    if (![...CHART_VARIABLE_ITEMS, ChartItemType.listEl].includes(_items[_targetId]?.elType) && !isSkipCheckVar) {
       return undefined;
     }
 
@@ -205,6 +204,8 @@ export const makeVariables = (
           return __result;
         } else if (_item.elType === ChartItemType.condition) {
           return _item.textList[_index];
+        } else if (_item.elType === ChartItemType.calculator) {
+          return _item.textList[_index];
         } else {
           return _item.text;
         }
@@ -226,30 +227,32 @@ export const makeVariables = (
       case ChartItemType.indexOf:
         return (typeof __var === 'number' ? `${__var}` : __var).indexOf(`${__text}`);
       case ChartItemType.condition:
+      case ChartItemType.calculator:
+        const _values = [__var, __text];
         const __code = _item.textList.reduce((_acc, _cur, _index) => {
           let _text = '';
+          let _var = _values[_index];
 
-          const _varId = _item.connectionVariables[_index]?.connectParentId;
-
-          let _var;
-          if (_items?.[_varId]?.elType === ChartItemType.variable) {
-            _var = (_items?.[_varId] as ChartVariableItem)?.var;
-          } else if (_items?.[_varId]?.elType === ChartItemType.sceneOrder) {
-            _var = `${_sceneOrder}`;
+          if (_item.elType === ChartItemType.calculator) {
+            _var = typeof _var === 'number' ? _var : _var.length;
           }
 
           if (_index !== 0) {
-            _text += _item.conditions;
+            _text += _item.operator;
           }
 
-          _text += JSON.stringify(_var || _cur);
+          _text += JSON.stringify(_.isUndefined(_var) ? _cur : _var);
 
           return _acc + _text;
         }, '');
 
         const conditionResult = new Function(`return ${__code}`)();
 
-        return conditionResult ? 1 : 0;
+        if (_item.elType === ChartItemType.condition) {
+          return conditionResult ? 1 : 0;
+        } else {
+          return conditionResult;
+        }
 
       default:
         return undefined;
@@ -288,6 +291,7 @@ export const makeVariables = (
         return _item.list;
 
       case ChartItemType.condition:
+      case ChartItemType.calculator:
       case ChartItemType.size:
       case ChartItemType.includes:
       case ChartItemType.indexOf:

@@ -38,6 +38,7 @@ export const CHART_VARIABLE_ITEMS = [
   ChartItemType.indexOf,
   ChartItemType.get,
   ChartItemType.sceneOrder,
+  ChartItemType.calculator,
 ];
 
 export const CHART_TEXT_ITEMS = [ChartItemType.span, ChartItemType.listEl];
@@ -297,6 +298,13 @@ export const FLOW_CHART_ITEMS_STYLE: {
       right: [ChartItemType.el],
     },
   },
+  [ChartItemType.calculator]: {
+    width: 200,
+    connectionTypeList: {
+      left: [ChartItemType.variable],
+      right: [],
+    },
+  },
 };
 
 export const FLOW_ITEM_DEFAULT_INFO = {
@@ -349,7 +357,7 @@ export const FLOW_ITEM_ADDITIONAL_INFO = {
   [ChartItemType.condition]: {
     textList: ['', ''],
     connectionVariables: [],
-    conditions: '==',
+    operator: '==',
   },
   [ChartItemType.size]: {
     connectionVariables: [],
@@ -408,6 +416,11 @@ export const FLOW_ITEM_ADDITIONAL_INFO = {
   },
   [ChartItemType.ifEl]: {
     connectionVariables: [],
+  },
+  [ChartItemType.calculator]: {
+    textList: ['', ''],
+    connectionVariables: [],
+    operator: '+',
   },
 };
 

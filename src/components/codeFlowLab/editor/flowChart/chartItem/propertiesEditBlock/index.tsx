@@ -5,7 +5,7 @@ import ImageEditBlock from './ImageEditBlock';
 import InputEditBlock from './InputEditBlock';
 import ArrayEditBlock from './arrayEditBlock';
 import ChangeValueEditBlock from './changeValueEditBlock';
-import ConditionEditBlock from './conditionEditBlock';
+import OperatorEditBlock from './operatorEditBlock';
 import IdSelectBlock from './idSelectBlock';
 import IfEditBlock from './ifEditBlock';
 import LinkEditBlock from './linkEditBlock';
@@ -69,11 +69,13 @@ function PropertiesEditBlock({ chartItem, handlePointConnectStart }: Props) {
           />
         );
       case ChartItemType.condition:
+      case ChartItemType.calculator:
         return (
-          <ConditionEditBlock
+          <OperatorEditBlock
             id={chartItem.id}
+            elType={chartItem.elType}
             textList={chartItem.textList}
-            conditions={chartItem.conditions}
+            operator={chartItem.operator}
             connectionVariables={chartItem.connectionVariables}
             handlePointConnectStart={handlePointConnectStart}
           />
