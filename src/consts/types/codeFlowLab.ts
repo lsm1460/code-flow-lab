@@ -36,6 +36,7 @@ export enum ChartItemType {
   get = 'get',
   list = 'list',
   listEl = 'list item',
+  ifEl = 'if Element',
 }
 
 interface FlowScene {
@@ -229,6 +230,10 @@ export interface ChartListElItem extends ChartItem {
   elId: string;
 }
 
+export interface ChartIfElementItem extends ChartItem {
+  elType: ChartItemType.ifEl;
+}
+
 export type ChartItems =
   | ChartBodyItem
   | ChartButtonItem
@@ -258,9 +263,10 @@ export type ChartItems =
   | ChartArrayItem
   | ChartGetItem
   | ChartListItem
-  | ChartListElItem;
+  | ChartListElItem
+  | ChartIfElementItem;
 
-export type ChartUtilsItems = ChartSizeItem | ChartIncludesItem | ChartIndexOfItem | ChartGetItem;
+export type ChartUtilsItems = ChartSizeItem | ChartIncludesItem | ChartIndexOfItem | ChartGetItem | ChartConditionItem;
 
 export interface CodeFlowChartDoc {
   items: {

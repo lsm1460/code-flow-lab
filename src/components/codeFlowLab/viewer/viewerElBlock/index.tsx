@@ -34,6 +34,7 @@ import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import ViewerBodyBlock from './viewerBodyBlock';
 import ViewerButtonBlock from './viewerButtonBlock';
 import ViewerDivBlock from './viewerDivBlock';
+import ViewerIfBlock from './viewerIfBlock';
 import ViewerImageBlock from './viewerImageBlock';
 import ViewerInputBlock from './viewerInputBlock';
 import ViewerLinkBlock from './viewerLinkBlock';
@@ -299,6 +300,7 @@ function ViewerElBlock({ viewerItem, mapItem }: Props) {
           [ChartItemType.image]: <ViewerImageBlock {...childProps} />,
           [ChartItemType.list]: <ViewerListBlock {...childProps} variables={variables} />,
           [ChartItemType.listEl]: <ViewerListItemBlock {...childProps} />,
+          [ChartItemType.ifEl]: <ViewerIfBlock {...childProps} variables={variables} />,
         }[viewerItem.elType]
       }
     </>

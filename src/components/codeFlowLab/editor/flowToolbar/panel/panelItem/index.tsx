@@ -63,6 +63,7 @@ function PanelItem({ itemType }: Props) {
     [ChartItemType.list]: '하위 엘리먼트를 지정된 횟수 만큼 생성합니다.',
     [ChartItemType.listEl]:
       '리스트 블럭의 하위로 연결될 된다면 리스트 블럭으로부터 받아온 Array의 값 또는 index를 표시합니다.',
+    [ChartItemType.ifEl]: '변수 블럭과 연결하여 하위 엘리먼트의 표시 여부를 결정할 수 있습니다.',
   };
 
   const handleMakeItem = () => {

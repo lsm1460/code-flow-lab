@@ -11,6 +11,7 @@ export const CHART_ELEMENT_ITEMS = [
   ChartItemType.input,
   ChartItemType.list,
   ChartItemType.listEl,
+  ChartItemType.ifEl,
 ];
 
 export const CHART_SCRIPT_ITEMS = [
@@ -289,6 +290,13 @@ export const FLOW_CHART_ITEMS_STYLE: {
       right: [ChartItemType.style, ChartItemType.trigger],
     },
   },
+  [ChartItemType.ifEl]: {
+    width: 200,
+    connectionTypeList: {
+      left: [ChartItemType.el],
+      right: [ChartItemType.el],
+    },
+  },
 };
 
 export const FLOW_ITEM_DEFAULT_INFO = {
@@ -397,6 +405,9 @@ export const FLOW_ITEM_ADDITIONAL_INFO = {
   },
   [ChartItemType.listEl]: {
     elId: '',
+  },
+  [ChartItemType.ifEl]: {
+    connectionVariables: [],
   },
 };
 
