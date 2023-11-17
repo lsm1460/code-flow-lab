@@ -31,18 +31,33 @@ function DragArea() {
 
         setIsDragOver(false);
       }
+
+      document.body.removeAttribute('data-drag');
+    };
+
+    document.body.onmousedown = (_event) => {
+      // _event.preventDefault();
+
+      document.body.setAttribute('data-drag', 'in');
     };
 
     document.body.ondragover = (_event) => {
       _event.preventDefault();
 
-      setIsDragOver(true);
+      if (document.body.dataset.drag !== 'in') {
+        setIsDragOver(true);
+      }
     };
 
-    document.body.ondragleave = (_event) => {
-      _event.preventDefault();
-
-      setIsDragOver(false);
+    document.body.onmouseout = (e) => {
+      // @ts-ignore
+      e = e ? e : window.event;
+      // @ts-ignore
+      var from = e.relatedTarget || e.toElement;
+      if (!from || from.nodeName == 'HTML') {
+        document.body.removeAttribute('data-drag');
+        setIsDragOver(false);
+      }
     };
   }, []);
 
