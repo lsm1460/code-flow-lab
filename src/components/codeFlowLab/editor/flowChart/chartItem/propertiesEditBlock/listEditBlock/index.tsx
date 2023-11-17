@@ -1,14 +1,12 @@
-import { ChartItemType, ConnectPoint } from '@/consts/types/codeFlowLab';
-import { RootState } from '@/reducers';
-import { MouseEventHandler, useEffect } from 'react';
-import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import ConnectDot from '../../connectDot';
-import TextEditBlock from '../textEditBlock';
-
-import classNames from 'classnames/bind';
-import styles from './listEditBlock.module.scss';
+import { ConnectPoint } from '@/consts/types/codeFlowLab';
 import { Operation, setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
+import classNames from 'classnames/bind';
+import { MouseEventHandler, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import TextEditBlock from '../textEditBlock';
 import ToggleEditBlock from '../toggleEditBlock';
+import VariableLinkBlock from '../variableLinkBlock';
+import styles from './listEditBlock.module.scss';
 const cx = classNames.bind(styles);
 
 interface Props {
@@ -20,8 +18,6 @@ interface Props {
 }
 function ListEditBlock({ id, size, useIndex, connectionVariables, handlePointConnectStart }: Props) {
   const dispatch = useDispatch();
-
-  const chartItems = useSelector((state: RootState) => state.contentDocument.items, shallowEqual);
 
   const toggleCallback = (_toggle: boolean) => {
     const operations: Operation[] = [{ key: `items.${id}.useIndex`, value: _toggle }];
@@ -40,30 +36,12 @@ function ListEditBlock({ id, size, useIndex, connectionVariables, handlePointCon
   return (
     <div>
       <div className={cx('condition-box')}>
-        <div className={cx('property-wrap')}>
-          <div className={cx('condition-list')}>
-            <p className={cx('condition-sub-title')}>
-              Array
-              {connectionVariables[0] ? `: ${chartItems?.[connectionVariables[0].connectParentId].name}` : ''}
-              <ConnectDot
-                parentId={id}
-                connectDir={'right'}
-                connectType={ChartItemType.variable}
-                targetType={ChartItemType.variable}
-                index={0}
-                typeIndex={0}
-                connectParentId={connectionVariables[0]?.connectParentId}
-                handlePointConnectStart={handlePointConnectStart}
-                isSlave
-                style={{
-                  position: 'absolute',
-                  right: 0,
-                  top: '50%',
-                }}
-              />
-            </p>
-          </div>
-        </div>
+        <VariableLinkBlock
+          label={'array'}
+          id={id}
+          connectPoint={connectionVariables[0]}
+          handlePointConnectStart={handlePointConnectStart}
+        />
         <div className={cx('toggle-wrap', { active: !!connectionVariables[0] })}>
           <ToggleEditBlock label="use index in list item" toggleCallback={toggleCallback} onoff={useIndex} />
         </div>

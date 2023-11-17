@@ -1,26 +1,5 @@
-.condition-sub-title {
-  color: #9a9a9a;
-  font-size: 13px;
-  text-transform: capitalize;
-  position: relative;
-}
-
 .condition-box {
   margin-bottom: 15px;
-
-  .property-wrap {
-    border: 1px solid #2e2e2e;
-    background-color: #1f1f1f;
-    border-radius: 5px;
-    padding: 5px;
-    margin-bottom: 5px;
-
-    .condition-list {
-      width: 100%;
-      margin-left: 5px;
-      pointer-events: none;
-    }
-  }
 
   .toggle-wrap {
     opacity: 0.2;

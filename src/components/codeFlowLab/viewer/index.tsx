@@ -1,6 +1,6 @@
 import { ChartItem, ChartItemType, ChartStyleItem, ConnectPoint, ViewerItem } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
-import { getChartItem, getSceneId, getVariables } from '@/utils/content';
+import { getChartItem, getSceneId } from '@/utils/content';
 import _ from 'lodash';
 import React, { useMemo } from 'react';
 import { shallowEqual, useSelector } from 'react-redux';
@@ -9,21 +9,15 @@ import ViewerElBlock from './viewerElBlock';
 
 interface Props {}
 function FlowChartViewer({}: Props) {
-  const { sceneId, sceneOrder, chartItems, sceneItemIds } = useSelector((state: RootState) => {
+  const { sceneOrder, chartItems, sceneItemIds } = useSelector((state: RootState) => {
     const sceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
 
     return {
-      sceneId,
       sceneOrder: state.sceneOrder,
       chartItems: state.contentDocument.items,
       sceneItemIds: state.contentDocument.scene[sceneId]?.itemIds || [],
     };
   }, shallowEqual);
-
-  const variables = useMemo(
-    () => getVariables(sceneId, chartItems, sceneItemIds, sceneOrder),
-    [sceneId, chartItems, sceneOrder]
-  );
 
   const selectedChartItem = useMemo(() => getChartItem(sceneItemIds, chartItems), [chartItems, sceneItemIds]);
 

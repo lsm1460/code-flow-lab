@@ -1,11 +1,8 @@
-import { ChartItemType, ConnectPoint } from '@/consts/types/codeFlowLab';
-import { RootState } from '@/reducers';
+import { ConnectPoint } from '@/consts/types/codeFlowLab';
 import { MouseEventHandler } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
-import ConnectDot from '../../connectDot';
 import TextEditBlock from '../textEditBlock';
-
 import classNames from 'classnames/bind';
+import VariableLinkBlock from '../variableLinkBlock';
 import styles from './variableUtilsEditBlock.module.scss';
 const cx = classNames.bind(styles);
 
@@ -16,35 +13,15 @@ interface Props {
   handlePointConnectStart: MouseEventHandler<HTMLElement>;
 }
 function VariableUtilsEditBlock({ id, text, connectionVariables, handlePointConnectStart }: Props) {
-  const chartItems = useSelector((state: RootState) => state.contentDocument.items, shallowEqual);
-
   return (
     <div>
       <div className={cx('condition-box')}>
-        <div className={cx('property-wrap')}>
-          <div className={cx('condition-list')}>
-            <p className={cx('condition-sub-title')}>
-              Variable
-              {connectionVariables[0] ? `: ${chartItems?.[connectionVariables[0].connectParentId].name}` : ''}
-              <ConnectDot
-                parentId={id}
-                connectDir={'right'}
-                connectType={ChartItemType.variable}
-                targetType={ChartItemType.variable}
-                index={0}
-                typeIndex={0}
-                connectParentId={connectionVariables[0]?.connectParentId}
-                handlePointConnectStart={handlePointConnectStart}
-                isSlave
-                style={{
-                  position: 'absolute',
-                  right: 0,
-                  top: '50%',
-                }}
-              />
-            </p>
-          </div>
-        </div>
+        <VariableLinkBlock
+          label={'variable'}
+          id={id}
+          connectPoint={connectionVariables[0]}
+          handlePointConnectStart={handlePointConnectStart}
+        />
       </div>
       <TextEditBlock
         id={id}

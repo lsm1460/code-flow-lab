@@ -18,6 +18,7 @@ import VariableEditBlock from './variableEditBlock';
 import VariableUtilsEditBlock from './variableUtilsEditBlock';
 import ListEditBlock from './listEditBlock';
 import ListElEditBlock from './listElEditBlock';
+import VariableLinkBlock from './variableLinkBlock';
 const cx = classNames.bind(styles);
 
 interface Props {
@@ -145,6 +146,15 @@ function PropertiesEditBlock({ chartItem, handlePointConnectStart }: Props) {
         );
       case ChartItemType.listEl:
         return <ListElEditBlock id={chartItem.id} elId={chartItem.elId} />;
+      case ChartItemType.ifEl:
+        return (
+          <VariableLinkBlock
+            label={'condition'}
+            id={chartItem.id}
+            connectPoint={chartItem.connectionVariables[0]}
+            handlePointConnectStart={handlePointConnectStart}
+          />
+        );
       default:
         return <></>;
     }
