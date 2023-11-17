@@ -63,6 +63,7 @@ $tabs-selected-text-color: #c1c1c1;
     }
 
     .tab.tab {
+      user-select: none;
       background-color: $tabs-bg-color;
       padding: 3px 5px 5px 10px;
       display: inline-flex;
@@ -170,6 +171,7 @@ $tabs-selected-text-color: #c1c1c1;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      user-select: none;
 
       button {
         width: 18px;

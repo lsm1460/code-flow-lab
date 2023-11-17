@@ -81,6 +81,10 @@
         cursor: grabbing;
       }
     }
+
+    input:read-only::selection {
+      user-select: none;
+    }
   }
 
   .point-list-wrap {

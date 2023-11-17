@@ -35,6 +35,7 @@
           width: 60px;
           display: inline-block;
           font-weight: 400;
+          user-select: none;
         }
 
         &.system {
@@ -59,6 +60,7 @@
     height: 28px;
     border-radius: 50%;
     transition: 0.3s all;
+    user-select: none;
 
     &:hover {
       background-color: rgba(255, 255, 255, 0.2);

@@ -31,6 +31,8 @@ interface Props {
 }
 function ChartItem({ chartItems, itemInfo, isSelected, handleItemMoveStart, handlePointConnectStart }: Props) {
   const dispatch = useDispatch();
+
+  const [isReadyOnly, setIsReadOnly] = useState(true);
   const [debounceSubmitText] = useDebounceSubmitText(`items.${itemInfo.id}.name`);
 
   const { deleteTargetIdList, sceneItemIds } = useSelector((state: RootState) => {
@@ -208,13 +210,17 @@ function ChartItem({ chartItems, itemInfo, isSelected, handleItemMoveStart, hand
 
         <input
           type="text"
-          readOnly={!isSelected}
+          readOnly={isReadyOnly}
           style={{
             height: BLOCK_HEADER_SIZE,
+          }}
+          onClick={() => {
+            setIsReadOnly(false);
           }}
           onKeyDown={handleCancelInsert}
           onChange={handleTitleInput}
           onBlur={(_event) => {
+            setIsReadOnly(true);
             setIsTyping(false);
 
             emitText(_event.target.value);
