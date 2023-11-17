@@ -124,160 +124,15 @@ const getSize = (_target: number | string | string[], _id: string, _key: string 
   if (_key && typeof _target === 'string') {
     const rgxp = new RegExp(`${_key}`, 'g');
     return (_target.match(rgxp) || []).length;
-  } else if (_key) {
+  } else if (_key && (_.isArray(_target) || typeof _target === 'string')) {
     return (_target as string[]).filter((_item) => _item === _key).length;
-  } else {
+  } else if (_.isArray(_target) || typeof _target === 'string') {
     return _target.length;
+  } else if (_target === undefined) {
+    return 0;
+  } else {
+    return `${_target}`.length;
   }
-};
-
-export const getVariables = (
-  _sceneId: string,
-  _items: CodeFlowChartDoc['items'],
-  sceneItemIdList: string[],
-  _sceneOrder: number
-) => {
-  let searched = {};
-
-  const searchUtilsVariableLoop = (_items: CodeFlowChartDoc['items'], _item: ChartUtilsItems, _sceneOrder: number) => {
-    if (!_item.connectionVariables?.[0]) {
-      return undefined;
-    }
-
-    if (searched[_item.id]) {
-      return searched[_item.id];
-    }
-
-    const _targetId = _item.connectionVariables[0].connectParentId;
-    const _textId = _item.connectionVariables[1]?.connectParentId;
-
-    if (!CHART_VARIABLE_ITEMS.includes(_items[_targetId].elType)) {
-      return undefined;
-    }
-
-    let __var, __text;
-
-    if (!searched[_targetId]) {
-      if (_items[_targetId].elType === ChartItemType.sceneOrder) {
-        __var = `${_sceneOrder}`;
-      } else if (_items[_targetId].elType === ChartItemType.array) {
-        __var = (_items[_targetId] as ChartArrayItem).list;
-      } else if (_items[_targetId].elType !== ChartItemType.variable) {
-        __var = searchUtilsVariableLoop(_items, _items[_targetId] as ChartUtilsItems, _sceneOrder);
-
-        searched = {
-          ...searched,
-          [_targetId]: __var,
-        };
-      } else {
-        __var = (_items[_targetId] as ChartVariableItem).var;
-      }
-    } else {
-      __var = searched[_targetId];
-    }
-
-    if (!searched[_textId]) {
-      if (_textId && _items[_textId].elType === ChartItemType.sceneOrder) {
-        __text = `${_sceneOrder}`;
-      } else if (_textId && _items[_textId].elType !== ChartItemType.variable) {
-        __text = searchUtilsVariableLoop(_items, _items[_textId] as ChartUtilsItems, _sceneOrder);
-
-        searched = {
-          ...searched,
-          [_textId]: __text,
-        };
-      } else if (_textId && _items[_textId].elType === ChartItemType.variable) {
-        __text = (_items[_textId] as ChartVariableItem).var;
-
-        searched = {
-          ...searched,
-          [_textId]: __text,
-        };
-      } else if (_textId && _items[_textId].elType === ChartItemType.array) {
-        __text = (_items[_textId] as ChartArrayItem).list;
-
-        searched = {
-          ...searched,
-          [_textId]: __text,
-        };
-      } else {
-        __text = _item.text;
-      }
-    } else {
-      __text = searched[_textId];
-    }
-
-    switch (_item.elType) {
-      case ChartItemType.get:
-        return __var[__text];
-      case ChartItemType.size:
-        return getSize(__var, _targetId, __text);
-      case ChartItemType.includes:
-        return `${__var}`.includes(__text) ? 1 : 0;
-      case ChartItemType.indexOf:
-        return `${__var}`.indexOf(__text);
-
-      default:
-        return undefined;
-    }
-  };
-
-  const _variableItemList = _.pickBy(_items, (_item) => {
-    if (_item.elType === ChartItemType.variable || _item.elType === ChartItemType.array) {
-      return _item.sceneId === _sceneId || !_item.sceneId;
-    } else if (
-      sceneItemIdList.includes(_item.id) &&
-      [...CHART_VARIABLE_ITEMS, ChartItemType.listEl].includes(_item.elType)
-    ) {
-      return true;
-    }
-
-    return false;
-  });
-
-  return _.mapValues(_variableItemList, (_item) => {
-    switch (_item.elType) {
-      case ChartItemType.variable:
-        return _item.var;
-      case ChartItemType.array:
-        return _item.list;
-
-      case ChartItemType.condition:
-        const __code = _item.textList.reduce((_acc, _cur, _index) => {
-          let _text = '';
-
-          const _varId = _item.connectionVariables[_index]?.connectParentId;
-
-          let _var;
-          if (_items?.[_varId]?.elType === ChartItemType.variable) {
-            _var = (_items?.[_varId] as ChartVariableItem)?.var;
-          } else if (_items?.[_varId]?.elType === ChartItemType.sceneOrder) {
-            _var = `${_sceneOrder}`;
-          }
-
-          if (_index !== 0) {
-            _text += _item.conditions;
-          }
-
-          _text += JSON.stringify(_var || _cur);
-
-          return _acc + _text;
-        }, '');
-
-        const conditionResult = new Function(`return ${__code}`)();
-
-        return conditionResult ? 1 : 0;
-      case ChartItemType.size:
-      case ChartItemType.includes:
-      case ChartItemType.indexOf:
-      case ChartItemType.get:
-        return searchUtilsVariableLoop(_items, _item, _sceneOrder);
-      case ChartItemType.sceneOrder:
-        return `${_sceneOrder}`;
-      default:
-        return undefined;
-    }
-  });
 };
 
 export const makeVariables = (
@@ -295,7 +150,7 @@ export const makeVariables = (
   let _variableItemList: CodeFlowChartDoc['items'] = {};
 
   const searchUtilsVariableLoop = (_items: CodeFlowChartDoc['items'], _item: ChartUtilsItems, _sceneOrder: number) => {
-    if (!_item.connectionVariables?.[0]) {
+    if (!_item.connectionVariables?.[0] && _item.elType !== ChartItemType.condition) {
       return undefined;
     }
 
@@ -303,14 +158,17 @@ export const makeVariables = (
       return searched[_item.id];
     }
 
-    const _targetId = _item.connectionVariables[0].connectParentId;
+    const _targetId = _item.connectionVariables[0]?.connectParentId;
     const _textId = _item.connectionVariables[1]?.connectParentId;
 
-    if (![...CHART_VARIABLE_ITEMS, ChartItemType.listEl].includes(_items[_targetId].elType)) {
+    if (
+      ![...CHART_VARIABLE_ITEMS, ChartItemType.listEl].includes(_items[_targetId]?.elType) &&
+      _item.elType !== ChartItemType.condition
+    ) {
       return undefined;
     }
 
-    const setVal = (__id) => {
+    const setVal = (__id, _index) => {
       let __result;
 
       if (!searched[__id]) {
@@ -345,6 +203,8 @@ export const makeVariables = (
           };
 
           return __result;
+        } else if (_item.elType === ChartItemType.condition) {
+          return _item.textList[_index];
         } else {
           return _item.text;
         }
@@ -353,12 +213,11 @@ export const makeVariables = (
       }
     };
 
-    const __var = setVal(_targetId);
-    const __text = setVal(_textId);
+    const __var = setVal(_targetId, 0);
+    const __text = setVal(_textId, 1);
 
     switch (_item.elType) {
       case ChartItemType.get:
-        console.log(__var);
         return __var?.[__text];
       case ChartItemType.size:
         return getSize(__var, _targetId, __text);
@@ -366,6 +225,31 @@ export const makeVariables = (
         return (typeof __var === 'number' ? `${__var}` : __var).includes(`${__text}`) ? 1 : 0;
       case ChartItemType.indexOf:
         return (typeof __var === 'number' ? `${__var}` : __var).indexOf(`${__text}`);
+      case ChartItemType.condition:
+        const __code = _item.textList.reduce((_acc, _cur, _index) => {
+          let _text = '';
+
+          const _varId = _item.connectionVariables[_index]?.connectParentId;
+
+          let _var;
+          if (_items?.[_varId]?.elType === ChartItemType.variable) {
+            _var = (_items?.[_varId] as ChartVariableItem)?.var;
+          } else if (_items?.[_varId]?.elType === ChartItemType.sceneOrder) {
+            _var = `${_sceneOrder}`;
+          }
+
+          if (_index !== 0) {
+            _text += _item.conditions;
+          }
+
+          _text += JSON.stringify(_var || _cur);
+
+          return _acc + _text;
+        }, '');
+
+        const conditionResult = new Function(`return ${__code}`)();
+
+        return conditionResult ? 1 : 0;
 
       default:
         return undefined;
@@ -404,30 +288,6 @@ export const makeVariables = (
         return _item.list;
 
       case ChartItemType.condition:
-        const __code = _item.textList.reduce((_acc, _cur, _index) => {
-          let _text = '';
-
-          const _varId = _item.connectionVariables[_index]?.connectParentId;
-
-          let _var;
-          if (_items?.[_varId]?.elType === ChartItemType.variable) {
-            _var = (_items?.[_varId] as ChartVariableItem)?.var;
-          } else if (_items?.[_varId]?.elType === ChartItemType.sceneOrder) {
-            _var = `${_sceneOrder}`;
-          }
-
-          if (_index !== 0) {
-            _text += _item.conditions;
-          }
-
-          _text += JSON.stringify(_var || _cur);
-
-          return _acc + _text;
-        }, '');
-
-        const conditionResult = new Function(`return ${__code}`)();
-
-        return conditionResult ? 1 : 0;
       case ChartItemType.size:
       case ChartItemType.includes:
       case ChartItemType.indexOf:

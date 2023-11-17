@@ -464,7 +464,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
 
         const searchIdList = [
           ...(selectedChartItem[_pathKey].connectionIds[_connectDir] || []),
-          ..._.compact(selectedChartItem[_pathKey]?.connectionVariables || []),
+          ...(_connectDir !== 'left' ? _.compact(selectedChartItem[_pathKey]?.connectionVariables || []) : []),
         ];
 
         const targetPos = searchIdList.map((_node) => ({

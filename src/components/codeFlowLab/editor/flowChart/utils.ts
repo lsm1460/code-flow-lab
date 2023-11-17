@@ -141,7 +141,7 @@ export const getConnectSizeByType = (
   return _.mapValues(_idsByDic, (_ids) => {
     _ids = _ids.filter((_point) => _sceneItemIds.includes(_point.connectParentId));
 
-    const typeGroup = _.groupBy(_ids, (_point) => getBlockType(_chartItems[_point.connectParentId]?.elType, _isDeep));
+    const typeGroup = _.groupBy(_ids, (_point) => _point.connectType);
     return _.mapValues(typeGroup, (_ids) => _ids.length);
   });
 };

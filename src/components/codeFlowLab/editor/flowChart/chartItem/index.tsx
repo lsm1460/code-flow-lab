@@ -14,7 +14,7 @@ import { getSceneId, useDebounceSubmitText } from '@/utils/content';
 import _ from 'lodash';
 import { KeyboardEventHandler, MouseEventHandler, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { checkVariableBlock, getBlockType, getConnectSizeByType } from '../utils';
+import { getBlockType, getConnectSizeByType } from '../utils';
 import ConnectDot from './connectDot';
 import PropertiesEditBlock from './propertiesEditBlock';
 
@@ -86,12 +86,7 @@ function ChartItem({ chartItems, itemInfo, isSelected, handleItemMoveStart, hand
       return (
         <ul key={_i} className={cx('point-list', _x)}>
           {(FLOW_CHART_ITEMS_STYLE[itemInfo.elType].connectionTypeList[_x] || []).map((_type, _j) => {
-            let _pointSize = connectSizeByType[_x][getBlockType(_type, checkDeep)] || 0;
-
-            // 일반적으로는 그룹 별로 묶인 수 + 1로 연결점의 수 정의되지만, 변수의 경우 다양한 블록들과 그룹지어 연결하지 않기 때문에 분기처리 추가
-            if (_type === ChartItemType.variable) {
-              _pointSize = (Object.values(connectSizeByType[_x]) as number[]).reduce((_acc, _cur) => _acc + _cur, 0);
-            }
+            let _pointSize = connectSizeByType[_x][_type] || 0;
 
             return Array(_pointSize + 1)
               .fill(undefined)
