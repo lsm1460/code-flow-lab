@@ -1,8 +1,9 @@
-const { Menu } = require('electron');
+const { Menu, ipcMain } = require('electron');
 const _edit = require('./menu/edit');
+const { REQUEST_ZOOM_AREA_CONTEXT } = require('../consts/channel');
 
 const registRightClick = (_mainWindow) => {
-  const ctxMenu = Menu.buildFromTemplate([
+  const editorMenu = Menu.buildFromTemplate([
     {
       label: 'Cut',
       accelerator: 'CommandOrControl+X',
@@ -20,8 +21,8 @@ const registRightClick = (_mainWindow) => {
     },
   ]);
 
-  _mainWindow.webContents.on('context-menu', (e, param) => {
-    ctxMenu.popup(_mainWindow, param.x, param.y);
+  ipcMain.on(REQUEST_ZOOM_AREA_CONTEXT, (_event) => {
+    editorMenu.popup(_mainWindow);
   });
 };
 

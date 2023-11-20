@@ -9,6 +9,10 @@ import {
   REQUEST_SAVE_STATE,
   SAVE_FILE,
   SET_DOCUMENT,
+  REQUEST_MINIMIZE,
+  REQUEST_MAXIMIZE,
+  CLOSE_WINDOW,
+  REQUEST_ZOOM_AREA_CONTEXT,
 } from '@/consts/channel.js';
 import { RootState } from '@/reducers';
 import {
@@ -58,10 +62,30 @@ const useIpcManager = (_ableReceive: boolean = true) => {
     ipcRenderer.send(OPEN_PROJECT, _path);
   };
 
+  const sendMinimizeRequest = () => {
+    ipcRenderer.send(REQUEST_MINIMIZE);
+  };
+
+  const sendMaximizeRequest = () => {
+    ipcRenderer.send(REQUEST_MAXIMIZE);
+  };
+
+  const sendCloseRequest = () => {
+    ipcRenderer.send(CLOSE_WINDOW);
+  };
+
+  const sendZoomAreaContextOpen = () => {
+    ipcRenderer.send(REQUEST_ZOOM_AREA_CONTEXT);
+  };
+
   return {
     sendDocumentForSave,
     sendOpenBrowser,
     sendOpenProject,
+    sendMinimizeRequest,
+    sendMaximizeRequest,
+    sendCloseRequest,
+    sendZoomAreaContextOpen,
   };
 };
 

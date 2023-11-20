@@ -26,6 +26,23 @@ const CSS_PROPERTIES = {
   marginBottom: 0,
   background: '',
   backgroundColor: '',
+  alignItems: ['baseline', 'center', 'flex-start', 'flex-end'],
+  justifyContent: ['start', 'center', 'space-between', 'space-around', 'space-evenly'],
+  letterSpacing: 0,
+  cursor: ['help', 'wait', 'crosshair', 'not-allowed', 'zoom-in', 'zoom-out', 'grab', 'pointer'],
+  filter: '',
+  float: ['left', 'right', 'none', 'inline-start', 'inline-end'],
+  overflow: ['visible', 'hidden', 'clip', 'scroll', 'auto'],
+  overflowX: ['visible', 'hidden', 'clip', 'scroll', 'auto'],
+  overflowY: ['visible', 'hidden', 'clip', 'scroll', 'auto'],
+  position: ['static', 'relative', 'absolute', 'fixed', 'sticky'],
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  opacity: 1,
+  aspectRatio: '1',
+  zIndex: 0,
 };
 interface Props {
   id: string;

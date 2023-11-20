@@ -1,8 +1,8 @@
 const { app, BrowserWindow, screen, Menu, dialog, protocol, net, globalShortcut } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
-const { getMenuTemplate } = require('./menu');
-const { registViwerChannelFunc } = require('./viewerRegister');
+const { getMenuTemplate, registWindowChannelFunc } = require('./menu');
+const registViwerChannelFunc = require('./viewerRegister');
 const registShortcut = require('./shortcutRegister');
 const { removeProjectFile, checkSaved, saveProject, registFileChannel } = require('./menu/file');
 const CUSTOM_PROTOCOL = require('../consts/protocol');
@@ -100,6 +100,7 @@ function createWindow() {
     }
   });
 
+  registWindowChannelFunc(mainWindow);
   registFileChannel(mainWindow);
   registViwerChannelFunc(mainWindow);
   registShortcut(mainWindow);

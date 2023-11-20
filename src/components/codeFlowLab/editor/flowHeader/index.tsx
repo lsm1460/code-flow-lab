@@ -12,10 +12,16 @@ const cx = classNames.bind(styles);
 
 function FlowHeader() {
   const dispatch = useDispatch();
-  const { sendDocumentForSave: handleSaveButton } = useIpcManager(false);
+  const {
+    sendDocumentForSave: handleSaveButton,
+    sendMinimizeRequest: handleMinimize,
+    sendMaximizeRequest,
+    sendCloseRequest: handleClose,
+  } = useIpcManager(false);
 
   const [historyNow, setHistoryNow] = useState(0);
   const [history, setHistory] = useState([]);
+  const [isMaximize, setIsMaximize] = useState(true);
 
   const { flowDoc, isSaved } = useSelector(
     (state: RootState) => ({ flowDoc: state.contentDocument, isSaved: state.isSaved }),
@@ -53,6 +59,11 @@ function FlowHeader() {
     !_.isEmpty(historyOp) && dispatch(setDocumentValueAction(historyOp));
   };
 
+  const handleMaximize = () => {
+    setIsMaximize((_prev) => !_prev);
+    sendMaximizeRequest();
+  };
+
   return (
     <header className={cx('header', { mac: window.electron.isMac })}>
       <span className={cx('logo')}>CODE_FLOW_LAB。</span>
@@ -73,6 +84,22 @@ function FlowHeader() {
       <button className={cx('save-btn', { 'need-save': !isSaved })} onClick={handleSaveButton}>
         {isSaved ? 'saved ✅' : 'need save ❗️'}
       </button>
+
+      {!window.electron.isMac && (
+        <div className={cx('togglers')}>
+          <button className={cx('minimize')} onClick={handleMinimize}>
+            <i className="material-symbols-outlined">minimize</i>
+          </button>
+          <button className={cx('maximize')} onClick={handleMaximize}>
+            <i className="material-symbols-outlined">{isMaximize ? 'close_fullscreen' : 'open_in_full'}</i>
+          </button>
+          <button className={cx('close')} onClick={handleClose}>
+            <span>
+              <i className="material-symbols-outlined">close</i>
+            </span>
+          </button>
+        </div>
+      )}
     </header>
   );
 }

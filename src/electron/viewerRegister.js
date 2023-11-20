@@ -7,6 +7,4 @@ const registViwerChannelFunc = (_mainWindow) => {
   });
 };
 
-module.exports = {
-  registViwerChannelFunc,
-};
+module.exports = registViwerChannelFunc;

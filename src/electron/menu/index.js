@@ -1,3 +1,6 @@
+const { ipcMain } = require('electron');
+const { REQUEST_MINIMIZE, REQUEST_MAXIMIZE, CLOSE_WINDOW } = require('../../consts/channel');
+
 const _file = require('./file');
 const _edit = require('./edit');
 
@@ -87,8 +90,27 @@ const getMenuTemplate = (_mainWindow, _app) => {
   ];
 };
 
+const registWindowChannelFunc = (_mainWindow) => {
+  ipcMain.on(REQUEST_MINIMIZE, (_event) => {
+    _mainWindow.minimize();
+  });
+
+  ipcMain.on(REQUEST_MAXIMIZE, (_event) => {
+    if (_mainWindow.isMaximized()) {
+      _mainWindow.unmaximize();
+    } else {
+      _mainWindow.maximize();
+    }
+  });
+
+  ipcMain.on(CLOSE_WINDOW, () => {
+    _file.closeWindow(_mainWindow);
+  });
+};
+
 module.exports = {
   getMenuTemplate,
   ..._file,
   ..._edit,
+  registWindowChannelFunc,
 };

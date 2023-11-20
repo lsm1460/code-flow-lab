@@ -2,10 +2,6 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-    />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
@@ -26,6 +22,31 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>Code Flow Lab</title>
+    <style>
+      /* fallback */
+      @font-face {
+        font-family: 'Material Symbols Outlined';
+        font-style: normal;
+        font-weight: 100 700;
+        src: url(%PUBLIC_URL%/google-material-icon.woff2) format('woff2');
+      }
+
+      .material-symbols-outlined {
+        font-family: 'Material Symbols Outlined';
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        word-wrap: normal;
+        direction: ltr;
+        -webkit-font-feature-settings: 'liga';
+        -webkit-font-smoothing: antialiased;
+      }
+    </style>
   </head>
   <body style="min-height: 100vh; background-color: #1e1e1e">
     <noscript>You need to enable JavaScript to run this app.</noscript>

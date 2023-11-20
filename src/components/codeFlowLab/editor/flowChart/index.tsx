@@ -47,15 +47,19 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
   const multiSelectBoxStartPos = useRef<[number, number]>(null);
   const multiSelectBoxEndPos = useRef<[number, number]>(null);
 
-  const { selectedSceneId, chartItems, sceneItemIds, itemsPos } = useSelector((state: RootState) => {
-    const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
-    return {
-      selectedSceneId,
-      chartItems: state.contentDocument.items,
-      itemsPos: state.contentDocument.itemsPos,
-      sceneItemIds: state.contentDocument.scene[selectedSceneId]?.itemIds || [],
-    };
-  }, shallowEqual);
+  const { selectedSceneId, deleteTargetIdList, chartItems, sceneItemIds, itemsPos } = useSelector(
+    (state: RootState) => {
+      const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
+      return {
+        selectedSceneId,
+        deleteTargetIdList: state.deleteTargetIdList,
+        chartItems: state.contentDocument.items,
+        itemsPos: state.contentDocument.itemsPos,
+        sceneItemIds: state.contentDocument.scene[selectedSceneId]?.itemIds || [],
+      };
+    },
+    shallowEqual
+  );
 
   const selectedChartItem = useMemo(() => getChartItem(sceneItemIds, chartItems), [chartItems, sceneItemIds, itemsPos]);
 
@@ -206,11 +210,16 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
     if (connectedCanvasCtx) {
       connectedCanvasCtx.clearRect(0, 0, connectedCanvasRef.current.width, connectedCanvasRef.current.height);
 
-      connectedPointList.forEach((_points) => {
-        drawConnectionPointLine('connected', connectedCanvasCtx, _points[0], _points[1]);
-      });
+      connectedPointList
+        .filter(
+          (_pointList) =>
+            !deleteTargetIdList.includes(_pointList[0].parentId) || !deleteTargetIdList.includes(_pointList[1].parentId)
+        )
+        .forEach((_points) => {
+          drawConnectionPointLine('connected', connectedCanvasCtx, _points[0], _points[1]);
+        });
     }
-  }, [connectedCanvasCtx, connectedPointList, transX, transY]);
+  }, [connectedCanvasCtx, deleteTargetIdList, connectedPointList, transX, transY]);
 
   useEffect(() => {
     multiSelectedIdListClone.current = Object.keys(multiSelectedItemList);
@@ -423,12 +432,27 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
 
     _ctx.strokeStyle = '#ff0000';
 
-    if (_next && _next.el !== _origin.el) {
-      _ctx.strokeStyle = getCanvasLineColor(_origin.connectType, _next.connectType);
+    if (_next || selectedConnectionPoint.current) {
+      const preP = { x: _origin.left + transX, y: _origin.top + transY };
+      let nexP;
 
-      _ctx.lineTo(_next.left + transX, _next.top + transY);
-    } else if (_type === 'line' && selectedConnectionPoint.current) {
-      _ctx.lineTo(selectedConnectionPoint.current.left + transX, selectedConnectionPoint.current.top + transY);
+      if (_next && _next.el !== _origin.el) {
+        _ctx.strokeStyle = getCanvasLineColor(_origin.connectType, _next.connectType);
+        _ctx.globalAlpha = 0.5;
+
+        // _ctx.lineTo(_next.left + transX, _next.top + transY);
+
+        nexP = { x: _next.left + transX, y: _next.top + transY };
+      } else if (_type === 'line' && selectedConnectionPoint.current) {
+        // _ctx.lineTo(selectedConnectionPoint.current.left + transX, selectedConnectionPoint.current.top + transY);
+
+        nexP = { x: selectedConnectionPoint.current.left + transX, y: selectedConnectionPoint.current.top + transY };
+      }
+
+      if (nexP) {
+        const _centerX = (preP.x + nexP.x) / 2;
+        _ctx.bezierCurveTo(_centerX, preP.y, _centerX, nexP.y, nexP.x, nexP.y);
+      }
     }
 
     if (!isSkip) {

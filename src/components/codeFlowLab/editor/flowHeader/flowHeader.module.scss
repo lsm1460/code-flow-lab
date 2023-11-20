@@ -20,6 +20,23 @@
 
   & button {
     -webkit-app-region: no-drag;
+    background-color: transparent;
+    border: 1px solid transparent;
+    transition: 0.3s all;
+
+    &:hover {
+      border: 1px solid #707070;
+    }
+
+    &:active {
+      background-color: #707070;
+    }
+
+    i {
+      display: block;
+      pointer-events: none;
+      -webkit-app-region: no-drag !important;
+    }
   }
 
   &.mac {
@@ -44,8 +61,6 @@
 
     li {
       button {
-        background-color: transparent;
-        border: 1px solid transparent;
         color: #ddd;
         cursor: pointer;
         text-align: center;
@@ -58,10 +73,6 @@
         }
 
         font-size: 10px;
-
-        &:hover {
-          border: 1px solid #9b9b9b;
-        }
       }
 
       & + li {
@@ -71,7 +82,6 @@
   }
 
   .save-btn {
-    background-color: transparent;
     border: 1px solid #555;
     border-radius: 5px;
     color: #ddd;
@@ -93,6 +103,36 @@
       &:hover {
         opacity: 1;
         background-color: rgba(255, 0, 0, 0.5);
+      }
+    }
+  }
+
+  .togglers {
+    margin-left: auto;
+    display: block;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 120px;
+    height: 100%;
+    -webkit-app-region: no-drag;
+
+    & > button {
+      display: block;
+      width: 25%;
+      aspect-ratio: 1;
+      cursor: default;
+      color: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-app-region: no-drag;
+      border-radius: 3px;
+
+      i {
+        -webkit-app-region: no-drag;
+        pointer-events: none;
+        font-size: 17px;
       }
     }
   }
