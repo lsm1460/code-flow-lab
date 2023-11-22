@@ -115,7 +115,7 @@ export const getBlockType = (_elType, _isDeep = false) => {
   }
 
   // 트리거는 function만 붙일 수 있도록 예외처리 추가
-  if (CHART_ELEMENT_ITEMS.includes(_elType)) {
+  if ([...CHART_ELEMENT_ITEMS, ChartItemType.group].includes(_elType)) {
     if ((_isDeep && _elType === ChartItemType.span) || _elType === ChartItemType.listEl) {
       return ChartItemType.span;
     }
@@ -181,7 +181,6 @@ export const makeNewItem = (
   const newItemId = getRandomId();
 
   const itemList = Object.values(selectedChartItems);
-  const lastEl = itemList[itemList.length - 1];
   const itemSize = Object.values(chartItems).filter((_item) => _item.elType === itemType).length;
 
   let _pos = {

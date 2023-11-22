@@ -19,6 +19,11 @@ const registRightClick = (_mainWindow) => {
       accelerator: 'CommandOrControl+V',
       click: () => _edit.requestPaste(_mainWindow),
     },
+    {
+      label: 'Make Group',
+      accelerator: 'Alt+CommandOrControl+I',
+      click: () => _edit.requestMakeGroup(_mainWindow),
+    },
   ]);
 
   ipcMain.on(REQUEST_ZOOM_AREA_CONTEXT, (_event) => {

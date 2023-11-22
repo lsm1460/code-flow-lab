@@ -45,6 +45,7 @@ const initialState: DocumentState = {
         order: 1,
       },
     },
+    group: {},
   },
   sceneOrder: 1,
   deleteTargetIdList: [],

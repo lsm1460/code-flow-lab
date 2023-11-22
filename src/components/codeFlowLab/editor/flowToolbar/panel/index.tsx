@@ -5,10 +5,11 @@ import VariablePanel from './variablePanel';
 
 import classNames from 'classnames/bind';
 import styles from './panel.module.scss';
+import GroupPanel from './groupPanel';
 const cx = classNames.bind(styles);
 
 interface Props {
-  activePanel: 'element' | 'function' | 'variable' | '';
+  activePanel: 'element' | 'function' | 'variable' | 'group' | '';
   handleClosePanel: () => void;
 }
 function ToolbarPanel({ activePanel, handleClosePanel }: Props) {
@@ -22,6 +23,7 @@ function ToolbarPanel({ activePanel, handleClosePanel }: Props) {
             element: <ElementPanel />,
             function: <FunctionPanel />,
             variable: <VariablePanel isSubOpen={isSubOpen} setIsSubOpen={setIsSubOpen} />,
+            group: <GroupPanel />,
           }[activePanel]
         }
       </div>

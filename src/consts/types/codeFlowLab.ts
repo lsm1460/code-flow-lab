@@ -38,6 +38,7 @@ export enum ChartItemType {
   listEl = 'list item',
   ifEl = 'if Element',
   calculator = 'calculator',
+  group = 'group',
 }
 
 interface FlowScene {
@@ -241,6 +242,11 @@ export interface ChartIfElementItem extends ChartItem {
   elType: ChartItemType.ifEl;
 }
 
+export interface ChartGroupItem extends ChartItem {
+  elType: ChartItemType.group;
+  rootId: string;
+}
+
 export type ChartItems =
   | ChartBodyItem
   | ChartButtonItem
@@ -272,7 +278,8 @@ export type ChartItems =
   | ChartListItem
   | ChartListElItem
   | ChartIfElementItem
-  | ChartCalculatorItem;
+  | ChartCalculatorItem
+  | ChartGroupItem;
 
 export type ChartUtilsItems =
   | ChartSizeItem
@@ -291,6 +298,16 @@ export interface CodeFlowChartDoc {
   };
   scene: {
     [_sceneId: string]: FlowScene;
+  };
+  group: {
+    [_itemId: string]: {
+      items: {
+        [_itemId: string]: ChartItems;
+      };
+      itemsPos: {
+        [_itemId: string]: ChartItemPos;
+      };
+    };
   };
 }
 

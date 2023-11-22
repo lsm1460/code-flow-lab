@@ -28,7 +28,7 @@ function FlowToolbar() {
 
   const selectedChartItem = useMemo(() => getChartItem(sceneItemIds, chartItems), [chartItems, sceneItemIds]);
 
-  const [panel, setPanel] = useState<'element' | 'function' | 'variable' | ''>('');
+  const [panel, setPanel] = useState<'element' | 'function' | 'variable' | 'group' | ''>('');
 
   const makeItem = (_itemType: ChartItemType) => {
     const zoomArea = document.getElementById(ZOOM_AREA_ELEMENT_ID);
@@ -70,19 +70,22 @@ function FlowToolbar() {
     <div className={cx('toolbar')}>
       <ul>
         <li className={cx('toolbar-item', 'element', { active: panel === 'element' })}>
-          <button onClick={() => setPanel((_prev) => (_prev !== 'element' ? 'element' : ''))}>Element</button>
+          <button onClick={() => setPanel((_prev) => (_prev !== 'element' ? 'element' : ''))}>element</button>
         </li>
         <li className={cx('toolbar-item', 'style')}>
-          <button onClick={() => makeItem(ChartItemType.style)}>Style</button>
+          <button onClick={() => makeItem(ChartItemType.style)}>style</button>
         </li>
         <li className={cx('toolbar-item', 'trigger')}>
-          <button onClick={() => makeItem(ChartItemType.trigger)}>Trigger</button>
+          <button onClick={() => makeItem(ChartItemType.trigger)}>trigger</button>
         </li>
         <li className={cx('toolbar-item', 'function', { active: panel === 'function' })}>
-          <button onClick={() => setPanel((_prev) => (_prev !== 'function' ? 'function' : ''))}>Script</button>
+          <button onClick={() => setPanel((_prev) => (_prev !== 'function' ? 'function' : ''))}>script</button>
         </li>
         <li className={cx('toolbar-item', 'variable', { active: panel === 'variable' })}>
-          <button onClick={() => setPanel((_prev) => (_prev !== 'variable' ? 'variable' : ''))}>Variable</button>
+          <button onClick={() => setPanel((_prev) => (_prev !== 'variable' ? 'variable' : ''))}>variable</button>
+        </li>
+        <li className={cx('toolbar-item', 'group', { active: panel === 'group' })}>
+          <button onClick={() => setPanel((_prev) => (_prev !== 'group' ? 'group' : ''))}>group</button>
         </li>
       </ul>
 

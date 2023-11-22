@@ -4,10 +4,10 @@ const {
   REQUEST_UNDO,
   REQUEST_REDO,
   REQUEST_CUT,
-  SEND_CUT_OBJECTS,
   REQUEST_COPY,
   SEND_COPY_OBJECTS,
   REQUEST_PASTE,
+  REQUEST_MAKE_GROUP,
 } = require('../../consts/channel');
 
 const requestUndo = (_mainWindow) => {
@@ -60,10 +60,15 @@ const requestPaste = (_mainWindow) => {
   }
 };
 
+const requestMakeGroup = (_mainWindow) => {
+  _mainWindow.webContents.send(REQUEST_MAKE_GROUP);
+};
+
 module.exports = {
   requestUndo,
   requestRedo,
   requestCut,
   requestCopy,
   requestPaste,
+  requestMakeGroup,
 };

@@ -305,6 +305,13 @@ export const FLOW_CHART_ITEMS_STYLE: {
       right: [],
     },
   },
+  [ChartItemType.group]: {
+    width: 200,
+    connectionTypeList: {
+      left: [ChartItemType.el],
+      right: [],
+    },
+  },
 };
 
 export const FLOW_ITEM_DEFAULT_INFO = {
@@ -421,6 +428,9 @@ export const FLOW_ITEM_ADDITIONAL_INFO = {
     textList: ['', ''],
     connectionVariables: [],
     operator: '+',
+  },
+  [ChartItemType.group]: {
+    rootId: '',
   },
 };
 

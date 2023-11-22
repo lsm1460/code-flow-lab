@@ -27,6 +27,7 @@
         border-radius: 5px;
         padding: 10px 0 7px;
         cursor: pointer;
+        text-transform: capitalize;
 
         &::before {
           content: '';
@@ -71,6 +72,13 @@
         button::before {
           content: '';
           background-color: $variable-point-color;
+        }
+      }
+
+      &.group {
+        button::before {
+          content: '';
+          background-color: $group-point-color;
         }
       }
 
