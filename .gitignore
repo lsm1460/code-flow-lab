@@ -140,6 +140,7 @@ dist
 
 # production
 /build
+/public/viewer
 
 # misc
 .DS_Store
