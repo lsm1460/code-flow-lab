@@ -11,23 +11,38 @@ import { getChartItem, getSceneId } from '@/utils/content';
 import _ from 'lodash';
 import React, { useMemo } from 'react';
 import { shallowEqual, useSelector } from 'react-redux';
-import { getBlockType } from '../editor/flowChart/utils';
+import { findGroupRootId, getBlockType } from '../editor/flowChart/utils';
 import ViewerElBlock from './viewerElBlock';
 
 interface Props {}
 function FlowChartViewer({}: Props) {
-  const { sceneOrder, chartItems, sceneItemIds, group } = useSelector((state: RootState) => {
-    const sceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
+  const { groupRootId, sceneOrder, chartItems, sceneItemIds, selectedGroupId, group } = useSelector(
+    (state: RootState) => {
+      const sceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
+      const groupRootId = findGroupRootId(
+        state.contentDocument.items,
+        state.contentDocument.group,
+        state.selectedGroupId
+      );
 
-    return {
-      sceneOrder: state.sceneOrder,
-      chartItems: state.contentDocument.items,
-      sceneItemIds: state.contentDocument.scene[sceneId]?.itemIds || [],
-      group: state.contentDocument.group,
-    };
-  }, shallowEqual);
+      return {
+        groupRootId,
+        sceneOrder: state.sceneOrder,
+        chartItems: state.contentDocument.items,
+        sceneItemIds: state.contentDocument.scene[sceneId]?.itemIds || [],
+        selectedGroupId: state.selectedGroupId,
+        group: state.contentDocument.group,
+      };
+    },
+    shallowEqual
+  );
 
-  const selectedChartItem = useMemo(() => getChartItem(sceneItemIds, chartItems), [chartItems, sceneItemIds]);
+  console.log('group', group);
+
+  const selectedChartItem = useMemo(
+    () => getChartItem(sceneItemIds, chartItems, selectedGroupId, group),
+    [chartItems, sceneItemIds, selectedGroupId, group]
+  );
 
   const makeStylePropReduce = (_acc = {}, _curPoint: ConnectPoint, groupId = '') => {
     const searchItems = groupId ? group[groupId].items : selectedChartItem;
@@ -95,10 +110,10 @@ function FlowChartViewer({}: Props) {
   };
 
   const templateDocument: ViewerItem = useMemo(() => {
-    const rootId = _.find(selectedChartItem, (_item) => _item.elType === ChartItemType.body).id;
+    const rootId = groupRootId || _.find(selectedChartItem, (_item) => _item.elType === ChartItemType.body).id;
 
     return makeViewerDocument(selectedChartItem[rootId]);
-  }, [selectedChartItem, sceneOrder, group]);
+  }, [selectedChartItem, sceneOrder, group, groupRootId]);
 
   return <ViewerElBlock viewerItem={templateDocument} />;
 }

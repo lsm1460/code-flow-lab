@@ -3,7 +3,7 @@ import { ZOOM_AREA_ELEMENT_ID } from '@/consts/codeFlowLab/items';
 import { ChartItemType } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
 import { Operation, setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
-import { getChartItem, getSceneId } from '@/utils/content';
+import { getChartItem, getItemPos, getSceneId } from '@/utils/content';
 import { useMemo } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 
@@ -17,18 +17,26 @@ interface Props {
 function PanelItem({ itemType }: Props) {
   const dispatch = useDispatch();
 
-  const { chartItems, itemsPos, selectedSceneId, sceneItemIds } = useSelector((state: RootState) => {
-    const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
+  const { chartItems, itemsPos, selectedSceneId, sceneItemIds, selectedGroupId, group } = useSelector(
+    (state: RootState) => {
+      const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
 
-    return {
-      chartItems: state.contentDocument.items,
-      itemsPos: state.contentDocument.itemsPos,
-      selectedSceneId,
-      sceneItemIds: state.contentDocument.scene[selectedSceneId]?.itemIds || [],
-    };
-  }, shallowEqual);
+      return {
+        chartItems: state.contentDocument.items,
+        itemsPos: getItemPos(state.contentDocument.itemsPos, state.selectedGroupId, state.contentDocument.group),
+        selectedSceneId,
+        sceneItemIds: state.contentDocument.scene[selectedSceneId]?.itemIds || [],
+        selectedGroupId: state.selectedGroupId,
+        group: state.contentDocument.group,
+      };
+    },
+    shallowEqual
+  );
 
-  const selectedChartItem = useMemo(() => getChartItem(sceneItemIds, chartItems), [chartItems, sceneItemIds]);
+  const selectedChartItem = useMemo(
+    () => getChartItem(sceneItemIds, chartItems, selectedGroupId, group),
+    [chartItems, sceneItemIds, selectedGroupId, group]
+  );
 
   const itemDesc = {
     [ChartItemType.div]: '엘리먼트의 그룹을 만들기 위한 단위 입니다.',
@@ -69,22 +77,24 @@ function PanelItem({ itemType }: Props) {
   };
 
   const handleMakeItem = () => {
+    const _items = selectedGroupId ? group[selectedGroupId].items : chartItems;
+
     const zoomArea = document.getElementById(ZOOM_AREA_ELEMENT_ID);
 
     const [newFlowItem, pos, newItemId] = makeNewItem(
       zoomArea,
-      chartItems,
+      _items,
       selectedChartItem,
       itemsPos,
       itemType,
-      selectedSceneId
+      selectedGroupId || selectedSceneId
     );
 
     const operations: Operation[] = [
       {
         key: 'items',
         value: {
-          ...chartItems,
+          ..._items,
           [newItemId]: newFlowItem,
         },
       },
@@ -95,11 +105,14 @@ function PanelItem({ itemType }: Props) {
           [newItemId]: pos,
         },
       },
-      {
+    ];
+
+    if (!selectedGroupId) {
+      operations.push({
         key: `scene.${selectedSceneId}.itemIds`,
         value: [...sceneItemIds, newItemId],
-      },
-    ];
+      });
+    }
 
     dispatch(setDocumentValueAction(operations));
   };

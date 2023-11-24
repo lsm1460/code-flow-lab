@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import { CHART_VARIABLE_ITEMS, CUSTOM_TRIGGER_TYPE } from '@/consts/codeFlowLab/items';
 import {
   ChartArrayItem,
+  ChartGroupItem,
   ChartItem,
   ChartItemType,
   ChartItems,
@@ -87,8 +88,29 @@ export const getDocumentValue = ({ document: _document, keys: _keys }) => {
 export const getSceneId = (_flowScene: CodeFlowChartDoc['scene'], _sceneOrder: number) =>
   Object.keys(_flowScene).filter((_sceneKey) => _flowScene[_sceneKey].order === _sceneOrder)?.[0] || '';
 
-export const getChartItem = (sceneItemIdList: string[], chartItem: CodeFlowChartDoc['items']) => {
+export const getChartItem = (
+  sceneItemIdList: string[],
+  chartItem: CodeFlowChartDoc['items'],
+  _selectedGroupId: string,
+  _group: CodeFlowChartDoc['group']
+) => {
+  if (_selectedGroupId) {
+    return _group[_selectedGroupId].items;
+  }
+
   return _.pickBy(chartItem, (_item) => (sceneItemIdList || []).includes(_item.id));
+};
+
+export const getItemPos = (
+  _itemPos: CodeFlowChartDoc['itemsPos'],
+  _selectedGroupId: string,
+  _group: CodeFlowChartDoc['group']
+) => {
+  if (_selectedGroupId) {
+    return _group[_selectedGroupId].itemsPos;
+  }
+
+  return _itemPos;
 };
 
 export const useDebounceSubmitText = (_dispatchKey, isNumber = false) => {

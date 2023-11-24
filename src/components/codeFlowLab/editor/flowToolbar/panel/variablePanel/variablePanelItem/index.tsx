@@ -1,7 +1,7 @@
 import { ChartVariableItem } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
 import { Operation, setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
-import { getSceneId } from '@/utils/content';
+import { getItemPos, getSceneId } from '@/utils/content';
 import { useMemo } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import TextEditBlock from '../../../../flowChart/chartItem/propertiesEditBlock/textEditBlock';
@@ -16,14 +16,15 @@ interface Props {
 function VariablePanelItem({ chartItem }: Props) {
   const dispatch = useDispatch();
 
-  const { sceneId, flowScene, flowItemsPos } = useSelector((state: RootState) => {
+  const { selectedGroupId, sceneId, flowScene, flowItemsPos } = useSelector((state: RootState) => {
     const sceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
 
     return {
+      selectedGroupId: state.selectedGroupId,
       sceneId,
       sceneOrder: state.sceneOrder,
       flowScene: state.contentDocument.scene,
-      flowItemsPos: state.contentDocument.itemsPos,
+      flowItemsPos: getItemPos(state.contentDocument.itemsPos, state.selectedGroupId, state.contentDocument.group),
     };
   }, shallowEqual);
 
@@ -51,14 +52,18 @@ function VariablePanelItem({ chartItem }: Props) {
         key: `itemsPos.${chartItem.id}`,
         value: {
           ...flowItemsPos[chartItem.id],
-          [sceneId]: _pos,
+          [selectedGroupId || sceneId]: _pos,
         },
       },
-      {
+    ];
+
+    if (!selectedGroupId) {
+      operation.push({
         key: `scene.${sceneId}.itemIds`,
         value: [...flowScene[sceneId].itemIds, chartItem.id],
-      },
-    ];
+      });
+    }
+
     dispatch(setDocumentValueAction(operation));
   };
 

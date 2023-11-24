@@ -74,8 +74,8 @@ const useIpcManager = (_ableReceive: boolean = true) => {
     ipcRenderer.send(CLOSE_WINDOW);
   };
 
-  const sendZoomAreaContextOpen = () => {
-    ipcRenderer.send(REQUEST_ZOOM_AREA_CONTEXT);
+  const sendZoomAreaContextOpen = (_groupId?: string) => {
+    ipcRenderer.send(REQUEST_ZOOM_AREA_CONTEXT, _groupId);
   };
 
   return {

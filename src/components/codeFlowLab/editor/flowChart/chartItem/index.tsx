@@ -20,6 +20,7 @@ import PropertiesEditBlock from './propertiesEditBlock';
 
 import classNames from 'classnames/bind';
 import styles from './chartItem.module.scss';
+import useIpcManager from '@/components/codeFlowLab/useIpcManager';
 const cx = classNames.bind(styles);
 
 interface Props {
@@ -31,6 +32,8 @@ interface Props {
 }
 function ChartItem({ chartItems, itemInfo, isSelected, handleItemMoveStart, handlePointConnectStart }: Props) {
   const dispatch = useDispatch();
+
+  const { sendZoomAreaContextOpen } = useIpcManager(false);
 
   const [isReadyOnly, setIsReadOnly] = useState(true);
   const [debounceSubmitText] = useDebounceSubmitText(`items.${itemInfo.id}.name`);
@@ -72,11 +75,7 @@ function ChartItem({ chartItems, itemInfo, isSelected, handleItemMoveStart, hand
   const selectedName = useMemo(() => selectName(isTyping, itemInfo.name, itemName), [isTyping, itemInfo, itemName]);
   const connectPointList = useMemo(() => {
     return Object.keys(FLOW_CHART_ITEMS_STYLE[itemInfo.elType].connectionTypeList).map((_x, _i) => {
-      const _connectedSceneItemIdList = (itemInfo.connectionIds[_x] || []).filter((_pos: ConnectPoint) =>
-        sceneItemIds.includes(_pos.connectParentId)
-      );
-
-      const typeGroup = _.groupBy(_connectedSceneItemIdList, (_point) => {
+      const typeGroup = _.groupBy(itemInfo.connectionIds[_x], (_point) => {
         // 일반적으로는 그룹 별로 묶지만, 변수의 경우 다양한 블록들과 그룹지어 연결하지 않기 때문에 분기처리 추가
         if (_point.connectType === ChartItemType.variable) {
           return ChartItemType.variable;
@@ -176,6 +175,10 @@ function ChartItem({ chartItems, itemInfo, isSelected, handleItemMoveStart, hand
     dispatch(setDeleteTargetIdListAction([itemInfo.id]));
   };
 
+  const handleContextMenu = () => {
+    sendZoomAreaContextOpen(itemInfo.elType === ChartItemType.group ? itemInfo.id : '');
+  };
+
   return (
     <div
       className={cx('chart-item', getBlockType(itemInfo.elType, true), {
@@ -192,6 +195,7 @@ function ChartItem({ chartItems, itemInfo, isSelected, handleItemMoveStart, hand
         zIndex: itemInfo.zIndex,
         transitionDelay: `${multiDeleteDelay || 100}ms`,
       }}
+      onContextMenu={handleContextMenu}
     >
       {itemInfo.elType !== ChartItemType.body && (
         <button className={cx('delete-button')} onClick={handleDeleteItem}>

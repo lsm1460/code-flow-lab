@@ -18,6 +18,8 @@ export const SET_ADDED_STYLES = 'document/SET_ADDED_STYLES';
 export const SET_REMOVE_STYLES = 'document/SET_REMOVE_STYLES';
 export const SET_TOGGLE_STYLES = 'document/SET_TOGGLE_STYLES';
 export const SET_IS_SAVE_STATE = 'document/SET_IS_SAVE_STATE';
+export const SET_SELECTED_GROUP_ID = 'document/SET_SELECTED_GROUP_ID';
+export const SET_OPENED_GROUP_ID_LIST = 'document/SET_OPENED_GROUP_ID_LIST';
 
 export const setDocumentAction = createAction(SET_DOCUMENT)<CodeFlowChartDoc>();
 export const setDocumentValueAction = createAction(SET_DOCUMENT_VALUE)<Operation | Operation[]>();
@@ -34,3 +36,5 @@ export const setAddedStylesAction = createAction(SET_ADDED_STYLES)<{ id: string;
 export const setRemoveStylesAction = createAction(SET_REMOVE_STYLES)<{ id: string; style: CSSProperties }>();
 export const setToggleStylesAction = createAction(SET_TOGGLE_STYLES)<{ id: string; style: CSSProperties }>();
 export const setIsSaveStateAction = createAction(SET_IS_SAVE_STATE)<boolean>();
+export const setSelectedGroupIdAction = createAction(SET_SELECTED_GROUP_ID)<string>();
+export const setOpenedGroupIdListAction = createAction(SET_OPENED_GROUP_ID_LIST)<string[]>();

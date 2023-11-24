@@ -8,6 +8,8 @@ const {
   SEND_COPY_OBJECTS,
   REQUEST_PASTE,
   REQUEST_MAKE_GROUP,
+  REQUEST_UNGROUP,
+  REQUEST_EDIT_GROUP,
 } = require('../../consts/channel');
 
 const requestUndo = (_mainWindow) => {
@@ -64,6 +66,14 @@ const requestMakeGroup = (_mainWindow) => {
   _mainWindow.webContents.send(REQUEST_MAKE_GROUP);
 };
 
+const requestUngroup = (_mainWindow, _groupId) => {
+  _mainWindow.webContents.send(REQUEST_UNGROUP, _groupId);
+};
+
+const requestEditGroup = (_mainWindow, _groupId) => {
+  _mainWindow.webContents.send(REQUEST_EDIT_GROUP, _groupId);
+};
+
 module.exports = {
   requestUndo,
   requestRedo,
@@ -71,4 +81,6 @@ module.exports = {
   requestCopy,
   requestPaste,
   requestMakeGroup,
+  requestUngroup,
+  requestEditGroup,
 };

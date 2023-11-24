@@ -2,7 +2,7 @@ import { ZOOM_AREA_ELEMENT_ID } from '@/consts/codeFlowLab/items';
 import { ChartItemType } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
 import { Operation, setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
-import { getChartItem, getSceneId } from '@/utils/content';
+import { getChartItem, getItemPos, getSceneId } from '@/utils/content';
 import { useMemo, useState } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { makeNewItem } from '../flowChart/utils';
@@ -15,38 +15,48 @@ const cx = classNames.bind(styles);
 function FlowToolbar() {
   const dispatch = useDispatch();
 
-  const { chartItems, itemsPos, selectedSceneId, sceneItemIds } = useSelector((state: RootState) => {
-    const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
+  const { chartItems, itemsPos, selectedSceneId, sceneItemIds, selectedGroupId, group } = useSelector(
+    (state: RootState) => {
+      const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
 
-    return {
-      chartItems: state.contentDocument.items,
-      itemsPos: state.contentDocument.itemsPos,
-      selectedSceneId,
-      sceneItemIds: state.contentDocument.scene[selectedSceneId]?.itemIds || [],
-    };
-  }, shallowEqual);
+      return {
+        chartItems: state.contentDocument.items,
+        itemsPos: getItemPos(state.contentDocument.itemsPos, state.selectedGroupId, state.contentDocument.group),
+        selectedSceneId,
+        sceneItemIds: state.contentDocument.scene[selectedSceneId]?.itemIds || [],
+        selectedGroupId: state.selectedGroupId,
+        group: state.contentDocument.group,
+      };
+    },
+    shallowEqual
+  );
 
-  const selectedChartItem = useMemo(() => getChartItem(sceneItemIds, chartItems), [chartItems, sceneItemIds]);
+  const selectedChartItem = useMemo(
+    () => getChartItem(sceneItemIds, chartItems, selectedGroupId, group),
+    [chartItems, sceneItemIds, selectedGroupId, group]
+  );
 
   const [panel, setPanel] = useState<'element' | 'function' | 'variable' | 'group' | ''>('');
 
   const makeItem = (_itemType: ChartItemType) => {
+    const _items = selectedGroupId ? group[selectedGroupId].items : chartItems;
+
     const zoomArea = document.getElementById(ZOOM_AREA_ELEMENT_ID);
 
     const [newFlowItem, pos, newItemId] = makeNewItem(
       zoomArea,
-      chartItems,
+      _items,
       selectedChartItem,
       itemsPos,
       _itemType,
-      selectedSceneId
+      selectedGroupId || selectedSceneId
     );
 
     const operations: Operation[] = [
       {
         key: 'items',
         value: {
-          ...chartItems,
+          ..._items,
           [newItemId]: newFlowItem,
         },
       },
@@ -57,11 +67,14 @@ function FlowToolbar() {
           [newItemId]: pos,
         },
       },
-      {
+    ];
+
+    if (!selectedGroupId) {
+      operations.push({
         key: `scene.${selectedSceneId}.itemIds`,
         value: [...sceneItemIds, newItemId],
-      },
-    ];
+      });
+    }
 
     dispatch(setDocumentValueAction(operations));
   };

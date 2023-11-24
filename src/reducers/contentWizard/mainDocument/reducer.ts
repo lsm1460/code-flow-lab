@@ -15,9 +15,11 @@ import {
   SET_DOCUMENT_VALUE,
   SET_FLOW_LOG,
   SET_IS_SAVE_STATE,
+  SET_OPENED_GROUP_ID_LIST,
   SET_OPTION_MODAL_INFO,
   SET_REMOVE_STYLES,
   SET_SCENE_ORDER,
+  SET_SELECTED_GROUP_ID,
   SET_TOGGLE_STYLES,
 } from './actions';
 import { DocumentAction, DocumentState, FlowLog, Operation } from './types';
@@ -47,6 +49,8 @@ const initialState: DocumentState = {
     },
     group: {},
   },
+  selectedGroupId: '',
+  openedGroupIdList: [],
   sceneOrder: 1,
   deleteTargetIdList: [],
   flowLogList: [],
@@ -67,6 +71,16 @@ const documentReducer = createReducer<DocumentState, DocumentAction>(initialStat
     let operations = _.map(payload, (operation: Operation) => ({
       ...operation,
     }));
+
+    // group이 열려있을때 오퍼레이션을 확인하여 앞에 group이 없을 때 추가함!!
+    if (state.selectedGroupId) {
+      operations = operations.map((_op) => ({
+        ..._op,
+        key: _op.key.startsWith('item') ? `group.${state.selectedGroupId}.` + _op.key : _op.key,
+      }));
+    }
+
+    console.log('operations', operations);
 
     const newDocument = _.reduce(
       operations,
@@ -173,6 +187,8 @@ const documentReducer = createReducer<DocumentState, DocumentAction>(initialStat
     }
   },
   [SET_IS_SAVE_STATE]: (state, { payload }) => ({ ...state, isSaved: payload }),
+  [SET_SELECTED_GROUP_ID]: (state, { payload }) => ({ ...state, selectedGroupId: payload }),
+  [SET_OPENED_GROUP_ID_LIST]: (state, { payload }) => ({ ...state, openedGroupIdList: payload }),
 });
 
 export default documentReducer;

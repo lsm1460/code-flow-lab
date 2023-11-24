@@ -7,7 +7,14 @@ import {
   FLOW_ITEM_DEFAULT_INFO,
   ROOT_BLOCK_ID,
 } from '@/consts/codeFlowLab/items';
-import { ChartBodyItem, ChartItemPos, ChartItemType, ChartItems, CodeFlowChartDoc } from '@/consts/types/codeFlowLab';
+import {
+  ChartBodyItem,
+  ChartGroupItem,
+  ChartItemPos,
+  ChartItemType,
+  ChartItems,
+  CodeFlowChartDoc,
+} from '@/consts/types/codeFlowLab';
 import { getRandomId } from '@/utils/content';
 import _ from 'lodash';
 
@@ -243,5 +250,25 @@ export const getCanvasLineColor = (_originElType: ChartItemType, _nextElType: Ch
     return '#7b7be8';
   } else {
     return 'red';
+  }
+};
+
+export const findGroupRootId = (
+  chartItems: CodeFlowChartDoc['items'],
+  group: CodeFlowChartDoc['group'],
+  selectedGroupId: string
+) => {
+  if (chartItems[selectedGroupId]) {
+    return (chartItems[selectedGroupId] as ChartGroupItem).rootId;
+  }
+
+  for (let _groupId in group) {
+    if (_groupId === selectedGroupId) {
+      continue;
+    }
+
+    if (group[_groupId].items[selectedGroupId]) {
+      return (group[_groupId].items[selectedGroupId] as ChartGroupItem).rootId;
+    }
   }
 };

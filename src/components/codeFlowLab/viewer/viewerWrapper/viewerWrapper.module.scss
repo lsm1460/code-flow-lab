@@ -1,0 +1,70 @@
+@import '../../variables';
+@import '../../mixin';
+
+$minimize-viewer-width: 120px;
+
+.viewer-wrapper {
+  position: fixed;
+  right: 30px;
+  top: $editor-header-height + $editor-tabs-height + 20px;
+  width: $viewer-width;
+  transition: 0.3s width;
+
+  & > div {
+    border-radius: 5px;
+    overflow: hidden;
+    border: 1px solid #555;
+    height: calc($viewer-width * 19.5 / 9);
+    transition: 0.3s height;
+
+    & > div {
+      width: $viewer-width;
+      transform: scale(1);
+      transform-origin: top left;
+      background-color: #ffffff;
+      aspect-ratio: 9/19.5;
+      opacity: 0.06;
+      box-shadow: 0px 2px 5px rgba(255, 255, 255, 0.9);
+      transition: 0.3s transform, 0.3s opacity, 0.3s box-shadow;
+    }
+
+    &:hover {
+      & > div {
+        opacity: 1;
+        box-shadow: 0px 2px 10px rgba(255, 255, 255, 0.9);
+      }
+    }
+  }
+
+  &.active > div > div {
+    opacity: 1;
+  }
+
+  &.minimize {
+    width: $minimize-viewer-width;
+
+    & > div {
+      height: calc($minimize-viewer-width * 19.5 / 9);
+
+      & > div {
+        transform: scale(calc($minimize-viewer-width / $viewer-width));
+      }
+    }
+  }
+
+  .viewer-controll-wrap {
+    position: absolute;
+    left: -10px;
+    transform: translateX(-100%);
+
+    li {
+      & + li {
+        margin-top: 8px;
+      }
+
+      button {
+        @include small-button;
+      }
+    }
+  }
+}

@@ -16,7 +16,7 @@ interface Props {
 function IdSelectBlock({ id, elId, targetElTypeList }: Props) {
   const dispatch = useDispatch();
 
-  const { chartItems, sceneItemIds } = useSelector((state: RootState) => {
+  const { chartItems, sceneItemIds, selectedGroupId, group } = useSelector((state: RootState) => {
     const sceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
 
     return {
@@ -24,11 +24,13 @@ function IdSelectBlock({ id, elId, targetElTypeList }: Props) {
       sceneOrder: state.sceneOrder,
       chartItems: state.contentDocument.items,
       sceneItemIds: state.contentDocument.scene[sceneId]?.itemIds || [],
+      selectedGroupId: state.selectedGroupId,
+      group: state.contentDocument.group,
     };
   }, shallowEqual);
 
   const valueList = useMemo(() => {
-    const selectedChartItem = getChartItem(sceneItemIds, chartItems);
+    const selectedChartItem = getChartItem(sceneItemIds, chartItems, selectedGroupId, group);
     const elChartItem = _.pickBy(selectedChartItem, (_item) => {
       const flag1 = CHART_ELEMENT_ITEMS.includes(_item.elType);
       const flag2 = (targetElTypeList || [_item.elType]).includes(_item.elType);
@@ -37,7 +39,7 @@ function IdSelectBlock({ id, elId, targetElTypeList }: Props) {
     });
 
     return _.map(elChartItem, (_item) => ({ value: _item.id, label: _item.name }));
-  }, [chartItems, sceneItemIds]);
+  }, [chartItems, sceneItemIds, selectedGroupId, group]);
 
   const onChangeValue = (_key: string, _id: string | number) => {
     dispatch(setDocumentValueAction({ key: `items.${id}.elId`, value: _id }));

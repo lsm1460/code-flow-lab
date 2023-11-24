@@ -46,7 +46,7 @@ function* handleDeleteBlock({ payload }: { type: string; payload: string[] }) {
   const {
     sceneOrder,
     deleteTargetIdList,
-    contentDocument: { items, itemsPos, scene },
+    contentDocument: { items, itemsPos, scene, group },
   }: RootState = yield select();
   if (deleteTargetIdList.length > 0) {
     return;
@@ -89,6 +89,10 @@ function* handleDeleteBlock({ payload }: { type: string; payload: string[] }) {
   ops.push({
     key: `scene.${selectedSceneId}.itemIds`,
     value: sceneItemIds.filter((_id) => !payload.includes(_id)),
+  });
+  ops.push({
+    key: `group`,
+    value: _.pickBy(group, (_v, _groupId) => !payload.includes(_groupId)),
   });
 
   yield put({ type: SET_DELETE_ANIMATION_ID_LIST, payload: [] });

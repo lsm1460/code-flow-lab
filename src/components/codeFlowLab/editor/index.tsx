@@ -1,4 +1,3 @@
-import { CHART_VARIABLE_ITEMS } from '@/consts/codeFlowLab/items';
 import { ChartItemType, PointPos } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
 import { Operation, setDocumentValueAction, setFlowLogAction } from '@/reducers/contentWizard/mainDocument';
@@ -7,13 +6,16 @@ import {
   getConnectOperationsForBlockToBlock,
   getConnectOperationsForCondition,
   getConnectOperationsForVariable,
+  getItemPos,
   getSceneId,
 } from '@/utils/content';
 import { clearHistory } from '@/utils/history';
+import classNames from 'classnames/bind';
 import _ from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import FlowChartViewer from '../viewer';
+import ViewerWrapper from '../viewer/viewerWrapper';
+import styles from './editor.module.scss';
 import FlowChart from './flowChart';
 import FlowHeader from './flowHeader';
 import FlowLog from './flowLog';
@@ -21,8 +23,6 @@ import FlowTabs from './flowTabs';
 import FlowToolbar from './flowToolbar';
 import FlowZoom from './flowZoom';
 import FlowOptionModal from './modal/flowOptionModal';
-import classNames from 'classnames/bind';
-import styles from './editor.module.scss';
 const cx = classNames.bind(styles);
 
 export type MoveItems = (_itemIds: string[], _deltaX: number, _deltaY: number) => void;
@@ -33,23 +33,26 @@ function CodeFlowLabEditor() {
 
   const [moveItemInfo, setMoveItemInfo] = useState<{ ids: string[]; deltaX: number; deltaY: number }>(null);
 
-  const { openTime, selectedSceneId, chartItems, sceneItemIds, itemsPos, isModalOpen } = useSelector(
-    (state: RootState) => {
+  const { selectedGroupId, group, openTime, selectedSceneId, chartItems, sceneItemIds, itemsPos, isModalOpen } =
+    useSelector((state: RootState) => {
       const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
 
       return {
+        selectedGroupId: state.selectedGroupId,
+        group: state.contentDocument.group,
         openTime: state.openTime,
         chartItems: state.contentDocument.items,
-        itemsPos: state.contentDocument.itemsPos,
+        itemsPos: getItemPos(state.contentDocument.itemsPos, state.selectedGroupId, state.contentDocument.group),
         selectedSceneId,
         sceneItemIds: state.contentDocument.scene[selectedSceneId]?.itemIds || [],
         isModalOpen: !!state.selectModal,
       };
-    },
-    shallowEqual
-  );
+    }, shallowEqual);
 
-  const selectedChartItem = useMemo(() => getChartItem(sceneItemIds, chartItems), [chartItems, sceneItemIds]);
+  const selectedChartItem = useMemo(
+    () => getChartItem(sceneItemIds, chartItems, selectedGroupId, group),
+    [chartItems, sceneItemIds, selectedGroupId, group]
+  );
 
   useEffect(() => {
     clearHistory();
@@ -65,10 +68,10 @@ function CodeFlowLabEditor() {
 
       const operations: Operation[] = Object.values(targetItems).map((_item) => {
         return {
-          key: `itemsPos.${_item.id}.${selectedSceneId}`,
+          key: `itemsPos.${_item.id}.${selectedGroupId || selectedSceneId}`,
           value: {
-            left: itemsPos[_item.id][selectedSceneId].left + moveItemInfo.deltaX,
-            top: itemsPos[_item.id][selectedSceneId].top + moveItemInfo.deltaY,
+            left: itemsPos[_item.id][selectedGroupId || selectedSceneId].left + moveItemInfo.deltaX,
+            top: itemsPos[_item.id][selectedGroupId || selectedSceneId].top + moveItemInfo.deltaY,
           },
         };
       });
@@ -77,7 +80,7 @@ function CodeFlowLabEditor() {
 
       setMoveItemInfo(null);
     }
-  }, [moveItemInfo, selectedChartItem]);
+  }, [moveItemInfo, selectedChartItem, selectedGroupId]);
 
   const moveItems: MoveItems = (_itemIds, _deltaX, _deltaY) => {
     setMoveItemInfo({ ids: _itemIds, deltaX: _deltaX, deltaY: _deltaY });
@@ -126,7 +129,7 @@ function CodeFlowLabEditor() {
           </FlowZoom>
           <FlowLog />
         </div>
-        <FlowChartViewer />
+        <ViewerWrapper />
       </div>
     </>
   );

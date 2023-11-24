@@ -8,6 +8,8 @@ export type FlowLog = { date: Date; text: string; type: 'log' | 'system' };
 
 export type DocumentState = {
   contentDocument: CodeFlowChartDoc;
+  selectedGroupId: string;
+  openedGroupIdList: string[];
   sceneOrder: number;
   deleteTargetIdList: string[];
   flowLogList: FlowLog[];
