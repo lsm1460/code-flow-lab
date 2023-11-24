@@ -37,8 +37,6 @@ function FlowChartViewer({}: Props) {
     shallowEqual
   );
 
-  console.log('group', group);
-
   const selectedChartItem = useMemo(
     () => getChartItem(sceneItemIds, chartItems, selectedGroupId, group),
     [chartItems, sceneItemIds, selectedGroupId, group]

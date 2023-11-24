@@ -80,8 +80,6 @@ const documentReducer = createReducer<DocumentState, DocumentAction>(initialStat
       }));
     }
 
-    console.log('operations', operations);
-
     const newDocument = _.reduce(
       operations,
       (document, op) =>

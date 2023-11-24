@@ -62,8 +62,6 @@ function FlowZoom({ children }: Props) {
     }
   }, [zoomRef]);
 
-  console.log({ selectedChartItem, itemsPos, selectedGroupId });
-
   const scrollArea = useMemo(() => {
     const [width, height] = originSize;
 

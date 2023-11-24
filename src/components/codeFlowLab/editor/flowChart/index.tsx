@@ -427,7 +427,6 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
         if (_items[_id].elType === ChartItemType.body) {
           return;
         } else if (rootId === _id) {
-          console.log(rootId, _id);
           return;
         } else if (CHART_ELEMENT_ITEMS.includes(_items[_id].elType) && !hasElementFlag) {
           hasElementFlag = true;
@@ -611,7 +610,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
             ..._.mapValues(group[_groupId].itemsPos, (_poses) =>
               _.mapKeys(_poses, (_pos, _sceneId) => {
                 if (_sceneId === _groupId) {
-                  return selectedSceneId;
+                  return selectedGroupId || selectedSceneId;
                 }
 
                 return _sceneId;
@@ -621,7 +620,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
         },
       ];
 
-      if (selectedGroupId) {
+      if (!selectedGroupId) {
         operations.push({
           key: `scene.${selectedSceneId}.itemIds`,
           value: [...sceneItemIds.filter((_id) => _groupId !== _id), ...Object.keys(group[_groupId].items)],
