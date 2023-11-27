@@ -2,12 +2,12 @@ import { ZOOM_AREA_ELEMENT_ID } from '@/consts/codeFlowLab/items';
 import { ChartItemType } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
 import { Operation, setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
-import { getChartItem, getItemPos, getSceneId } from '@/utils/content';
+import { getChartItem, getSceneId } from '@/utils/content';
 import { useMemo, useState } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { makeNewItem } from '../flowChart/utils';
 import ToolbarPanel from './panel';
-
+import _ from 'lodash';
 import classNames from 'classnames/bind';
 import styles from './flowToolbar.module.scss';
 const cx = classNames.bind(styles);
@@ -17,11 +17,11 @@ function FlowToolbar() {
 
   const { chartItems, itemsPos, selectedSceneId, sceneItemIds, selectedGroupId, group } = useSelector(
     (state: RootState) => {
-      const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
+      const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder, state.selectedGroupId);
 
       return {
         chartItems: state.contentDocument.items,
-        itemsPos: getItemPos(state.contentDocument.itemsPos, state.selectedGroupId, state.contentDocument.group),
+        itemsPos: state.contentDocument.itemsPos,
         selectedSceneId,
         sceneItemIds: state.contentDocument.scene[selectedSceneId]?.itemIds || [],
         selectedGroupId: state.selectedGroupId,
@@ -39,24 +39,22 @@ function FlowToolbar() {
   const [panel, setPanel] = useState<'element' | 'function' | 'variable' | 'group' | ''>('');
 
   const makeItem = (_itemType: ChartItemType) => {
-    const _items = selectedGroupId ? group[selectedGroupId].items : chartItems;
-
     const zoomArea = document.getElementById(ZOOM_AREA_ELEMENT_ID);
 
     const [newFlowItem, pos, newItemId] = makeNewItem(
       zoomArea,
-      _items,
+      chartItems,
       selectedChartItem,
       itemsPos,
       _itemType,
-      selectedGroupId || selectedSceneId
+      selectedSceneId
     );
 
     const operations: Operation[] = [
       {
         key: 'items',
         value: {
-          ..._items,
+          ...chartItems,
           [newItemId]: newFlowItem,
         },
       },
@@ -69,7 +67,12 @@ function FlowToolbar() {
       },
     ];
 
-    if (!selectedGroupId) {
+    if (selectedGroupId) {
+      operations.push({
+        key: `group.${selectedGroupId}`,
+        value: [...group[selectedGroupId], newItemId],
+      });
+    } else {
       operations.push({
         key: `scene.${selectedSceneId}.itemIds`,
         value: [...sceneItemIds, newItemId],

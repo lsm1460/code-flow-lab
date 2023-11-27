@@ -170,6 +170,16 @@ const openProject = async (_mainWindow, _filePath) => {
           })
           .value(),
       },
+      group: _.mapValues(_document.group, (_group) => ({
+        ..._group,
+        items: _.mapValues(_group.items, (_item) => {
+          if (_item.elType === 'image' && _item.src) {
+            return { ..._item, src: `${_path}/images/${_imgName}` };
+          }
+
+          return _item;
+        }),
+      })),
     };
 
     global.projectPath = { path: _pathArray.join('/'), fileName: _fileName };
@@ -195,6 +205,14 @@ const saveProject = (_mainWindow) => {
 
         const imageFolder = zip.folder('images');
         const _imgItemList = Object.values(_contents.items).filter((_item) => _item.elType === 'image' && _item.src);
+
+        Object.values(_contents.group).forEach((_group) =>
+          Object.values(_group.items).forEach((_item) => {
+            if (_item.elType === 'image' && _item.src) {
+              _imgItemList.push(_item);
+            }
+          })
+        );
 
         for (let _item of _imgItemList) {
           const _imgFileName = path.basename(_item.src);

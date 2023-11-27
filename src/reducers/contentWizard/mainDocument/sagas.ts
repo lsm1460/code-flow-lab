@@ -4,6 +4,7 @@ import {
   SET_DELETE_ANIMATION_ID_LIST,
   SET_DELETE_TARGET_ID_LIST,
   SET_DOCUMENT_VALUE,
+  SET_OPENED_GROUP_ID_LIST,
 } from './actions';
 import { Operation, SagaOperationParam } from './types';
 
@@ -46,6 +47,8 @@ function* handleDeleteBlock({ payload }: { type: string; payload: string[] }) {
   const {
     sceneOrder,
     deleteTargetIdList,
+    selectedGroupId,
+    openedGroupIdList,
     contentDocument: { items, itemsPos, scene, group },
   }: RootState = yield select();
   if (deleteTargetIdList.length > 0) {
@@ -54,7 +57,7 @@ function* handleDeleteBlock({ payload }: { type: string; payload: string[] }) {
 
   yield put({ type: SET_DELETE_ANIMATION_ID_LIST, payload });
 
-  const selectedSceneId = getSceneId(scene, sceneOrder);
+  const selectedSceneId = getSceneId(scene, sceneOrder, selectedGroupId);
   const sceneItemIds = scene[selectedSceneId]?.itemIds || [];
 
   yield delay((payload.length + 1) * 100);
@@ -95,6 +98,10 @@ function* handleDeleteBlock({ payload }: { type: string; payload: string[] }) {
     value: _.pickBy(group, (_v, _groupId) => !payload.includes(_groupId)),
   });
 
+  yield put({
+    type: SET_OPENED_GROUP_ID_LIST,
+    payload: openedGroupIdList.filter((_groupId) => !payload.includes(_groupId)),
+  });
   yield put({ type: SET_DELETE_ANIMATION_ID_LIST, payload: [] });
   yield put({ type: SET_DOCUMENT_VALUE, payload: ops });
 }

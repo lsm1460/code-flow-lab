@@ -72,14 +72,6 @@ const documentReducer = createReducer<DocumentState, DocumentAction>(initialStat
       ...operation,
     }));
 
-    // group이 열려있을때 오퍼레이션을 확인하여 앞에 group이 없을 때 추가함!!
-    if (state.selectedGroupId) {
-      operations = operations.map((_op) => ({
-        ..._op,
-        key: _op.key.startsWith('item') ? `group.${state.selectedGroupId}.` + _op.key : _op.key,
-      }));
-    }
-
     const newDocument = _.reduce(
       operations,
       (document, op) =>
@@ -87,6 +79,7 @@ const documentReducer = createReducer<DocumentState, DocumentAction>(initialStat
           document,
           keys: op.key.split('.'),
           value: op.value,
+          debug: '',
         }),
       state.contentDocument
     );
@@ -186,7 +179,7 @@ const documentReducer = createReducer<DocumentState, DocumentAction>(initialStat
   },
   [SET_IS_SAVE_STATE]: (state, { payload }) => ({ ...state, isSaved: payload }),
   [SET_SELECTED_GROUP_ID]: (state, { payload }) => ({ ...state, selectedGroupId: payload }),
-  [SET_OPENED_GROUP_ID_LIST]: (state, { payload }) => ({ ...state, openedGroupIdList: payload }),
+  [SET_OPENED_GROUP_ID_LIST]: (state, { payload }) => ({ ...state, openedGroupIdList: _.uniq(payload) }),
 });
 
 export default documentReducer;

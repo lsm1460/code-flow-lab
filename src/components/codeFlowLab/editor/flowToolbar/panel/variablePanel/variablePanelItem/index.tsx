@@ -1,7 +1,7 @@
 import { ChartVariableItem } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
 import { Operation, setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
-import { getItemPos, getSceneId } from '@/utils/content';
+import { getSceneId } from '@/utils/content';
 import { useMemo } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import TextEditBlock from '../../../../flowChart/chartItem/propertiesEditBlock/textEditBlock';
@@ -24,7 +24,7 @@ function VariablePanelItem({ chartItem }: Props) {
       sceneId,
       sceneOrder: state.sceneOrder,
       flowScene: state.contentDocument.scene,
-      flowItemsPos: getItemPos(state.contentDocument.itemsPos, state.selectedGroupId, state.contentDocument.group),
+      flowItemsPos: state.contentDocument.itemsPos,
     };
   }, shallowEqual);
 

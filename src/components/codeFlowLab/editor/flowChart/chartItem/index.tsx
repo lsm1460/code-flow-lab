@@ -1,3 +1,4 @@
+import useIpcManager from '@/components/codeFlowLab/useIpcManager';
 import {
   BLOCK_HEADER_SIZE,
   CHART_SCRIPT_ITEMS,
@@ -7,20 +8,18 @@ import {
   FLOW_CHART_ITEMS_STYLE,
   POINT_LIST_PADDING,
 } from '@/consts/codeFlowLab/items';
-import { ChartItemType, ChartItems, CodeFlowChartDoc, ConnectPoint } from '@/consts/types/codeFlowLab';
+import { ChartGroupItem, ChartItemType, ChartItems, CodeFlowChartDoc, ConnectPoint } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
 import { setDeleteTargetIdListAction, setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
 import { getSceneId, useDebounceSubmitText } from '@/utils/content';
+import classNames from 'classnames/bind';
 import _ from 'lodash';
 import { KeyboardEventHandler, MouseEventHandler, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { getBlockType, getConnectSizeByType } from '../utils';
+import styles from './chartItem.module.scss';
 import ConnectDot from './connectDot';
 import PropertiesEditBlock from './propertiesEditBlock';
-
-import classNames from 'classnames/bind';
-import styles from './chartItem.module.scss';
-import useIpcManager from '@/components/codeFlowLab/useIpcManager';
 const cx = classNames.bind(styles);
 
 interface Props {
@@ -33,26 +32,36 @@ interface Props {
 function ChartItem({ chartItems, itemInfo, isSelected, handleItemMoveStart, handlePointConnectStart }: Props) {
   const dispatch = useDispatch();
 
-  const { sendZoomAreaContextOpen } = useIpcManager(false);
+  const { sendContextOpen } = useIpcManager(false);
 
   const [isReadyOnly, setIsReadOnly] = useState(true);
   const [debounceSubmitText] = useDebounceSubmitText(`items.${itemInfo.id}.name`);
 
-  const { deleteTargetIdList, sceneItemIds } = useSelector((state: RootState) => {
-    const sceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
+  const { rootId, selectedGroupId, group, deleteTargetIdList, sceneItemIds } = useSelector((state: RootState) => {
+    const sceneId = getSceneId(state.contentDocument.scene, state.sceneOrder, state.selectedGroupId);
 
     return {
+      rootId: (state.contentDocument.items[state.selectedGroupId] as ChartGroupItem)?.rootId,
+      selectedGroupId: state.selectedGroupId,
       deleteTargetIdList: state.deleteTargetIdList,
       sceneItemIds: state.contentDocument.scene[sceneId]?.itemIds || [],
+      group: state.contentDocument.group,
     };
-  });
+  }, shallowEqual);
+
+  const isRoot = rootId === itemInfo.id || itemInfo.elType === ChartItemType.body;
 
   const checkDeep = ![ChartItemType.trigger, ChartItemType.style, ...CHART_SCRIPT_ITEMS].includes(itemInfo.elType);
 
-  const connectSizeByType = useMemo(
-    () => getConnectSizeByType(itemInfo.connectionIds, chartItems, sceneItemIds, checkDeep),
-    [chartItems, itemInfo, sceneItemIds, checkDeep]
-  );
+  const connectSizeByType = useMemo(() => {
+    let _ids = [...sceneItemIds];
+
+    if (selectedGroupId) {
+      _ids = group[selectedGroupId];
+    }
+
+    return getConnectSizeByType(itemInfo.connectionIds, chartItems, _ids, checkDeep);
+  }, [chartItems, itemInfo, sceneItemIds, checkDeep, selectedGroupId, group]);
 
   const [itemName, setItemName] = useState(itemInfo.name);
   const [isTyping, setIsTyping] = useState(false);
@@ -176,7 +185,12 @@ function ChartItem({ chartItems, itemInfo, isSelected, handleItemMoveStart, hand
   };
 
   const handleContextMenu = () => {
-    sendZoomAreaContextOpen(itemInfo.elType === ChartItemType.group ? itemInfo.id : '');
+    sendContextOpen({
+      itemId: itemInfo.id,
+      groupId: selectedGroupId,
+      isGroup: itemInfo.elType === ChartItemType.group,
+      isRoot,
+    });
   };
 
   return (
@@ -197,7 +211,25 @@ function ChartItem({ chartItems, itemInfo, isSelected, handleItemMoveStart, hand
       }}
       onContextMenu={handleContextMenu}
     >
-      {itemInfo.elType !== ChartItemType.body && (
+      {isRoot && (
+        <svg
+          className={cx('root-item')}
+          style={{ color: '#f3da35' }}
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 256 256"
+        >
+          <rect width="256" height="256" fill="none"></rect>
+          <path
+            d="M45.1,196a8.1,8.1,0,0,0,10,5.9,273,273,0,0,1,145.7,0,8.1,8.1,0,0,0,10-5.9L236.3,87.7a8,8,0,0,0-11-9.2L174.7,101a8.1,8.1,0,0,1-10.3-3.4L135,44.6a8,8,0,0,0-14,0l-29.4,53A8.1,8.1,0,0,1,81.3,101L30.7,78.5a8,8,0,0,0-11,9.2Z"
+            fill="#f3da35"
+            stroke="#f3da35"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="12"
+          ></path>
+        </svg>
+      )}
+      {!isRoot && (
         <button className={cx('delete-button')} onClick={handleDeleteItem}>
           <i className="material-symbols-outlined">close</i>
         </button>

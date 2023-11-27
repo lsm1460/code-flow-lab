@@ -6,7 +6,6 @@ import {
   getConnectOperationsForBlockToBlock,
   getConnectOperationsForCondition,
   getConnectOperationsForVariable,
-  getItemPos,
   getSceneId,
 } from '@/utils/content';
 import { clearHistory } from '@/utils/history';
@@ -35,14 +34,14 @@ function CodeFlowLabEditor() {
 
   const { selectedGroupId, group, openTime, selectedSceneId, chartItems, sceneItemIds, itemsPos, isModalOpen } =
     useSelector((state: RootState) => {
-      const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
+      const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder, state.selectedGroupId);
 
       return {
         selectedGroupId: state.selectedGroupId,
         group: state.contentDocument.group,
         openTime: state.openTime,
         chartItems: state.contentDocument.items,
-        itemsPos: getItemPos(state.contentDocument.itemsPos, state.selectedGroupId, state.contentDocument.group),
+        itemsPos: state.contentDocument.itemsPos,
         selectedSceneId,
         sceneItemIds: state.contentDocument.scene[selectedSceneId]?.itemIds || [],
         isModalOpen: !!state.selectModal,
@@ -68,10 +67,10 @@ function CodeFlowLabEditor() {
 
       const operations: Operation[] = Object.values(targetItems).map((_item) => {
         return {
-          key: `itemsPos.${_item.id}.${selectedGroupId || selectedSceneId}`,
+          key: `itemsPos.${_item.id}.${selectedSceneId}`,
           value: {
-            left: itemsPos[_item.id][selectedGroupId || selectedSceneId].left + moveItemInfo.deltaX,
-            top: itemsPos[_item.id][selectedGroupId || selectedSceneId].top + moveItemInfo.deltaY,
+            left: itemsPos[_item.id][selectedSceneId].left + moveItemInfo.deltaX,
+            top: itemsPos[_item.id][selectedSceneId].top + moveItemInfo.deltaY,
           },
         };
       });
@@ -80,7 +79,7 @@ function CodeFlowLabEditor() {
 
       setMoveItemInfo(null);
     }
-  }, [moveItemInfo, selectedChartItem, selectedGroupId]);
+  }, [moveItemInfo, selectedChartItem, selectedSceneId]);
 
   const moveItems: MoveItems = (_itemIds, _deltaX, _deltaY) => {
     setMoveItemInfo({ ids: _itemIds, deltaX: _deltaX, deltaY: _deltaY });

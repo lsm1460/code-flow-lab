@@ -300,14 +300,7 @@ export interface CodeFlowChartDoc {
     [_sceneId: string]: FlowScene;
   };
   group: {
-    [_itemId: string]: {
-      items: {
-        [_itemId: string]: ChartItems;
-      };
-      itemsPos: {
-        [_itemId: string]: ChartItemPos;
-      };
-    };
+    [_itemId: string]: string[];
   };
 }
 

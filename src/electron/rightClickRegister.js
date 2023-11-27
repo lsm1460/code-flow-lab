@@ -1,6 +1,6 @@
 const { Menu, ipcMain } = require('electron');
 const _edit = require('./menu/edit');
-const { REQUEST_ZOOM_AREA_CONTEXT } = require('../consts/channel');
+const { REQUEST_CONTEXT } = require('../consts/channel');
 
 const registRightClick = (_mainWindow) => {
   const defaultMenu = [
@@ -37,17 +37,35 @@ const registRightClick = (_mainWindow) => {
     },
   ];
 
-  ipcMain.on(REQUEST_ZOOM_AREA_CONTEXT, (_event, _groupId) => {
+  const extendsForChangeRoot = (_groupId, _itemId) => [
+    {
+      label: 'Change Root',
+      click: () => _edit.requestChangeRoot(_mainWindow, _groupId, _itemId),
+    },
+  ];
+
+  ipcMain.on(REQUEST_CONTEXT, (_event, _payload) => {
+    const { itemId, groupId, isGroup, isRoot } = _payload || {};
     let _menu = [...defaultMenu];
 
-    if (_groupId) {
+    if (isGroup) {
       _menu = [
         ..._menu,
         {
           type: 'separator',
         },
-        ...extendsForGroup(_groupId),
+        ...extendsForGroup(itemId),
       ];
+    } else {
+      if (groupId && !isRoot) {
+        _menu = [
+          ..._menu,
+          {
+            type: 'separator',
+          },
+          ...extendsForChangeRoot(groupId, itemId),
+        ];
+      }
     }
 
     const editorMenu = Menu.buildFromTemplate(_menu);

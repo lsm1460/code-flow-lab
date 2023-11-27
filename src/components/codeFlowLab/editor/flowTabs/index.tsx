@@ -1,26 +1,34 @@
-import { ChartItemType, ChartVariableItem } from '@/consts/types/codeFlowLab';
+import { ChartItemType } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
-import { Operation, setDocumentValueAction, setSceneOrderAction } from '@/reducers/contentWizard/mainDocument';
-import { getItemPos, getRandomId } from '@/utils/content';
+import {
+  Operation,
+  setDocumentValueAction,
+  setOpenedGroupIdListAction,
+  setSceneOrderAction,
+  setSelectedGroupIdAction,
+} from '@/reducers/contentWizard/mainDocument';
+import { getRandomId } from '@/utils/content';
+import classNames from 'classnames/bind';
 import _ from 'lodash';
 import { useMemo } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { ReactSortable } from 'react-sortablejs';
-import { makeNewRoot } from '../flowChart/utils';
-
-import classNames from 'classnames/bind';
+import { getOperationsForGroup, makeNewRoot } from '../flowChart/utils';
 import styles from './flowTabs.module.scss';
 const cx = classNames.bind(styles);
 
 function FlowTabs() {
   const dispatch = useDispatch();
 
-  const { sceneOrder, flowScene, flowItems, flowItemsPos } = useSelector(
+  const { selectedGroupId, openedGroupIdList, sceneOrder, flowScene, flowItems, group, flowItemsPos } = useSelector(
     (state: RootState) => ({
+      selectedGroupId: state.selectedGroupId,
+      openedGroupIdList: state.openedGroupIdList,
       sceneOrder: state.sceneOrder,
       flowScene: state.contentDocument.scene,
       flowItems: state.contentDocument.items,
-      flowItemsPos: getItemPos(state.contentDocument.itemsPos, state.selectedGroupId, state.contentDocument.group),
+      group: state.contentDocument.group,
+      flowItemsPos: state.contentDocument.itemsPos,
     }),
     shallowEqual
   );
@@ -32,6 +40,10 @@ function FlowTabs() {
         .sort((a, b) => a.order - b.order),
     [flowScene]
   );
+
+  const groupList = useMemo(() => {
+    return openedGroupIdList.map((id, _i) => ({ id, name: flowItems[id].name, order: _i }));
+  }, [flowItems, group, openedGroupIdList]);
 
   const selectScene = (_sceneOrder: number) => {
     dispatch(setSceneOrderAction(_sceneOrder));
@@ -76,7 +88,7 @@ function FlowTabs() {
       },
     ];
 
-    dispatch(setDocumentValueAction(operations));
+    dispatch(setDocumentValueAction(getOperationsForGroup(operations, selectedGroupId)));
 
     dispatch(setSceneOrderAction(newSceneOrder));
   };
@@ -127,7 +139,7 @@ function FlowTabs() {
     // 순서를 먼저 변경하고 삭제과정 처리 진행
     dispatch(setSceneOrderAction(Math.max(1, sceneOrder - 1)));
 
-    dispatch(setDocumentValueAction(operations));
+    dispatch(setDocumentValueAction(getOperationsForGroup(operations, selectedGroupId)));
   };
 
   const setList = (
@@ -160,16 +172,69 @@ function FlowTabs() {
     dispatch(setSceneOrderAction(changedTabOrder + 1));
   };
 
+  const setGroupList = (
+    _list: {
+      id: string;
+      name: string;
+      chosen?: boolean;
+    }[]
+  ) => {
+    const _ids = _list.map((_item) => _item.id);
+    let isChanged = !_.isEqual(openedGroupIdList, _ids);
+
+    if (!isChanged) {
+      return;
+    }
+
+    const changedTabOrder = _.findIndex(_list, (_item) => _.isBoolean(_item.chosen));
+
+    dispatch(setOpenedGroupIdListAction(_ids));
+
+    dispatch(setSelectedGroupIdAction(_list[changedTabOrder].id));
+  };
+
+  const closeGroup = (_groupId) => {
+    dispatch(setSelectedGroupIdAction(''));
+
+    dispatch(setOpenedGroupIdListAction(openedGroupIdList.filter((_id) => _id !== _groupId)));
+  };
+
   return (
     <div className={cx('flow-tabs-wrap')}>
       <div className={cx('flow-tabs')}>
         <div className={cx('scene-list')}>
+          <ReactSortable list={groupList} setList={setGroupList}>
+            {groupList.map((_group) => (
+              <div
+                className={cx('tab', { active: _group.id === selectedGroupId })}
+                key={_group.id}
+                onClick={() => {
+                  dispatch(setSelectedGroupIdAction(_group.id));
+                }}
+              >
+                {_group.name}
+                <button
+                  onClick={(_event) => {
+                    _event.stopPropagation();
+
+                    closeGroup(_group.id);
+                  }}
+                >
+                  <i className="material-symbols-outlined">close</i>
+                </button>
+              </div>
+            ))}
+          </ReactSortable>
           <ReactSortable list={sceneList} setList={setList}>
             {sceneList.map((_scene, _i) => (
               <div
                 key={_scene.id}
-                className={cx('tab', { active: _i + 1 === sceneOrder })}
-                onClick={() => selectScene(_i + 1)}
+                className={cx('tab', { active: !selectedGroupId && _i + 1 === sceneOrder })}
+                onClick={() => {
+                  dispatch(setSelectedGroupIdAction(''));
+
+                  selectScene(_i + 1);
+                }}
               >
                 {_scene.name}
                 {_i !== 0 && (

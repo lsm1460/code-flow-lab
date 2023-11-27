@@ -1,4 +1,5 @@
 import {
+  REQUEST_CHANGE_ROOT,
   REQUEST_COPY,
   REQUEST_CUT,
   REQUEST_EDIT_GROUP,
@@ -23,7 +24,7 @@ import {
   setOpenedGroupIdListAction,
   setSelectedGroupIdAction,
 } from '@/reducers/contentWizard/mainDocument';
-import { getChartItem, getItemPos, getRandomId, getSceneId } from '@/utils/content';
+import { getChartItem, getRandomId, getSceneId } from '@/utils/content';
 import classNames from 'classnames/bind';
 import _ from 'lodash';
 import { MouseEventHandler, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -31,15 +32,7 @@ import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { ConnectPoints, MoveItems } from '..';
 import ChartItem from './chartItem';
 import styles from './flowChart.module.scss';
-import {
-  doPolygonsIntersect,
-  findGroupRootId,
-  getBlockType,
-  getCanvasLineColor,
-  getNewPos,
-  getRectPoints,
-  makeNewItem,
-} from './utils';
+import { doPolygonsIntersect, getBlockType, getCanvasLineColor, getNewPos, getRectPoints, makeNewItem } from './utils';
 const cx = classNames.bind(styles);
 
 type PathInfo = { pos: string; prev: string; prevList: string[] };
@@ -80,15 +73,16 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
     sceneItemIds,
     itemsPos,
   } = useSelector((state: RootState) => {
-    const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
+    const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder, state.selectedGroupId);
+
     return {
       selectedGroupId: state.selectedGroupId,
       openedGroupIdList: state.openedGroupIdList,
       selectedSceneId,
       deleteTargetIdList: state.deleteTargetIdList,
       chartItems: state.contentDocument.items,
-      itemsPos: getItemPos(state.contentDocument.itemsPos, state.selectedGroupId, state.contentDocument.group),
-      sceneItemIds: state.contentDocument.scene[selectedSceneId]?.itemIds || [],
+      itemsPos: state.contentDocument.itemsPos,
+      sceneItemIds: state.contentDocument.scene[selectedSceneId]?.itemIds,
       group: state.contentDocument.group,
     };
   }, shallowEqual);
@@ -152,7 +146,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
     const adjustedMovePosItems = _.mapValues(selectedChartItem, (_v, _kId) => ({
       ..._v,
       pos: {
-        ...itemsPos[_v.id][selectedGroupId || selectedSceneId],
+        ...itemsPos[_v.id][selectedSceneId],
         ...(selectedIdList.includes(_kId) && {
           left: multiSelectedItemList[_kId].x,
           top: multiSelectedItemList[_kId].y,
@@ -161,7 +155,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
     }));
 
     return Object.values(adjustedMovePosItems);
-  }, [selectedChartItem, scale, multiSelectedItemList, selectedItemId, itemsPos, selectedGroupId]);
+  }, [selectedChartItem, scale, multiSelectedItemList, selectedItemId, itemsPos]);
 
   useEffect(() => {
     const triggerResizeCanvas = _.debounce(() => {
@@ -299,7 +293,9 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
   useEffect(() => {
     // paste
     const handleRequestPaste = (e, { items, pos }) => {
-      const _items = selectedGroupId ? group[selectedGroupId].items : chartItems;
+      const _items = selectedGroupId
+        ? _.pickBy(chartItems, (_item, _itemId) => group[selectedGroupId].includes(_itemId))
+        : chartItems;
 
       const sceneItemSize = Object.keys(getChartItem(sceneItemIds, _items, selectedGroupId, group)).length;
 
@@ -352,11 +348,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
               _val = {
                 ..._op.value,
                 [newItemId]: {
-                  [selectedGroupId || selectedSceneId]: getNewPos(
-                    itemsPos,
-                    selectedGroupId || selectedSceneId,
-                    pos[_cur.id]
-                  ),
+                  [selectedSceneId]: getNewPos(itemsPos, selectedSceneId, pos[_cur.id]),
                 },
               };
             } else {
@@ -369,19 +361,15 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
         [
           {
             key: 'items',
-            value: {
-              ...(selectedGroupId ? group[selectedGroupId].items : chartItems),
-            },
+            value: chartItems,
           },
           {
             key: `itemsPos`,
-            value: {
-              ...itemsPos,
-            },
+            value: itemsPos,
           },
           {
-            key: `scene.${selectedSceneId}.itemIds`,
-            value: [...sceneItemIds],
+            key: selectedGroupId ? `group.${selectedGroupId}` : `scene.${selectedSceneId}.itemIds`,
+            value: selectedGroupId ? group[selectedGroupId] : sceneItemIds,
           },
         ]
       );
@@ -407,7 +395,9 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
 
       // make group block, move block to group section, remove block in items and item pos
       const zoomArea = document.getElementById(ZOOM_AREA_ELEMENT_ID);
-      const _items = selectedGroupId ? group[selectedGroupId].items : chartItems;
+      const _items = selectedGroupId
+        ? _.pickBy(chartItems, (_item, _itemId) => group[selectedGroupId].includes(_itemId))
+        : chartItems;
 
       const [newFlowItem, pos, newItemId] = makeNewItem(
         zoomArea,
@@ -415,18 +405,16 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
         selectedChartItem,
         itemsPos,
         ChartItemType.group,
-        selectedGroupId || selectedSceneId
+        selectedSceneId
       );
 
       let hasElementFlag = false;
-
-      const rootId = findGroupRootId(chartItems, group, selectedGroupId);
 
       for (let _id of selectedId) {
         // body는 포함될 수 없음
         if (_items[_id].elType === ChartItemType.body) {
           return;
-        } else if (rootId === _id) {
+        } else if ((chartItems[selectedGroupId] as ChartGroupItem)?.rootId === _id) {
           return;
         } else if (CHART_ELEMENT_ITEMS.includes(_items[_id].elType) && !hasElementFlag) {
           hasElementFlag = true;
@@ -455,69 +443,48 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
         }
       }, []);
 
+      console.log(itemsPos[_rootCandidate[0]]);
+
       // group을 만들 때, 하위 그룹도 지원하기 위해서는 그룹 변경 명령을 먼저 보내야 함!!
       const operations: Operation[] = [
         {
           key: `group`,
           value: {
             ...group,
-            [newItemId]: {
-              items: _.mapValues(
-                _.pickBy(_items, (_item, _itemId) => selectedId.includes(_itemId)),
-                (_item) => ({
-                  ..._item,
-                  connectionIds: _.mapValues(_item.connectionIds, (_pointlist, _dir) =>
-                    _pointlist.filter((_point) => selectedId.includes(_point.connectParentId))
-                  ),
-                  ...(_item.connectionVariables && {
-                    connectionVariables: _item.connectionVariables.filter((_point) =>
-                      selectedId.includes(_point.connectParentId)
-                    ),
-                  }),
-                })
-              ),
-              itemsPos: _.mapValues(
-                _.pickBy(itemsPos, (_pos, _itemId) => selectedId.includes(_itemId)),
-                (_poses) =>
-                  _.mapKeys(_poses, (_pos, _sceneId) => {
-                    if (_sceneId === selectedSceneId || _sceneId === selectedGroupId) {
-                      return newItemId;
-                    }
-
-                    return _sceneId;
-                  })
-              ),
-            },
+            [newItemId]: selectedId,
           },
         },
         {
           key: 'items',
           value: {
-            ..._.mapValues(
-              _.pickBy(_items, (_item, _itemId) => !selectedId.includes(_itemId)),
-              (_item) => ({
-                ..._item,
-                connectionIds: _.mapValues(_item.connectionIds, (_pointlist, _dir) =>
-                  _pointlist
-                    .map((_point) => {
-                      if (_rootCandidate[0] && _rootCandidate[0] === _point.connectParentId) {
-                        return {
-                          ..._point,
-                          connectParentId: newItemId,
-                        };
-                      }
+            ..._.mapValues(_items, (_item, _itemId) => {
+              if (!selectedId.includes(_itemId)) {
+                return {
+                  ..._item,
+                  connectionIds: _.mapValues(_item.connectionIds, (_pointlist, _dir) =>
+                    _pointlist
+                      .map((_point) => {
+                        if (_rootCandidate[0] && _rootCandidate[0] === _point.connectParentId) {
+                          return {
+                            ..._point,
+                            connectParentId: newItemId,
+                          };
+                        }
 
-                      return _point;
-                    })
-                    .filter((_point) => !selectedId.includes(_point.connectParentId))
-                ),
-                ...(_item.connectionVariables && {
-                  connectionVariables: _item.connectionVariables.filter(
-                    (_point) => !selectedId.includes(_point.connectParentId)
+                        return _point;
+                      })
+                      .filter((_point) => !selectedId.includes(_point.connectParentId))
                   ),
-                }),
-              })
-            ),
+                  ...(_item.connectionVariables && {
+                    connectionVariables: _item.connectionVariables.filter(
+                      (_point) => !selectedId.includes(_point.connectParentId)
+                    ),
+                  }),
+                };
+              }
+
+              return _item;
+            }),
             [newItemId]: {
               ...newFlowItem,
               rootId: _rootCandidate[0],
@@ -535,39 +502,20 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
         {
           key: `itemsPos`,
           value: {
-            ..._.pickBy(itemsPos, (_pos, _itemId) => !selectedId.includes(_itemId)),
+            ..._.mapValues(itemsPos, (_itemPos, _itemId) => ({ ..._itemPos, [newItemId]: _itemPos[selectedSceneId] })),
             [newItemId]: _rootCandidate[0] ? itemsPos[_rootCandidate[0]] : pos,
           },
         },
-      ];
-
-      _.mapValues(
-        _.pickBy(itemsPos, (_pos, _itemId) => selectedId.includes(_itemId)),
-        (_poses) =>
-          _.mapKeys(_poses, (_pos, _sceneId) => {
-            if (_sceneId === selectedSceneId) {
-              return newItemId;
-            }
-
-            return _sceneId;
-          })
-      );
-
-      if (!selectedGroupId) {
-        operations.push({
+        {
           key: `scene.${selectedSceneId}.itemIds`,
           value: [...sceneItemIds.filter((_itemId) => !selectedId.includes(_itemId)), newItemId],
-        });
-      }
+        },
+      ];
 
       dispatch(setDocumentValueAction(operations));
     };
 
     const handleRequestUngroup = (_e, _groupId) => {
-      const _items = selectedGroupId ? group[selectedGroupId].items : chartItems;
-
-      const { rootId } = _items[_groupId] as ChartGroupItem;
-
       const operations: Operation[] = [
         {
           key: `group`,
@@ -577,55 +525,17 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
         },
         {
           key: 'items',
-          value: {
-            ..._.mapValues(
-              _.pickBy(_items, (_item, _itemId) => _itemId !== _groupId),
-              (_item) => ({
-                ..._item,
-                connectionIds: _.mapValues(_item.connectionIds, (_pointList, _dir) =>
-                  _pointList.map((_point) => ({
-                    ..._point,
-                    connectParentId: _point.connectParentId === _groupId && rootId ? rootId : _point.connectParentId,
-                  }))
-                ),
-              })
-            ),
-            ..._.mapValues(group[_groupId].items, (_item, _itemId) => ({
-              ..._item,
-              connectionIds: _.mapValues(_item.connectionIds, (_pointList, _dir) => [
-                ..._pointList,
-                ...(rootId &&
-                  (_items[_groupId].connectionIds?.[_dir] || []).map((_point) => ({
-                    ..._point,
-                    parentId: rootId,
-                  }))),
-              ]),
-            })),
-          },
+          value: _.pickBy(chartItems, (_item, _itemId) => _itemId !== _groupId),
         },
         {
           key: `itemsPos`,
-          value: {
-            ..._.pickBy(itemsPos, (_pos, _itemId) => _itemId !== _groupId),
-            ..._.mapValues(group[_groupId].itemsPos, (_poses) =>
-              _.mapKeys(_poses, (_pos, _sceneId) => {
-                if (_sceneId === _groupId) {
-                  return selectedGroupId || selectedSceneId;
-                }
-
-                return _sceneId;
-              })
-            ),
-          },
+          value: _.mapValues(itemsPos, (_itemPos) => _.pickBy(_itemPos, (_pos, _sceneId) => _sceneId !== _groupId)),
+        },
+        {
+          key: `scene.${selectedSceneId}.itemIds`,
+          value: [...sceneItemIds.filter((_id) => _groupId !== _id), ...group[_groupId]],
         },
       ];
-
-      if (!selectedGroupId) {
-        operations.push({
-          key: `scene.${selectedSceneId}.itemIds`,
-          value: [...sceneItemIds.filter((_id) => _groupId !== _id), ...Object.keys(group[_groupId].items)],
-        });
-      }
 
       dispatch(setDocumentValueAction(operations));
     };
@@ -652,6 +562,23 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
       ipcRenderer.removeAllListeners(REQUEST_EDIT_GROUP);
     };
   }, [openedGroupIdList]);
+
+  useEffect(() => {
+    const handleRequestChangeRoot = (_e, { groupId, itemId }) => {
+      dispatch(
+        setDocumentValueAction({
+          key: `items.${groupId}.rootId`,
+          value: itemId,
+        })
+      );
+    };
+
+    ipcRenderer.on(REQUEST_CHANGE_ROOT, handleRequestChangeRoot);
+
+    return () => {
+      ipcRenderer.removeAllListeners(REQUEST_CHANGE_ROOT);
+    };
+  }, [chartItems, group, selectedGroupId]);
 
   useEffect(() => {
     if (selectedItemId.current) {
@@ -1041,8 +968,8 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
     const _ids = _.mapKeys(_itemIdList, (_id) => _id);
 
     return _.mapValues(_ids, (__, _itemId) => ({
-      x: itemsPos[_itemId][selectedGroupId || selectedSceneId].left,
-      y: itemsPos[_itemId][selectedGroupId || selectedSceneId].top,
+      x: itemsPos[_itemId][selectedSceneId].left,
+      y: itemsPos[_itemId][selectedSceneId].top,
     }));
   };
 

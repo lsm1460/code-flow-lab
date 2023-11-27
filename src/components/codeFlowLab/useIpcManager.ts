@@ -12,7 +12,7 @@ import {
   REQUEST_MINIMIZE,
   REQUEST_MAXIMIZE,
   CLOSE_WINDOW,
-  REQUEST_ZOOM_AREA_CONTEXT,
+  REQUEST_CONTEXT,
 } from '@/consts/channel.js';
 import { RootState } from '@/reducers';
 import {
@@ -74,8 +74,8 @@ const useIpcManager = (_ableReceive: boolean = true) => {
     ipcRenderer.send(CLOSE_WINDOW);
   };
 
-  const sendZoomAreaContextOpen = (_groupId?: string) => {
-    ipcRenderer.send(REQUEST_ZOOM_AREA_CONTEXT, _groupId);
+  const sendContextOpen = (_payload?: { itemId: string; groupId: string; isGroup: boolean; isRoot: boolean }) => {
+    ipcRenderer.send(REQUEST_CONTEXT, _payload);
   };
 
   return {
@@ -85,7 +85,7 @@ const useIpcManager = (_ableReceive: boolean = true) => {
     sendMinimizeRequest,
     sendMaximizeRequest,
     sendCloseRequest,
-    sendZoomAreaContextOpen,
+    sendContextOpen,
   };
 };
 

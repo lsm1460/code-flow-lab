@@ -48,9 +48,18 @@ type makeDocumentParams = {
   document: any;
   keys: string[];
   value: any;
+  debug: string;
+  count?: number;
 };
 type makeNewDocument = (makeDocumentParams: makeDocumentParams) => CodeFlowChartDoc;
-export const makeNewDocument: makeNewDocument = ({ document: _document, keys: _keys, value: _value }) => {
+export const makeNewDocument: makeNewDocument = ({
+  document: _document,
+  keys: _keys,
+  value: _value,
+  debug = '',
+  count = 0,
+}) => {
+  let isFind = false;
   let mapFunction = null;
 
   if (_.isArray(_document)) {
@@ -65,15 +74,20 @@ export const makeNewDocument: makeNewDocument = ({ document: _document, keys: _k
   }
 
   return mapFunction(_document, (prop, propKey) => {
-    if (_keys.length > 1 && `${propKey}` === `${_keys[0]}`) {
+    if (!isFind && _keys.length > 1 && `${propKey}` === `${_keys[0]}`) {
+      isFind = true;
       _keys.shift();
 
       return makeNewDocument({
         document: prop,
         keys: _keys,
         value: _value,
+        debug: debug + `.${propKey}`,
+        count: count + 1,
       });
-    } else if (_keys.length === 1 && `${propKey}` === `${_keys[0]}`) {
+    } else if (!isFind && _keys.length === 1 && `${propKey}` === `${_keys[0]}`) {
+      isFind = true;
+
       return _value;
     }
 
@@ -85,8 +99,13 @@ export const getDocumentValue = ({ document: _document, keys: _keys }) => {
   return _keys.reduce((acc, val) => (acc ? acc[val] : ''), _document);
 };
 
-export const getSceneId = (_flowScene: CodeFlowChartDoc['scene'], _sceneOrder: number) =>
-  Object.keys(_flowScene).filter((_sceneKey) => _flowScene[_sceneKey].order === _sceneOrder)?.[0] || '';
+export const getSceneId = (_flowScene: CodeFlowChartDoc['scene'], _sceneOrder: number, _selectedGroupId?: string) => {
+  if (_selectedGroupId) {
+    return _selectedGroupId;
+  }
+
+  return Object.keys(_flowScene).filter((_sceneKey) => _flowScene[_sceneKey].order === _sceneOrder)?.[0] || '';
+};
 
 export const getChartItem = (
   sceneItemIdList: string[],
@@ -95,22 +114,10 @@ export const getChartItem = (
   _group: CodeFlowChartDoc['group']
 ) => {
   if (_selectedGroupId) {
-    return _group[_selectedGroupId].items;
+    sceneItemIdList = _group[_selectedGroupId];
   }
 
   return _.pickBy(chartItem, (_item) => (sceneItemIdList || []).includes(_item.id));
-};
-
-export const getItemPos = (
-  _itemPos: CodeFlowChartDoc['itemsPos'],
-  _selectedGroupId: string,
-  _group: CodeFlowChartDoc['group']
-) => {
-  if (_selectedGroupId) {
-    return _group[_selectedGroupId].itemsPos;
-  }
-
-  return _itemPos;
 };
 
 export const useDebounceSubmitText = (_dispatchKey, isNumber = false) => {

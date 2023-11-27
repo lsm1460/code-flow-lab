@@ -141,4 +141,13 @@
       }
     }
   }
+
+  .root-item {
+    position: absolute;
+    top: -3px;
+    left: 3px;
+    transform: translateY(-100%);
+    width: 15px;
+    pointer-events: none;
+  }
 }

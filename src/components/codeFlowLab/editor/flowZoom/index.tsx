@@ -1,6 +1,6 @@
 import { FLOW_CHART_ITEMS_STYLE, SCROLL_CLASS_PREFIX, ZOOM_AREA_ELEMENT_ID } from '@/consts/codeFlowLab/items';
 import { RootState } from '@/reducers';
-import { getChartItem, getItemPos, getSceneId } from '@/utils/content';
+import { getChartItem, getSceneId } from '@/utils/content';
 import classNames from 'classnames/bind';
 import React, { MouseEventHandler, ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import { shallowEqual, useSelector } from 'react-redux';
@@ -18,7 +18,7 @@ function FlowZoom({ children }: Props) {
   const isHorizonMove = useRef<boolean>(false);
   const isVerticalMove = useRef<boolean>(false);
 
-  const { sendZoomAreaContextOpen } = useIpcManager(false);
+  const { sendContextOpen } = useIpcManager(false);
 
   const [originSize, setOriginSize] = useState([0, 0]);
   const [scale, setScale] = useState(1);
@@ -29,11 +29,11 @@ function FlowZoom({ children }: Props) {
 
   const { chartItems, itemsPos, sceneItemIds, selectedSceneId, selectedGroupId, group } = useSelector(
     (state: RootState) => {
-      const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder);
+      const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder, state.selectedGroupId);
 
       return {
         chartItems: state.contentDocument.items,
-        itemsPos: getItemPos(state.contentDocument.itemsPos, state.selectedGroupId, state.contentDocument.group),
+        itemsPos: state.contentDocument.itemsPos,
         selectedSceneId,
         sceneItemIds: state.contentDocument.scene[selectedSceneId]?.itemIds || [],
         selectedGroupId: state.selectedGroupId,
@@ -62,6 +62,8 @@ function FlowZoom({ children }: Props) {
     }
   }, [zoomRef]);
 
+  console.log('itemsPos', itemsPos);
+
   const scrollArea = useMemo(() => {
     const [width, height] = originSize;
 
@@ -73,16 +75,13 @@ function FlowZoom({ children }: Props) {
 
     for (let _id in selectedChartItem) {
       const _item = selectedChartItem[_id];
-
       const _maxX = Math.max(
-        Math.abs(itemsPos[_item.id][selectedGroupId || selectedSceneId].left - xCenter),
-        FLOW_CHART_ITEMS_STYLE[_item.elType].width +
-          itemsPos[_item.id][selectedGroupId || selectedSceneId].left -
-          xCenter
+        Math.abs(itemsPos[_item.id][selectedSceneId].left - xCenter),
+        FLOW_CHART_ITEMS_STYLE[_item.elType].width + itemsPos[_item.id][selectedSceneId].left - xCenter
       );
       const _maxY = Math.max(
-        Math.abs(itemsPos[_item.id][selectedGroupId || selectedSceneId].top - yCenter),
-        500 + itemsPos[_item.id][selectedGroupId || selectedSceneId].top - yCenter
+        Math.abs(itemsPos[_item.id][selectedSceneId].top - yCenter),
+        500 + itemsPos[_item.id][selectedSceneId].top - yCenter
       );
 
       maxX = maxX > _maxX ? maxX : _maxX;
@@ -93,7 +92,7 @@ function FlowZoom({ children }: Props) {
     const scrollY = Math.max(maxY * 2 - height / scale, 0);
 
     return [scrollX + SCROLL_AREA_PADDING, scrollY + SCROLL_AREA_PADDING];
-  }, [originSize, selectedChartItem, scale, itemsPos, selectedGroupId]);
+  }, [originSize, selectedChartItem, scale, itemsPos]);
 
   const scrollBarX = useMemo(() => {
     const fullSize = scrollArea[0] + originSize[0];
@@ -220,7 +219,7 @@ function FlowZoom({ children }: Props) {
   };
 
   const handleContextMenu = () => {
-    sendZoomAreaContextOpen();
+    sendContextOpen();
   };
 
   return (
