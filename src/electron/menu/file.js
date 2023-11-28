@@ -21,7 +21,11 @@ const checkSaved = (_mainWindow) =>
       resolve(_isSaved);
     });
 
-    _mainWindow.webContents.send(REQUEST_SAVE_STATE, null);
+    if (_mainWindow?.webContents) {
+      _mainWindow.webContents.send(REQUEST_SAVE_STATE, null);
+    } else {
+      resolve(true);
+    }
   });
 
 const removeProjectFile = () => {

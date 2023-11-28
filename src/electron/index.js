@@ -59,8 +59,12 @@ function createWindow() {
 
     checkSaved(mainWindow).then(async (_isSaved) => {
       if (_isSaved) {
-        mainWindow.hide();
-        mainWindow = null;
+        if (mainWindow) {
+          mainWindow.hide();
+          mainWindow = null;
+        } else {
+          app.exit();
+        }
       } else {
         const options = {
           type: 'question',
