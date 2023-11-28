@@ -30,6 +30,11 @@ const removeProjectFile = () => {
   }
 
   fs.rmSync(`${global.projectPath.path}/.${global.projectPath.fileName}`, { recursive: true, force: true });
+
+  global.projectPath = {
+    path: '',
+    fileName: '',
+  };
 };
 
 const createProject = async (_mainWindow) => {
@@ -170,16 +175,6 @@ const openProject = async (_mainWindow, _filePath) => {
           })
           .value(),
       },
-      group: _.mapValues(_document.group, (_group) => ({
-        ..._group,
-        items: _.mapValues(_group.items, (_item) => {
-          if (_item.elType === 'image' && _item.src) {
-            return { ..._item, src: `${_path}/images/${_imgName}` };
-          }
-
-          return _item;
-        }),
-      })),
     };
 
     global.projectPath = { path: _pathArray.join('/'), fileName: _fileName };
@@ -198,21 +193,11 @@ const saveProject = (_mainWindow) => {
       _mainWindow.webContents.send(REQUEST_PROJECT, null);
 
       ipcMain.once(SAVE_FILE, async (event, _contents) => {
-        // TODO: 이미지까지 묶은 후 저장!
-
         const zip = new JSZip();
         zip.file('data.json', JSON.stringify(_contents));
 
         const imageFolder = zip.folder('images');
         const _imgItemList = Object.values(_contents.items).filter((_item) => _item.elType === 'image' && _item.src);
-
-        Object.values(_contents.group).forEach((_group) =>
-          Object.values(_group.items).forEach((_item) => {
-            if (_item.elType === 'image' && _item.src) {
-              _imgItemList.push(_item);
-            }
-          })
-        );
 
         for (let _item of _imgItemList) {
           const _imgFileName = path.basename(_item.src);

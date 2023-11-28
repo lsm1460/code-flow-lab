@@ -2,11 +2,15 @@ import FlowChartViewer from '../../viewer';
 import classNames from 'classnames/bind';
 import styles from './viewerWrapper.module.scss';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/reducers';
 const cx = classNames.bind(styles);
 
 function ViewerWrapper() {
   const [isMinimize, setIsMinimize] = useState(true);
   const [isActive, setIsActive] = useState(true);
+
+  const selectedGroupId = useSelector((state: RootState) => state.selectedGroupId);
 
   return (
     <div className={cx('viewer-wrapper', { minimize: isMinimize, active: isActive })}>
@@ -29,11 +33,13 @@ function ViewerWrapper() {
             {!isActive ? 'light_off' : 'lightbulb'}
           </button>
         </li>
-        <li>
-          <button className="material-symbols-outlined" title="재생">
-            play_arrow
-          </button>
-        </li>
+        {!selectedGroupId && (
+          <li>
+            <button className="material-symbols-outlined" title="재생">
+              play_arrow
+            </button>
+          </li>
+        )}
       </ul>
       <div>
         <div>

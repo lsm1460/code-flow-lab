@@ -1,0 +1,11 @@
+@import '../../../../mixin';
+
+.group-panel-wrap {
+  padding: 15px;
+  height: 100%;
+  @include scroll-bar;
+
+  li + li {
+    margin-top: 15px;
+  }
+}

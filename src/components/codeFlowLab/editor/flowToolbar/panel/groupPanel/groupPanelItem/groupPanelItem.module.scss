@@ -1,0 +1,74 @@
+@import '../../../../../mixin';
+
+.panel-item {
+  @include flow-item-mixin;
+  cursor: pointer;
+
+  .panel-title {
+    text-transform: capitalize;
+    height: 30px;
+
+    @include flow-item-header;
+
+    span {
+      color: #ffffff;
+    }
+  }
+
+  .panel-desc {
+    padding: 5px;
+    background-color: #252525;
+
+    .scene-list-title {
+      margin-top: 15px;
+      color: #c1c1c1;
+      font-size: 15px;
+      font-family: sans-serif;
+      text-transform: capitalize;
+      padding: 0 3px 3px;
+      margin-bottom: 5px;
+      border-bottom: 1px solid #3d3d3d;
+    }
+
+    .scene-list {
+      padding-left: 25px;
+
+      li {
+        list-style: circle;
+        font-size: 13px;
+        color: #c1c1c1;
+        font-family: sans-serif;
+        text-transform: capitalize;
+      }
+    }
+  }
+
+  .btn-list {
+    padding: 10px;
+
+    li {
+      & + li {
+        margin-top: 10px;
+      }
+
+      button {
+        display: block;
+        width: 100%;
+        padding: 5px 3px;
+        cursor: pointer;
+        color: #c1c1c1;
+        border: none;
+        border-radius: 3px;
+        background-color: #252525;
+
+        &:hover {
+          background-color: #424242;
+        }
+
+        &:active {
+          background-color: #282828;
+        }
+      }
+    }
+  }
+}

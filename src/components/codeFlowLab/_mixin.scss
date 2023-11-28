@@ -51,6 +51,10 @@
     background-color: $element-point-color;
   }
 
+  &.group::before {
+    background-color: $group-point-color;
+  }
+
   &.span::before {
     background-color: $span-point-color;
   }

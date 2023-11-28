@@ -117,8 +117,6 @@ function PanelItem({ itemType }: Props) {
       });
     }
 
-    console.log('operations', operations);
-
     dispatch(setDocumentValueAction(operations));
   };
 

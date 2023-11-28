@@ -416,7 +416,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
           return;
         } else if ((chartItems[selectedGroupId] as ChartGroupItem)?.rootId === _id) {
           return;
-        } else if (CHART_ELEMENT_ITEMS.includes(_items[_id].elType) && !hasElementFlag) {
+        } else if (CHART_ELEMENT_ITEMS.includes(chartItems[_id].elType) && !hasElementFlag) {
           hasElementFlag = true;
         }
       }
@@ -426,7 +426,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
       }
 
       const _rootCandidate = selectedId.reduce((_acc, _cur) => {
-        if (!CHART_ELEMENT_ITEMS.includes(_items[_cur].elType)) {
+        if (!CHART_ELEMENT_ITEMS.includes(chartItems[_cur].elType)) {
           return _acc;
         }
 
@@ -443,21 +443,25 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
         }
       }, []);
 
-      console.log(itemsPos[_rootCandidate[0]]);
-
       // group을 만들 때, 하위 그룹도 지원하기 위해서는 그룹 변경 명령을 먼저 보내야 함!!
       const operations: Operation[] = [
         {
           key: `group`,
           value: {
-            ...group,
+            ..._.mapValues(group, (_itemIdList, _groupId) => {
+              if (_groupId === selectedGroupId) {
+                return [newItemId, ..._itemIdList].filter((_itemId) => !selectedId.includes(_itemId));
+              }
+
+              return _itemIdList;
+            }),
             [newItemId]: selectedId,
           },
         },
         {
           key: 'items',
           value: {
-            ..._.mapValues(_items, (_item, _itemId) => {
+            ..._.mapValues(chartItems, (_item, _itemId) => {
               if (!selectedId.includes(_itemId)) {
                 return {
                   ..._item,
@@ -481,9 +485,19 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
                     ),
                   }),
                 };
+              } else {
+                return {
+                  ..._item,
+                  connectionIds: _.mapValues(_item.connectionIds, (_connectPoint, _dir) =>
+                    _connectPoint.filter((_point) => selectedId.includes(_point.connectParentId))
+                  ),
+                  ...(_item.connectionVariables && {
+                    connectionVariables: _item.connectionVariables.filter((_point) =>
+                      selectedId.includes(_point.connectParentId)
+                    ),
+                  }),
+                };
               }
-
-              return _item;
             }),
             [newItemId]: {
               ...newFlowItem,
@@ -506,37 +520,88 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
             [newItemId]: _rootCandidate[0] ? itemsPos[_rootCandidate[0]] : pos,
           },
         },
-        {
+      ];
+
+      if (!selectedGroupId) {
+        operations.push({
           key: `scene.${selectedSceneId}.itemIds`,
           value: [...sceneItemIds.filter((_itemId) => !selectedId.includes(_itemId)), newItemId],
-        },
-      ];
+        });
+      }
 
       dispatch(setDocumentValueAction(operations));
     };
 
     const handleRequestUngroup = (_e, _groupId) => {
+      const groupedItemIdList = group[_groupId];
+      const { rootId, connectionIds } = chartItems[_groupId] as ChartGroupItem;
+      const connectedIdList = Object.values(connectionIds).reduce(
+        (_acc, _cur) => [..._acc, ..._cur.map((_point) => _point.connectParentId)],
+        []
+      );
+
       const operations: Operation[] = [
         {
           key: `group`,
-          value: {
-            ..._.pickBy(group, (_var, __id) => _groupId !== __id),
-          },
+          value: _.mapValues(
+            _.pickBy(group, (_var, __id) => _groupId !== __id),
+            (_itemIdList, __groupId) => {
+              if (__groupId === selectedGroupId) {
+                return [..._itemIdList, ...groupedItemIdList].filter((_id) => _id !== _groupId);
+              }
+
+              return _itemIdList;
+            }
+          ),
         },
         {
           key: 'items',
-          value: _.pickBy(chartItems, (_item, _itemId) => _itemId !== _groupId),
+          value: _.mapValues(
+            _.pickBy(chartItems, (_item, _itemId) => _itemId !== _groupId),
+            (_item, _itemId) => {
+              if (connectedIdList.includes(_itemId)) {
+                return {
+                  ..._item,
+                  connectionIds: _.mapValues(_item.connectionIds, (_connectPoints, _dir) =>
+                    _connectPoints.map((_point) => {
+                      if (_point.connectParentId === _groupId) {
+                        return {
+                          ..._point,
+                          connectParentId: rootId,
+                        };
+                      } else {
+                        return _point;
+                      }
+                    })
+                  ),
+                };
+              } else if (_itemId === rootId) {
+                return {
+                  ..._item,
+                  connectionIds: _.mapValues(_item.connectionIds, (_connectPoints, _dir) => {
+                    return _.uniqBy([..._connectPoints, ...(connectionIds[_dir] || [])], 'connectParentId');
+                  }),
+                };
+              }
+
+              return _item;
+            }
+          ),
         },
         {
           key: `itemsPos`,
           value: _.mapValues(itemsPos, (_itemPos) => _.pickBy(_itemPos, (_pos, _sceneId) => _sceneId !== _groupId)),
         },
-        {
-          key: `scene.${selectedSceneId}.itemIds`,
-          value: [...sceneItemIds.filter((_id) => _groupId !== _id), ...group[_groupId]],
-        },
       ];
 
+      if (!selectedGroupId) {
+        operations.push({
+          key: `scene.${selectedSceneId}.itemIds`,
+          value: [...sceneItemIds.filter((_id) => _groupId !== _id), ...group[_groupId]],
+        });
+      }
+
+      dispatch(setOpenedGroupIdListAction(openedGroupIdList.filter((_id) => _groupId !== _id)));
       dispatch(setDocumentValueAction(operations));
     };
 
@@ -627,9 +692,15 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
     if (_event?.code === 'Delete' || _targetIdList) {
       _targetIdList = _targetIdList || Object.keys(multiSelectedItemList);
 
-      const deleteTargetIdList = _targetIdList.filter(
-        (_itemId) => selectedChartItem[_itemId].elType !== ChartItemType.body
-      );
+      const deleteTargetIdList = _targetIdList.filter((_itemId) => {
+        if (selectedChartItem[_itemId].elType === ChartItemType.body) {
+          return false;
+        } else if (selectedGroupId && (chartItems[selectedGroupId] as ChartGroupItem).rootId === _itemId) {
+          return false;
+        }
+
+        return true;
+      });
 
       if (deleteTargetIdList.length < 1) {
         return;

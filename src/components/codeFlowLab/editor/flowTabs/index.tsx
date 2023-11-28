@@ -211,6 +211,12 @@ function FlowTabs() {
                 onClick={() => {
                   dispatch(setSelectedGroupIdAction(_group.id));
                 }}
+                onMouseUp={(_event) => {
+                  _event.stopPropagation();
+                  if (_event.button === 1) {
+                    closeGroup(_group.id);
+                  }
+                }}
               >
                 {_group.name}
                 <button
@@ -234,6 +240,12 @@ function FlowTabs() {
                   dispatch(setSelectedGroupIdAction(''));
 
                   selectScene(_i + 1);
+                }}
+                onMouseUp={(_event) => {
+                  _event.stopPropagation();
+                  if (_i !== 0) {
+                    removeScene(_scene.id);
+                  }
                 }}
               >
                 {_scene.name}
