@@ -52,7 +52,6 @@ $label-height: 30px;
       @include scroll-bar;
 
       height: calc(100% - $label-height);
-      overflow: auto;
 
       & > li {
         visibility: visible;

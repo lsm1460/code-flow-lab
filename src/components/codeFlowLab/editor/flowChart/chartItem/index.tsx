@@ -84,7 +84,14 @@ function ChartItem({ chartItems, itemInfo, isSelected, handleItemMoveStart, hand
   const selectedName = useMemo(() => selectName(isTyping, itemInfo.name, itemName), [isTyping, itemInfo, itemName]);
   const connectPointList = useMemo(() => {
     return Object.keys(FLOW_CHART_ITEMS_STYLE[itemInfo.elType].connectionTypeList).map((_x, _i) => {
-      const typeGroup = _.groupBy(itemInfo.connectionIds[_x], (_point) => {
+      const pointList = (itemInfo.connectionIds[_x] || []).filter((_point) => {
+        if (selectedGroupId) {
+          return group[selectedGroupId].includes(_point.connectParentId);
+        }
+
+        return sceneItemIds.includes(_point.connectParentId);
+      });
+      const typeGroup = _.groupBy(pointList, (_point) => {
         // 일반적으로는 그룹 별로 묶지만, 변수의 경우 다양한 블록들과 그룹지어 연결하지 않기 때문에 분기처리 추가
         if (_point.connectType === ChartItemType.variable) {
           return ChartItemType.variable;

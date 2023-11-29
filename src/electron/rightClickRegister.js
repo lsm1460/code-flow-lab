@@ -4,21 +4,9 @@ const { REQUEST_CONTEXT } = require('../consts/channel');
 
 const registRightClick = (_mainWindow) => {
   const defaultMenu = [
-    {
-      label: 'Cut',
-      accelerator: 'CommandOrControl+X',
-      click: () => _edit.requestCut(_mainWindow),
-    },
-    {
-      label: 'Copy',
-      accelerator: 'CommandOrControl+C',
-      click: () => _edit.requestCopy(_mainWindow),
-    },
-    {
-      label: 'Paste',
-      accelerator: 'CommandOrControl+V',
-      click: () => _edit.requestPaste(_mainWindow),
-    },
+    { role: 'cut' },
+    { role: 'copy' },
+    { role: 'paste' },
     {
       label: 'Group',
       accelerator: 'Alt+CommandOrControl+I',

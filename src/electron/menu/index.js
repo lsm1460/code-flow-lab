@@ -70,21 +70,9 @@ const getMenuTemplate = (_mainWindow, _app) => {
         {
           type: 'separator',
         },
-        {
-          label: 'Cut',
-          accelerator: 'CommandOrControl+X',
-          click: () => _edit.requestCut(_mainWindow),
-        },
-        {
-          label: 'Copy',
-          accelerator: 'CommandOrControl+C',
-          click: () => _edit.requestCopy(_mainWindow),
-        },
-        {
-          label: 'Paste',
-          accelerator: 'CommandOrControl+V',
-          click: () => _edit.requestPaste(_mainWindow),
-        },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
       ],
     },
   ];

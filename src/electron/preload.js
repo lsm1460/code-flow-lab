@@ -6,4 +6,5 @@ contextBridge.exposeInMainWorld('electron', {
   ipcRenderer: { ...ipcRenderer, on: ipcRenderer.on, removeAllListeners: ipcRenderer.removeAllListeners },
   isMac,
   isWindows,
+  PRIVATE_KEY: process.env.PRIVATE_KEY,
 });

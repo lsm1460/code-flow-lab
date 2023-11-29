@@ -110,6 +110,9 @@
 }
 
 @mixin scroll-bar {
+  overflow-x: hidden;
+  overflow-y: auto;
+
   &::-webkit-scrollbar-track {
     background-color: transparent;
   }

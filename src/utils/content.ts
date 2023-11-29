@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import { useCallback, useState } from 'react';
 
+import { getNewPos } from '@/components/codeFlowLab/editor/flowChart/utils';
 import { CHART_VARIABLE_ITEMS, CUSTOM_TRIGGER_TYPE } from '@/consts/codeFlowLab/items';
 import {
   ChartArrayItem,
-  ChartGroupItem,
   ChartItem,
   ChartItemType,
   ChartItems,
@@ -16,7 +16,7 @@ import {
   TriggerProps,
   ViewerItem,
 } from '@/consts/types/codeFlowLab';
-import { setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
+import { Operation, setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
 import { nanoid } from 'nanoid';
 import { useDispatch } from 'react-redux';
 export * from './connect-point';
@@ -338,3 +338,151 @@ export const makeVariables = (
 
 export const getElementTrigger = (_triggerProps: TriggerProps) =>
   _.pickBy(_triggerProps, (_trigger, _key) => !CUSTOM_TRIGGER_TYPE.includes(_key));
+
+export const getGroupItemIdList = (_group: CodeFlowChartDoc['group'], _idList: string[]) => {
+  return _.flatten(
+    _idList.map((_id) => {
+      if (_group[_id]) {
+        return [_id, ...getGroupItemIdList(_group, _group[_id])];
+      } else {
+        return _id;
+      }
+    })
+  );
+};
+
+export const makePasteOperations = (
+  chartItems: CodeFlowChartDoc['items'],
+  itemsPos: CodeFlowChartDoc['itemsPos'],
+  group: CodeFlowChartDoc['group'],
+  items: CodeFlowChartDoc['items'],
+  pos: CodeFlowChartDoc['itemsPos'],
+  copiedGroup: CodeFlowChartDoc['group'],
+  selectedGroupId: string,
+  selectedSceneId: string,
+  sceneItemIds: string[]
+) => {
+  const _items = selectedGroupId
+    ? _.pickBy(chartItems, (_item, _itemId) => group[selectedGroupId].includes(_itemId))
+    : chartItems;
+
+  const sceneItemSize = Object.keys(getChartItem(sceneItemIds, _items, selectedGroupId, group)).length;
+
+  const copiedIdList = Object.keys(items);
+  const changedIds = _.mapValues(_.mapKeys(copiedIdList), () => getRandomId());
+
+  const operations = Object.values(items).reduce<Operation[]>(
+    (_acc, _cur: ChartItems, _index) => {
+      const newItemId = changedIds[_cur.id];
+
+      let _val;
+      let __groupId = '';
+
+      for (let _id in copiedGroup) {
+        if (copiedGroup[_id].includes(_cur.id)) {
+          __groupId = _id;
+          break;
+        }
+      }
+
+      return _acc.map((_op) => {
+        if (_op.key === 'items') {
+          let connectionIds = _.mapValues(_cur.connectionIds, (_pointList, _dir) =>
+            _pointList
+              .map(
+                (_point) =>
+                  changedIds[_point.connectParentId] && {
+                    ..._point,
+                    parentId: newItemId,
+                    connectParentId: changedIds[_point.connectParentId],
+                  }
+              )
+              .filter((_point) => _point)
+          );
+
+          _val = {
+            ..._op.value,
+            [newItemId]: {
+              ..._cur,
+              id: newItemId,
+              connectionIds,
+              zIndex: sceneItemSize + _index + 1,
+              ...(_cur.connectionVariables && {
+                connectionVariables: _cur.connectionVariables
+                  .map(
+                    (_point) =>
+                      changedIds[_point.connectParentId] && {
+                        ..._point,
+                        parentId: newItemId,
+                        connectParentId: changedIds[_point.connectParentId],
+                      }
+                  )
+                  .filter((_point) => _point),
+              }),
+              ...(_cur.elType === ChartItemType.group && {
+                rootId: changedIds[_cur.rootId],
+              }),
+            },
+          };
+        } else if (_op.key === 'itemsPos') {
+          if (__groupId) {
+            _val = {
+              ..._op.value,
+              [newItemId]: {
+                [changedIds[__groupId]]: getNewPos(itemsPos, selectedSceneId, pos[_cur.id][__groupId]),
+              },
+            };
+          } else {
+            _val = {
+              ..._op.value,
+              [newItemId]: {
+                [selectedSceneId]: getNewPos(
+                  itemsPos,
+                  selectedSceneId,
+                  Object.values(pos[_cur.id])[0] as { left: number; top: number }
+                ),
+              },
+            };
+          }
+        } else if (_op.key === 'group') {
+          if (changedIds[__groupId]) {
+            _val = {
+              ..._op.value,
+              [changedIds[__groupId]]: [...(_op.value[changedIds[__groupId]] || []), newItemId],
+            };
+          } else {
+            _val = _op.value;
+          }
+        } else {
+          if (__groupId) {
+            _val = _op.value;
+          } else {
+            _val = [..._op.value, newItemId];
+          }
+        }
+
+        return { ..._op, value: _val };
+      });
+    },
+    [
+      {
+        key: 'items',
+        value: chartItems,
+      },
+      {
+        key: `itemsPos`,
+        value: itemsPos,
+      },
+      {
+        key: 'group',
+        value: group,
+      },
+      {
+        key: selectedGroupId ? `group.${selectedGroupId}` : `scene.${selectedSceneId}.itemIds`,
+        value: selectedGroupId ? group[selectedGroupId] : sceneItemIds,
+      },
+    ]
+  );
+
+  return operations;
+};

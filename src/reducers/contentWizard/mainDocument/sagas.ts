@@ -10,7 +10,7 @@ import { Operation, SagaOperationParam } from './types';
 
 import { ConnectPoint } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
-import { getSceneId } from '@/utils/content';
+import { getGroupItemIdList, getSceneId } from '@/utils/content';
 import { addHistory } from '@/utils/history';
 import _ from 'lodash';
 
@@ -64,9 +64,11 @@ function* handleDeleteBlock({ payload }: { type: string; payload: string[] }) {
 
   const ops = [];
 
-  const filterPoint = (_point: ConnectPoint) => !payload.includes(_point.connectParentId);
+  const _idList = getGroupItemIdList(group, payload);
 
-  let newChartItems = _.pickBy(items, (_item) => !payload.includes(_item.id));
+  const filterPoint = (_point: ConnectPoint) => !_idList.includes(_point.connectParentId);
+
+  let newChartItems = _.pickBy(items, (_item) => !_idList.includes(_item.id));
   newChartItems = _.mapValues(newChartItems, (_item) => ({
     ..._item,
     connectionIds: {
@@ -76,7 +78,7 @@ function* handleDeleteBlock({ payload }: { type: string; payload: string[] }) {
     },
     ...(_item.connectionVariables && {
       connectionVariables: _item.connectionVariables.map((_point) =>
-        payload.includes(_point?.connectParentId) ? undefined : _point
+        _idList.includes(_point?.connectParentId) ? undefined : _point
       ),
     }),
   }));
@@ -87,20 +89,20 @@ function* handleDeleteBlock({ payload }: { type: string; payload: string[] }) {
   });
   ops.push({
     key: 'itemsPos',
-    value: _.pickBy(itemsPos, (_v, _itemId) => !payload.includes(_itemId)),
+    value: _.pickBy(itemsPos, (_v, _itemId) => !_idList.includes(_itemId)),
   });
   ops.push({
     key: `scene.${selectedSceneId}.itemIds`,
-    value: sceneItemIds.filter((_id) => !payload.includes(_id)),
+    value: sceneItemIds.filter((_id) => !_idList.includes(_id)),
   });
   ops.push({
     key: `group`,
-    value: _.pickBy(group, (_v, _groupId) => !payload.includes(_groupId)),
+    value: _.pickBy(group, (_v, _groupId) => !_idList.includes(_groupId)),
   });
 
   yield put({
     type: SET_OPENED_GROUP_ID_LIST,
-    payload: openedGroupIdList.filter((_groupId) => !payload.includes(_groupId)),
+    payload: openedGroupIdList.filter((_groupId) => !_idList.includes(_groupId)),
   });
   yield put({ type: SET_DELETE_ANIMATION_ID_LIST, payload: [] });
   yield put({ type: SET_DOCUMENT_VALUE, payload: ops });

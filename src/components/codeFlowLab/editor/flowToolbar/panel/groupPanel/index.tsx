@@ -15,6 +15,7 @@ function GroupPanel() {
 
   return (
     <div className={cx('group-panel-wrap')}>
+      {_.isEmpty(groupList) && <p className={cx('no-result')}>no result</p>}
       <ul>
         {Object.values(groupList).map((_item: ChartGroupItem) => (
           <li key={_item.id}>

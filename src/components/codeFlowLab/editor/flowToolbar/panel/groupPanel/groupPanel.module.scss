@@ -3,9 +3,22 @@
 .group-panel-wrap {
   padding: 15px;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+
   @include scroll-bar;
 
   li + li {
     margin-top: 15px;
+  }
+
+  .no-result {
+    text-align: center;
+    padding: 5px;
+    font-size: 13px;
+    border: 1px solid #707070;
+    color: #ffffff;
+    text-transform: capitalize;
   }
 }

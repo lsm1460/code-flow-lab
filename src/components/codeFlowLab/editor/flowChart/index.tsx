@@ -1,13 +1,4 @@
-import {
-  REQUEST_CHANGE_ROOT,
-  REQUEST_COPY,
-  REQUEST_CUT,
-  REQUEST_EDIT_GROUP,
-  REQUEST_MAKE_GROUP,
-  REQUEST_PASTE,
-  REQUEST_UNGROUP,
-  SEND_COPY_OBJECTS,
-} from '@/consts/channel.js';
+import { REQUEST_CHANGE_ROOT, REQUEST_EDIT_GROUP, REQUEST_MAKE_GROUP, REQUEST_UNGROUP } from '@/consts/channel.js';
 import {
   CHART_ELEMENT_ITEMS,
   CHART_SCRIPT_ITEMS,
@@ -24,15 +15,17 @@ import {
   setOpenedGroupIdListAction,
   setSelectedGroupIdAction,
 } from '@/reducers/contentWizard/mainDocument';
-import { getChartItem, getRandomId, getSceneId } from '@/utils/content';
+import { getChartItem, getGroupItemIdList, getSceneId, makePasteOperations } from '@/utils/content';
 import classNames from 'classnames/bind';
+import CryptoJS from 'crypto-js';
 import _ from 'lodash';
 import { MouseEventHandler, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { ConnectPoints, MoveItems } from '..';
 import ChartItem from './chartItem';
 import styles from './flowChart.module.scss';
-import { doPolygonsIntersect, getBlockType, getCanvasLineColor, getNewPos, getRectPoints, makeNewItem } from './utils';
+import { doPolygonsIntersect, getBlockType, getCanvasLineColor, getRectPoints, makeNewItem } from './utils';
+
 const cx = classNames.bind(styles);
 
 type PathInfo = { pos: string; prev: string; prevList: string[] };
@@ -262,125 +255,87 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
 
   useEffect(() => {
     // cut, copy
-    const handleRequestCopy = () => {
-      ipcRenderer.send(SEND_COPY_OBJECTS, {
-        items: _.pickBy(
-          selectedChartItem,
-          (_item) => multiSelectedIdListClone.current.includes(_item.id) && _item.elType !== ChartItemType.body
-        ),
-        pos: _.mapValues(
-          _.pickBy(itemsPos, (_pos, _itemId) => multiSelectedIdListClone.current.includes(_itemId)),
-          (_pos) => _pos[selectedSceneId]
-        ),
-      });
+    const handleRequestCopy = (_event: ClipboardEvent) => {
+      if (document.activeElement.tagName === 'BODY' && multiSelectedIdListClone.current.length > 0) {
+        _event.preventDefault();
+
+        const idList = getGroupItemIdList(group, multiSelectedIdListClone.current);
+
+        navigator.clipboard.writeText(
+          CryptoJS.AES.encrypt(
+            JSON.stringify({
+              items: _.pickBy(chartItems, (_item) => idList.includes(_item.id) && _item.elType !== ChartItemType.body),
+              pos: _.pickBy(itemsPos, (_pos, _itemId) => idList.includes(_itemId)),
+              group: _.pickBy(group, (_idList, _groupId) => idList.includes(_groupId)),
+              'copy-by': 'code-flow-lab',
+            }),
+            window.electron.PRIVATE_KEY
+          ).toString()
+        );
+      }
     };
 
-    const handleRequestCut = () => {
-      handleRequestCopy();
+    const handleRequestCut = (_event) => {
+      handleRequestCopy(_event);
 
       deleteItems(null, multiSelectedIdListClone.current);
     };
 
-    ipcRenderer.on(REQUEST_CUT, handleRequestCut);
-    ipcRenderer.on(REQUEST_COPY, handleRequestCopy);
+    document.addEventListener('cut', handleRequestCut);
+    document.addEventListener('copy', handleRequestCopy);
 
     return () => {
-      ipcRenderer.removeAllListeners(REQUEST_CUT);
-      ipcRenderer.removeAllListeners(REQUEST_COPY);
+      document.removeEventListener('cut', handleRequestCut);
+      document.removeEventListener('copy', handleRequestCopy);
     };
-  }, [selectedChartItem, selectedSceneId]);
+  }, [chartItems, group]);
 
   useEffect(() => {
     // paste
-    const handleRequestPaste = (e, { items, pos }) => {
-      const _items = selectedGroupId
-        ? _.pickBy(chartItems, (_item, _itemId) => group[selectedGroupId].includes(_itemId))
-        : chartItems;
+    const handleRequestPaste = async (_event) => {
+      if (document.activeElement.tagName !== 'BODY') {
+        return;
+      }
 
-      const sceneItemSize = Object.keys(getChartItem(sceneItemIds, _items, selectedGroupId, group)).length;
+      let clipText = await navigator.clipboard.readText();
 
-      const copiedIdList = Object.keys(items);
-      const changedIds = _.mapValues(_.mapKeys(copiedIdList), () => getRandomId());
+      clipText = CryptoJS.AES.decrypt(clipText, window.electron.PRIVATE_KEY).toString(CryptoJS.enc.Utf8);
 
-      const operations = Object.values(items).reduce<Operation[]>(
-        (_acc, _cur: ChartItems, _index) => {
-          const newItemId = changedIds[_cur.id];
+      try {
+        const objects = JSON.parse(clipText);
 
-          let _val;
+        if (objects['copy-by'] !== 'code-flow-lab') {
+          throw new Error('not code flow lab objects');
+        }
 
-          return _acc.map((_op) => {
-            if (_op.key === 'items') {
-              let connectionIds = _.mapValues(_cur.connectionIds, (_pointList, _dir) =>
-                _pointList
-                  .map(
-                    (_point) =>
-                      changedIds[_point.connectParentId] && {
-                        ..._point,
-                        parentId: newItemId,
-                        connectParentId: changedIds[_point.connectParentId],
-                      }
-                  )
-                  .filter((_point) => _point)
-              );
+        _event.preventDefault();
 
-              _val = {
-                ..._op.value,
-                [newItemId]: {
-                  ..._cur,
-                  id: newItemId,
-                  connectionIds,
-                  zIndex: sceneItemSize + _index + 1,
-                  ...(_cur.connectionVariables && {
-                    connectionVariables: _cur.connectionVariables
-                      .map(
-                        (_point) =>
-                          changedIds[_point.connectParentId] && {
-                            ..._point,
-                            parentId: newItemId,
-                            connectParentId: changedIds[_point.connectParentId],
-                          }
-                      )
-                      .filter((_point) => _point),
-                  }),
-                },
-              };
-            } else if (_op.key === 'itemsPos') {
-              _val = {
-                ..._op.value,
-                [newItemId]: {
-                  [selectedSceneId]: getNewPos(itemsPos, selectedSceneId, pos[_cur.id]),
-                },
-              };
-            } else {
-              _val = [..._op.value, newItemId];
-            }
+        delete objects['copy-by'];
 
-            return { ..._op, value: _val };
-          });
-        },
-        [
-          {
-            key: 'items',
-            value: chartItems,
-          },
-          {
-            key: `itemsPos`,
-            value: itemsPos,
-          },
-          {
-            key: selectedGroupId ? `group.${selectedGroupId}` : `scene.${selectedSceneId}.itemIds`,
-            value: selectedGroupId ? group[selectedGroupId] : sceneItemIds,
-          },
-        ]
-      );
+        console.log('objects', objects);
 
-      dispatch(setDocumentValueAction(operations));
+        const { items, pos, group: copiedGroup } = objects;
+
+        const operations = makePasteOperations(
+          chartItems,
+          itemsPos,
+          group,
+          items,
+          pos,
+          copiedGroup,
+          selectedGroupId,
+          selectedSceneId,
+          sceneItemIds
+        );
+
+        dispatch(setDocumentValueAction(operations));
+      } catch (e) {}
     };
 
-    ipcRenderer.on(REQUEST_PASTE, handleRequestPaste);
+    document.addEventListener('paste', handleRequestPaste);
 
     return () => {
-      ipcRenderer.removeAllListeners(REQUEST_PASTE);
+      document.removeEventListener('paste', handleRequestPaste);
     };
   }, [chartItems, itemsPos, selectedSceneId, selectedGroupId, group]);
 

@@ -175,6 +175,16 @@ export const getNewPos = (
   }
 };
 
+export const getCenterPos = (zoomArea: HTMLElement) => {
+  const { scale, transX, transY } = zoomArea.dataset;
+  const { width, height } = zoomArea.parentElement.getBoundingClientRect();
+
+  return {
+    left: width / parseFloat(scale) / 2 - parseFloat(transX),
+    top: height / parseFloat(scale) / 2 - parseFloat(transY),
+  };
+};
+
 export const makeNewItem = (
   zoomArea: HTMLElement,
   chartItems: CodeFlowChartDoc['items'],
@@ -183,18 +193,12 @@ export const makeNewItem = (
   itemType: ChartItemType,
   sceneId: string
 ): [ChartItems, ChartItemPos, string] => {
-  const { scale, transX, transY } = zoomArea.dataset;
-  const { width, height } = zoomArea.parentElement.getBoundingClientRect();
-
   const newItemId = getRandomId();
 
   const itemList = Object.values(selectedChartItems);
   const itemSize = Object.values(chartItems).filter((_item) => _item.elType === itemType).length;
 
-  let _pos = {
-    left: width / parseFloat(scale) / 2 - parseFloat(transX),
-    top: height / parseFloat(scale) / 2 - parseFloat(transY),
-  };
+  let _pos = getCenterPos(zoomArea);
 
   _pos = getNewPos(itemsPos, sceneId, _pos);
 
