@@ -1,3 +1,5 @@
+@import '../../../../variables';
+
 .property-block-wrap {
   background-color: #252525;
   padding: 10px 0;
@@ -15,6 +17,15 @@
 
     & > :first-child {
       margin-top: 8px;
+    }
+  }
+
+  &.note {
+    padding: 15px 0 0;
+    background-color: $note-point-color;
+
+    & > div {
+      padding: 0;
     }
   }
 }

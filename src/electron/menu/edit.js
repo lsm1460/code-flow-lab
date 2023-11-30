@@ -36,6 +36,10 @@ const requestAddMemo = (_mainWindow) => {
   _mainWindow.webContents.send(REQUEST_ADD_MEMO);
 };
 
+const requestDelete = (_mainWindow) => {
+  console.log('delete');
+};
+
 module.exports = {
   requestUndo,
   requestRedo,
@@ -44,4 +48,5 @@ module.exports = {
   requestEditGroup,
   requestChangeRoot,
   requestAddMemo,
+  requestDelete,
 };

@@ -247,6 +247,15 @@ export interface ChartGroupItem extends ChartItem {
   rootId: string;
 }
 
+export interface ChartNoteItem extends ChartItem {
+  elType: ChartItemType.note;
+  text: string;
+  size: {
+    width: number;
+    height: number;
+  };
+}
+
 export type ChartItems =
   | ChartBodyItem
   | ChartButtonItem
@@ -279,7 +288,8 @@ export type ChartItems =
   | ChartListElItem
   | ChartIfElementItem
   | ChartCalculatorItem
-  | ChartGroupItem;
+  | ChartGroupItem
+  | ChartNoteItem;
 
 export type ChartUtilsItems =
   | ChartSizeItem

@@ -19,6 +19,7 @@ import VariableUtilsEditBlock from './variableUtilsEditBlock';
 import ListEditBlock from './listEditBlock';
 import ListElEditBlock from './listElEditBlock';
 import VariableLinkBlock from './variableLinkBlock';
+import NoteEditBlock from './noteEditBlock';
 const cx = classNames.bind(styles);
 
 interface Props {
@@ -157,14 +158,16 @@ function PropertiesEditBlock({ chartItem, handlePointConnectStart }: Props) {
             handlePointConnectStart={handlePointConnectStart}
           />
         );
+      case ChartItemType.note:
+        return <NoteEditBlock id={chartItem.id} text={chartItem.text} size={chartItem.size} />;
       default:
         return <></>;
     }
   };
 
   return (
-    <div className={cx('property-block-wrap')}>
-      <p className={cx('block-el-type')}>Block Type: {chartItem.elType}</p>
+    <div className={cx('property-block-wrap', { note: chartItem.elType === ChartItemType.note })}>
+      {chartItem.elType !== ChartItemType.note && <p className={cx('block-el-type')}>Block Type: {chartItem.elType}</p>}
       <div>{drawInnerBlock()}</div>
     </div>
   );

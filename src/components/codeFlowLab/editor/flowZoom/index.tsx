@@ -1,12 +1,11 @@
+import { REQUEST_RESET_ZOOM, REQUEST_ZOOMIN, REQUEST_ZOOMOUT } from '@/consts/channel.js';
 import { FLOW_CHART_ITEMS_STYLE, SCROLL_CLASS_PREFIX, ZOOM_AREA_ELEMENT_ID } from '@/consts/codeFlowLab/items';
 import { RootState } from '@/reducers';
 import { getChartItem, getSceneId } from '@/utils/content';
 import classNames from 'classnames/bind';
 import React, { MouseEventHandler, ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import { shallowEqual, useSelector } from 'react-redux';
-import useIpcManager from '../../useIpcManager';
 import styles from './flowZoom.module.scss';
-import { REQUEST_RESET_ZOOM, REQUEST_ZOOMIN, REQUEST_ZOOMOUT } from '@/consts/channel.js';
 const cx = classNames.bind(styles);
 
 const SCROLL_AREA_PADDING = 100;
@@ -18,8 +17,6 @@ function FlowZoom({ children }: Props) {
   const zoomRef = useRef<HTMLDivElement>(null);
   const isHorizonMove = useRef<boolean>(false);
   const isVerticalMove = useRef<boolean>(false);
-
-  const { sendContextOpen } = useIpcManager(false);
 
   const [originSize, setOriginSize] = useState([0, 0]);
   const [scale, setScale] = useState(1);
@@ -243,12 +240,8 @@ function FlowZoom({ children }: Props) {
     });
   };
 
-  const handleContextMenu = () => {
-    sendContextOpen();
-  };
-
   return (
-    <div className={cx('zoom-area-wrap')} ref={zoomRef} onContextMenu={handleContextMenu}>
+    <div className={cx('zoom-area-wrap')} ref={zoomRef}>
       <div
         id={ZOOM_AREA_ELEMENT_ID}
         className={cx('zoom-area')}

@@ -31,6 +31,7 @@ import { ConnectPoints, MoveItems } from '..';
 import ChartItem from './chartItem';
 import styles from './flowChart.module.scss';
 import { doPolygonsIntersect, getBlockType, getCanvasLineColor, getRectPoints, makeNewItem } from './utils';
+import useIpcManager from '../../useIpcManager';
 
 const cx = classNames.bind(styles);
 
@@ -45,6 +46,8 @@ interface Props {
 }
 function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
   const { ipcRenderer } = window.electron;
+
+  const { sendContextOpen } = useIpcManager(false);
 
   const dispatch = useDispatch();
 
@@ -317,8 +320,6 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
         _event.preventDefault();
 
         delete objects['copy-by'];
-
-        console.log('objects', objects);
 
         const { items, pos, group: copiedGroup } = objects;
 
@@ -614,8 +615,6 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
         x: _event.clientX,
         y: _event.clientY,
       };
-
-      console.log(position);
     };
 
     document.addEventListener('mousemove', handleSetTempPosition);
@@ -1171,6 +1170,12 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
     document.removeEventListener('mouseup', handleMouseUpMultiSelect);
   };
 
+  const handleContextMenu = () => {
+    sendContextOpen({
+      ableDelete: (selectedItemId.current || []).length > 0,
+    });
+  };
+
   return (
     <div
       ref={flowChartRef}
@@ -1182,6 +1187,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
         left: `calc(50% - ${transX}px)`,
         top: `calc(50% - ${transY}px)`,
       }}
+      onContextMenu={handleContextMenu}
     >
       <canvas ref={connectedCanvasRef} className={cx('connection-flow-chart')} />
 

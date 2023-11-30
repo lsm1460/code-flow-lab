@@ -432,6 +432,13 @@ export const FLOW_ITEM_ADDITIONAL_INFO = {
   [ChartItemType.group]: {
     rootId: '',
   },
+  [ChartItemType.note]: {
+    text: '',
+    size: {
+      width: 200,
+      height: 100,
+    },
+  },
 };
 
 export const CONNECT_POINT_START = 15;

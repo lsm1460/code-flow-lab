@@ -7,14 +7,7 @@ import {
   FLOW_ITEM_DEFAULT_INFO,
   ROOT_BLOCK_ID,
 } from '@/consts/codeFlowLab/items';
-import {
-  ChartBodyItem,
-  ChartGroupItem,
-  ChartItemPos,
-  ChartItemType,
-  ChartItems,
-  CodeFlowChartDoc,
-} from '@/consts/types/codeFlowLab';
+import { ChartBodyItem, ChartItemPos, ChartItemType, ChartItems, CodeFlowChartDoc } from '@/consts/types/codeFlowLab';
 import { Operation } from '@/reducers/contentWizard/mainDocument';
 import { getRandomId } from '@/utils/content';
 import _ from 'lodash';

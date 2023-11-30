@@ -74,7 +74,13 @@ const useIpcManager = (_ableReceive: boolean = true) => {
     ipcRenderer.send(CLOSE_WINDOW);
   };
 
-  const sendContextOpen = (_payload?: { itemId: string; groupId: string; isGroup: boolean; isRoot: boolean }) => {
+  const sendContextOpen = (_payload?: {
+    itemId?: string;
+    groupId?: string;
+    isGroup?: boolean;
+    isRoot?: boolean;
+    ableDelete?: boolean;
+  }) => {
     ipcRenderer.send(REQUEST_CONTEXT, _payload);
   };
 

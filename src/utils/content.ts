@@ -120,7 +120,7 @@ export const getChartItem = (
   return _.pickBy(chartItem, (_item) => (sceneItemIdList || []).includes(_item.id));
 };
 
-export const useDebounceSubmitText = (_dispatchKey, isNumber = false) => {
+export const useDebounceSubmitText = (_dispatchKey, isNumber = false, isSkip = false) => {
   const [dispatchKey, setDispatchKey] = useState(_dispatchKey);
   const dispatch = useDispatch();
 
@@ -134,6 +134,7 @@ export const useDebounceSubmitText = (_dispatchKey, isNumber = false) => {
         setDocumentValueAction({
           key: dispatchKey,
           value: _text,
+          isSkip,
         })
       );
     }, 800),

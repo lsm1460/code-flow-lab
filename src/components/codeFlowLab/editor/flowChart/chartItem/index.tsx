@@ -191,12 +191,15 @@ function ChartItem({ chartItems, itemInfo, isSelected, handleItemMoveStart, hand
     dispatch(setDeleteTargetIdListAction([itemInfo.id]));
   };
 
-  const handleContextMenu = () => {
+  const handleContextMenu = (_event) => {
+    _event.stopPropagation();
+
     sendContextOpen({
       itemId: itemInfo.id,
       groupId: selectedGroupId,
       isGroup: itemInfo.elType === ChartItemType.group,
       isRoot,
+      ableDelete: !isRoot,
     });
   };
 
@@ -273,44 +276,48 @@ function ChartItem({ chartItems, itemInfo, isSelected, handleItemMoveStart, hand
           <i className="material-symbols-outlined">drag_indicator</i>
         </div>
 
-        <input
-          type="text"
-          readOnly={isReadyOnly}
+        {itemInfo.elType !== ChartItemType.note && (
+          <input
+            type="text"
+            readOnly={isReadyOnly}
+            style={{
+              height: BLOCK_HEADER_SIZE,
+            }}
+            onClick={() => {
+              setIsReadOnly(false);
+            }}
+            onKeyDown={handleCancelInsert}
+            onChange={handleTitleInput}
+            onBlur={(_event) => {
+              setIsReadOnly(true);
+              setIsTyping(false);
+
+              emitText(_event.target.value);
+            }}
+            value={selectedName}
+            maxLength={15}
+          />
+        )}
+      </div>
+
+      {itemInfo.elType !== ChartItemType.note && (
+        <div
+          className={cx('point-list-wrap')}
           style={{
-            height: BLOCK_HEADER_SIZE,
+            minHeight:
+              Math.max(
+                (itemInfo.connectionIds?.right || []).length,
+                Math.max((itemInfo.connectionIds?.left || []).length, 0)
+              ) *
+              (CONNECT_POINT_GAP + CONNECT_POINT_SIZE),
+            paddingLeft: POINT_LIST_PADDING,
+            paddingRight: POINT_LIST_PADDING,
+            paddingTop: CONNECT_POINT_START,
           }}
-          onClick={() => {
-            setIsReadOnly(false);
-          }}
-          onKeyDown={handleCancelInsert}
-          onChange={handleTitleInput}
-          onBlur={(_event) => {
-            setIsReadOnly(true);
-            setIsTyping(false);
-
-            emitText(_event.target.value);
-          }}
-          value={selectedName}
-          maxLength={15}
-        />
-      </div>
-
-      <div
-        className={cx('point-list-wrap')}
-        style={{
-          minHeight:
-            Math.max(
-              (itemInfo.connectionIds?.right || []).length,
-              Math.max((itemInfo.connectionIds?.left || []).length, 0)
-            ) *
-            (CONNECT_POINT_GAP + CONNECT_POINT_SIZE),
-          paddingLeft: POINT_LIST_PADDING,
-          paddingRight: POINT_LIST_PADDING,
-          paddingTop: CONNECT_POINT_START,
-        }}
-      >
-        {connectPointList}
-      </div>
+        >
+          {connectPointList}
+        </div>
+      )}
 
       <PropertiesEditBlock chartItem={itemInfo} handlePointConnectStart={handlePointConnectStart} />
     </div>

@@ -1,0 +1,20 @@
+@import '../../../../../variables';
+@import '../../../../../mixin';
+
+.text-input-wrap {
+  .text-input {
+    min-width: 200px;
+    min-height: 100px;
+    width: 100%;
+    border: none;
+    padding: 3px 5px 5px;
+    background-color: $note-point-color;
+    color: #3c3c3c;
+
+    @include scroll-bar;
+  }
+
+  & + .text-input-wrap {
+    margin-top: 8px;
+  }
+}
