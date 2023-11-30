@@ -1,4 +1,10 @@
-import { REQUEST_CHANGE_ROOT, REQUEST_EDIT_GROUP, REQUEST_MAKE_GROUP, REQUEST_UNGROUP } from '@/consts/channel.js';
+import {
+  REQUEST_CHANGE_ROOT,
+  REQUEST_EDIT_GROUP,
+  REQUEST_MAKE_GROUP,
+  REQUEST_UNGROUP,
+  REQUEST_ADD_MEMO,
+} from '@/consts/channel.js';
 import {
   CHART_ELEMENT_ITEMS,
   CHART_SCRIPT_ITEMS,
@@ -599,6 +605,75 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
       ipcRenderer.removeAllListeners(REQUEST_CHANGE_ROOT);
     };
   }, [chartItems, group, selectedGroupId]);
+
+  useEffect(() => {
+    let position = { x: 0, y: 0 };
+
+    const handleSetTempPosition = (_event) => {
+      position = {
+        x: _event.clientX,
+        y: _event.clientY,
+      };
+
+      console.log(position);
+    };
+
+    document.addEventListener('mousemove', handleSetTempPosition);
+
+    const handleAddNote = () => {
+      const zoomArea = document.getElementById(ZOOM_AREA_ELEMENT_ID);
+
+      const { x, y } = convertClientPosToLocalPos(position);
+
+      const [newFlowItem, pos, newItemId] = makeNewItem(
+        zoomArea,
+        chartItems,
+        selectedChartItem,
+        itemsPos,
+        ChartItemType.note,
+        selectedSceneId,
+        { left: x - transX, top: y - transY }
+      );
+
+      const operations: Operation[] = [
+        {
+          key: 'items',
+          value: {
+            ...chartItems,
+            [newItemId]: newFlowItem,
+          },
+        },
+        {
+          key: `itemsPos`,
+          value: {
+            ...itemsPos,
+            [newItemId]: pos,
+          },
+        },
+      ];
+
+      if (selectedGroupId) {
+        operations.push({
+          key: `group.${selectedGroupId}`,
+          value: [...group[selectedGroupId], newItemId],
+        });
+      } else {
+        operations.push({
+          key: `scene.${selectedSceneId}.itemIds`,
+          value: [...sceneItemIds, newItemId],
+        });
+      }
+
+      dispatch(setDocumentValueAction(operations));
+    };
+
+    ipcRenderer.on(REQUEST_ADD_MEMO, handleAddNote);
+
+    return () => {
+      document.removeEventListener('mousemove', handleSetTempPosition);
+      ipcRenderer.removeAllListeners(REQUEST_ADD_MEMO);
+    };
+  }, [chartItems, selectedChartItem, itemsPos, selectedSceneId, sceneItemIds, selectedGroupId, scale, transX, transY]);
 
   useEffect(() => {
     if (selectedItemId.current) {

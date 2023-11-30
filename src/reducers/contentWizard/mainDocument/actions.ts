@@ -20,6 +20,7 @@ export const SET_TOGGLE_STYLES = 'document/SET_TOGGLE_STYLES';
 export const SET_IS_SAVE_STATE = 'document/SET_IS_SAVE_STATE';
 export const SET_SELECTED_GROUP_ID = 'document/SET_SELECTED_GROUP_ID';
 export const SET_OPENED_GROUP_ID_LIST = 'document/SET_OPENED_GROUP_ID_LIST';
+export const SET_IS_FULLSCREEN = 'document/SET_IS_FULLSCREEN';
 
 export const setDocumentAction = createAction(SET_DOCUMENT)<CodeFlowChartDoc>();
 export const setDocumentValueAction = createAction(SET_DOCUMENT_VALUE)<Operation | Operation[]>();
@@ -38,3 +39,4 @@ export const setToggleStylesAction = createAction(SET_TOGGLE_STYLES)<{ id: strin
 export const setIsSaveStateAction = createAction(SET_IS_SAVE_STATE)<boolean>();
 export const setSelectedGroupIdAction = createAction(SET_SELECTED_GROUP_ID)<string>();
 export const setOpenedGroupIdListAction = createAction(SET_OPENED_GROUP_ID_LIST)<string[]>();
+export const setIsFullscreenAction = createAction(SET_IS_FULLSCREEN)<boolean>();

@@ -14,6 +14,7 @@ import {
   SET_DOCUMENT,
   SET_DOCUMENT_VALUE,
   SET_FLOW_LOG,
+  SET_IS_FULLSCREEN,
   SET_IS_SAVE_STATE,
   SET_OPENED_GROUP_ID_LIST,
   SET_OPTION_MODAL_INFO,
@@ -58,6 +59,7 @@ const initialState: DocumentState = {
   addedStyles: {},
   isSaved: true,
   openTime: new Date().getTime(),
+  isFullscreen: false,
 };
 
 const documentReducer = createReducer<DocumentState, DocumentAction>(initialState, {
@@ -180,6 +182,7 @@ const documentReducer = createReducer<DocumentState, DocumentAction>(initialStat
   [SET_IS_SAVE_STATE]: (state, { payload }) => ({ ...state, isSaved: payload }),
   [SET_SELECTED_GROUP_ID]: (state, { payload }) => ({ ...state, selectedGroupId: payload }),
   [SET_OPENED_GROUP_ID_LIST]: (state, { payload }) => ({ ...state, openedGroupIdList: _.uniq(payload) }),
+  [SET_IS_FULLSCREEN]: (state, { payload }) => ({ ...state, isFullscreen: payload }),
 });
 
 export default documentReducer;

@@ -3,13 +3,12 @@ import { ChartItemType } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
 import { Operation, setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
 import { getChartItem, getSceneId } from '@/utils/content';
+import classNames from 'classnames/bind';
 import { useMemo, useState } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { makeNewItem } from '../flowChart/utils';
-import ToolbarPanel from './panel';
-import _ from 'lodash';
-import classNames from 'classnames/bind';
 import styles from './flowToolbar.module.scss';
+import ToolbarPanel from './panel';
 const cx = classNames.bind(styles);
 
 function FlowToolbar() {

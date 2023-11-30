@@ -6,6 +6,7 @@ import React, { MouseEventHandler, ReactElement, useEffect, useMemo, useRef, use
 import { shallowEqual, useSelector } from 'react-redux';
 import useIpcManager from '../../useIpcManager';
 import styles from './flowZoom.module.scss';
+import { REQUEST_RESET_ZOOM, REQUEST_ZOOMIN, REQUEST_ZOOMOUT } from '@/consts/channel.js';
 const cx = classNames.bind(styles);
 
 const SCROLL_AREA_PADDING = 100;
@@ -115,6 +116,32 @@ function FlowZoom({ children }: Props) {
 
     setTransY(_transY);
   }, [scrollArea, verticalPos]);
+
+  useEffect(() => {
+    const { ipcRenderer } = window.electron;
+
+    const resetZoom = () => {
+      setScale(1);
+    };
+
+    const zoomInScreen = () => {
+      setScale((_prev) => Math.min(_prev + 0.1, 2));
+    };
+
+    const zoomOutScreen = () => {
+      setScale((_prev) => Math.max(_prev - 0.1, 0.5));
+    };
+
+    ipcRenderer.on(REQUEST_RESET_ZOOM, resetZoom);
+    ipcRenderer.on(REQUEST_ZOOMIN, zoomInScreen);
+    ipcRenderer.on(REQUEST_ZOOMOUT, zoomOutScreen);
+
+    return () => {
+      ipcRenderer.removeAllListeners(REQUEST_RESET_ZOOM);
+      ipcRenderer.removeAllListeners(REQUEST_ZOOMIN);
+      ipcRenderer.removeAllListeners(REQUEST_ZOOMOUT);
+    };
+  }, []);
 
   const handleZoom: MouseEventHandler<HTMLButtonElement> = (_event) => {
     const buttonEl = _event.nativeEvent.target as HTMLButtonElement;

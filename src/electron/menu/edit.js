@@ -5,6 +5,7 @@ const {
   REQUEST_UNGROUP,
   REQUEST_EDIT_GROUP,
   REQUEST_CHANGE_ROOT,
+  REQUEST_ADD_MEMO,
 } = require('../../consts/channel');
 
 const requestUndo = (_mainWindow) => {
@@ -31,6 +32,10 @@ const requestChangeRoot = (_mainWindow, _groupId, _itemId) => {
   _mainWindow.webContents.send(REQUEST_CHANGE_ROOT, { groupId: _groupId, itemId: _itemId });
 };
 
+const requestAddMemo = (_mainWindow) => {
+  _mainWindow.webContents.send(REQUEST_ADD_MEMO);
+};
+
 module.exports = {
   requestUndo,
   requestRedo,
@@ -38,4 +43,5 @@ module.exports = {
   requestUngroup,
   requestEditGroup,
   requestChangeRoot,
+  requestAddMemo,
 };

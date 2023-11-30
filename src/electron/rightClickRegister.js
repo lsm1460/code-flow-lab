@@ -4,6 +4,13 @@ const { REQUEST_CONTEXT } = require('../consts/channel');
 
 const registRightClick = (_mainWindow) => {
   const defaultMenu = [
+    {
+      label: 'Add Memo',
+      click: () => _edit.requestAddMemo(_mainWindow),
+    },
+    {
+      type: 'separator',
+    },
     { role: 'cut' },
     { role: 'copy' },
     { role: 'paste' },

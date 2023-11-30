@@ -3,6 +3,7 @@ const { REQUEST_MINIMIZE, REQUEST_MAXIMIZE, CLOSE_WINDOW } = require('../../cons
 
 const _file = require('./file');
 const _edit = require('./edit');
+const _view = require('./view');
 
 const getMenuTemplate = (_mainWindow, _app) => {
   return [
@@ -15,12 +16,7 @@ const getMenuTemplate = (_mainWindow, _app) => {
         {
           type: 'separator',
         },
-        {
-          label: 'Quit Code Flow Lab',
-          click: () => {
-            _app.exit();
-          },
-        },
+        { role: 'quit' },
       ],
     },
     {
@@ -47,11 +43,7 @@ const getMenuTemplate = (_mainWindow, _app) => {
         {
           type: 'separator',
         },
-        {
-          label: 'Close Window',
-          accelerator: 'Shift+CommandOrControl+W',
-          click: () => _file.closeWindow(_mainWindow),
-        },
+        { role: 'close' },
       ],
     },
     {
@@ -73,6 +65,38 @@ const getMenuTemplate = (_mainWindow, _app) => {
         { role: 'cut' },
         { role: 'copy' },
         { role: 'paste' },
+      ],
+    },
+    {
+      label: 'View',
+      submenu: [
+        { role: 'togglefullscreen' },
+        {
+          type: 'separator',
+        },
+        {
+          label: 'Play',
+          accelerator: 'CommandOrControl+Return',
+          click: () => _view.requestPlay(_mainWindow),
+        },
+        {
+          type: 'separator',
+        },
+        {
+          label: 'Reset Zoom',
+          accelerator: 'CommandOrControl+num0',
+          click: () => _view.requestResetZoom(_mainWindow),
+        },
+        {
+          label: 'Zoom in',
+          accelerator: 'CommandOrControl+numadd',
+          click: () => _view.requestZoomin(_mainWindow),
+        },
+        {
+          label: 'Zoom out',
+          accelerator: 'CommandOrControl+numsub',
+          click: () => _view.requestZoomout(_mainWindow),
+        },
       ],
     },
   ];

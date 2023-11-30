@@ -5,6 +5,7 @@ const { getMenuTemplate, registWindowChannelFunc } = require('./menu');
 const registViwerChannelFunc = require('./viewerRegister');
 const registShortcut = require('./shortcutRegister');
 const { removeProjectFile, checkSaved, saveProject, registFileChannel } = require('./menu/file');
+const { requestFullscreenOff, registViewChannel } = require('./menu/view');
 const CUSTOM_PROTOCOL = require('../consts/protocol');
 const registRightClick = require('./rightClickRegister');
 require('dotenv/config');
@@ -104,8 +105,13 @@ function createWindow() {
     }
   });
 
+  mainWindow.on('leave-full-screen', () => {
+    requestFullscreenOff(mainWindow);
+  });
+
   registWindowChannelFunc(mainWindow);
   registFileChannel(mainWindow);
+  registViewChannel(mainWindow);
   registViwerChannelFunc(mainWindow);
   registShortcut(mainWindow);
   registRightClick(mainWindow);

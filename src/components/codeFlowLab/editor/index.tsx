@@ -32,21 +32,31 @@ function CodeFlowLabEditor() {
 
   const [moveItemInfo, setMoveItemInfo] = useState<{ ids: string[]; deltaX: number; deltaY: number }>(null);
 
-  const { selectedGroupId, group, openTime, selectedSceneId, chartItems, sceneItemIds, itemsPos, isModalOpen } =
-    useSelector((state: RootState) => {
-      const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder, state.selectedGroupId);
+  const {
+    selectedGroupId,
+    group,
+    openTime,
+    selectedSceneId,
+    chartItems,
+    sceneItemIds,
+    itemsPos,
+    isModalOpen,
+    isFullscreen,
+  } = useSelector((state: RootState) => {
+    const selectedSceneId = getSceneId(state.contentDocument.scene, state.sceneOrder, state.selectedGroupId);
 
-      return {
-        selectedGroupId: state.selectedGroupId,
-        group: state.contentDocument.group,
-        openTime: state.openTime,
-        chartItems: state.contentDocument.items,
-        itemsPos: state.contentDocument.itemsPos,
-        selectedSceneId,
-        sceneItemIds: state.contentDocument.scene[selectedSceneId]?.itemIds || [],
-        isModalOpen: !!state.selectModal,
-      };
-    }, shallowEqual);
+    return {
+      selectedGroupId: state.selectedGroupId,
+      group: state.contentDocument.group,
+      openTime: state.openTime,
+      chartItems: state.contentDocument.items,
+      itemsPos: state.contentDocument.itemsPos,
+      selectedSceneId,
+      sceneItemIds: state.contentDocument.scene[selectedSceneId]?.itemIds || [],
+      isModalOpen: !!state.selectModal,
+      isFullscreen: state.isFullscreen,
+    };
+  }, shallowEqual);
 
   const selectedChartItem = useMemo(
     () => getChartItem(sceneItemIds, chartItems, selectedGroupId, group),
@@ -118,18 +128,22 @@ function CodeFlowLabEditor() {
   return (
     <>
       {isModalOpen && <FlowOptionModal />}
-      <FlowHeader />
-      <div className={cx('editor-wrap')}>
-        <FlowToolbar />
-        <div className={cx('canvas-area')}>
-          <FlowTabs />
-          <FlowZoom>
-            <FlowChart moveItems={moveItems} connectPoints={connectPoints} />
-          </FlowZoom>
-          <FlowLog />
-        </div>
-        <ViewerWrapper />
-      </div>
+      {!isFullscreen && (
+        <>
+          <FlowHeader />
+          <div className={cx('editor-wrap')}>
+            <FlowToolbar />
+            <div className={cx('canvas-area')}>
+              <FlowTabs />
+              <FlowZoom>
+                <FlowChart moveItems={moveItems} connectPoints={connectPoints} />
+              </FlowZoom>
+              <FlowLog />
+            </div>
+          </div>
+        </>
+      )}
+      <ViewerWrapper />
     </>
   );
 }

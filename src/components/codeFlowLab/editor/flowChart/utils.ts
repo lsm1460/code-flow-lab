@@ -191,14 +191,15 @@ export const makeNewItem = (
   selectedChartItems: CodeFlowChartDoc['items'],
   itemsPos: CodeFlowChartDoc['itemsPos'],
   itemType: ChartItemType,
-  sceneId: string
+  sceneId: string,
+  __pos?: { left: number; top: number }
 ): [ChartItems, ChartItemPos, string] => {
   const newItemId = getRandomId();
 
   const itemList = Object.values(selectedChartItems);
   const itemSize = Object.values(chartItems).filter((_item) => _item.elType === itemType).length;
 
-  let _pos = getCenterPos(zoomArea);
+  let _pos = __pos ? __pos : getCenterPos(zoomArea);
 
   _pos = getNewPos(itemsPos, sceneId, _pos);
 

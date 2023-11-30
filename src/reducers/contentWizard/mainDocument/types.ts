@@ -17,6 +17,7 @@ export type DocumentState = {
   addedStyles: { [_id: string]: CSSProperties };
   isSaved: boolean;
   openTime: number;
+  isFullscreen: boolean;
 };
 
 export interface Operation {

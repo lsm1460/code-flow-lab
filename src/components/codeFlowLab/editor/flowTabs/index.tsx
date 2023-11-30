@@ -243,7 +243,7 @@ function FlowTabs() {
                 }}
                 onMouseUp={(_event) => {
                   _event.stopPropagation();
-                  if (_i !== 0) {
+                  if (_event.button === 1) {
                     removeScene(_scene.id);
                   }
                 }}
