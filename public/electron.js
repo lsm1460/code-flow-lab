@@ -1,13 +1,12 @@
 const { app, BrowserWindow, screen, Menu, dialog, protocol, net, globalShortcut } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
-const { getMenuTemplate, registWindowChannelFunc } = require('./menu');
-const registViwerChannelFunc = require('./viewerRegister');
-const registShortcut = require('./shortcutRegister');
-const { removeProjectFile, checkSaved, saveProject, registFileChannel } = require('./menu/file');
-const { requestFullscreenOff, registViewChannel } = require('./menu/view');
-const CUSTOM_PROTOCOL = require('../consts/protocol');
-const registRightClick = require('./rightClickRegister');
+const { getMenuTemplate, registWindowChannelFunc } = require('./controller/menu');
+const registViwerChannelFunc = require('./controller/viewerRegister');
+const registShortcut = require('./controller/shortcutRegister');
+const { removeProjectFile, checkSaved, saveProject, registFileChannel } = require('./controller/menu/file');
+const { requestFullscreenOff, registViewChannel } = require('./controller/menu/view');
+const registRightClick = require('./controller/rightClickRegister');
 require('dotenv/config');
 
 let mainWindow;
@@ -40,7 +39,7 @@ function createWindow() {
 
   mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
 
-  if (isDev) {
+  if (true) {
     mainWindow.webContents.openDevTools({ mode: 'detach' });
   }
 
@@ -133,7 +132,7 @@ app.whenReady().then(() => {
   });
 
   protocol.handle(
-    CUSTOM_PROTOCOL,
+    process.env.CUSTOM_PROTOCOL,
     (_req) => net.fetch(`file://${new URL(_req.url).pathname}`),
     (error) => {
       if (error) console.error('프로토콜 등록 실패');

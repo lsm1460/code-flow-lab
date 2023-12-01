@@ -2,7 +2,6 @@ import classNames from 'classnames/bind';
 import styles from './imageEditBlock.module.scss';
 import { useDispatch } from 'react-redux';
 import { setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
-import CUSTOM_PROTOCOL from '@/consts/protocol.js';
 const cx = classNames.bind(styles);
 //
 
@@ -36,7 +35,7 @@ function ImageEditBlock({ id, src }: Props) {
       <label>
         <input type="file" accept="image/png, image/jpeg" onChange={handleChangeImageSrc} />
         {!src && <span className="material-symbols-outlined">add_photo_alternate</span>}
-        {src && <img src={`${CUSTOM_PROTOCOL}://${src}`} />}
+        {src && <img src={`${window.electron.CUSTOM_PROTOCOL}://${src}`} />}
       </label>
     </div>
   );

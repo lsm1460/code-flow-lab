@@ -1,6 +1,6 @@
 const { Menu, ipcMain } = require('electron');
 const _edit = require('./menu/edit');
-const { REQUEST_CONTEXT } = require('../consts/channel');
+const { REQUEST_CONTEXT } = require('../channel');
 
 const registRightClick = (_mainWindow) => {
   const getDefaultMenu = ({ selectedIdList }) => [

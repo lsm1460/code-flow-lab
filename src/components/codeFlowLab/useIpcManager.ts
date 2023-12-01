@@ -13,6 +13,7 @@ import {
   REQUEST_MAXIMIZE,
   CLOSE_WINDOW,
   REQUEST_CONTEXT,
+  DEBUG,
 } from '@/consts/channel.js';
 import { RootState } from '@/reducers';
 import {
@@ -47,6 +48,10 @@ const useIpcManager = (_ableReceive: boolean = true) => {
       const { isSaved }: RootState = store.getState();
 
       ipcRenderer.send(CHECK_SAVED, isSaved);
+    });
+
+    ipcRenderer.on(DEBUG, (e, msg) => {
+      alert(JSON.stringify(msg));
     });
   }
 

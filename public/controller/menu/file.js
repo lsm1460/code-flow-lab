@@ -13,7 +13,9 @@ const {
   CHECK_SAVED,
   REQUEST_SAVE,
   OPEN_PROJECT,
-} = require('../../consts/channel');
+  DEBUG,
+} = require('../../channel');
+const { createZipFromFolder } = require('../zip-folder');
 
 const checkSaved = (_mainWindow) =>
   new Promise((resolve) => {
@@ -272,6 +274,18 @@ const registFileChannel = (_mainWindow) => {
   });
 };
 
+const exportProject = (_mainWindow) => {
+  const tt = path.join(process.resourcesPath, '/temp-viewer');
+  const res = fs.existsSync(tt);
+
+  _mainWindow.webContents.send(DEBUG, { tt, res });
+  // _mainWindow.webContents.send(REQUEST_PROJECT, null);
+
+  // ipcMain.once(SAVE_FILE, async (event, _contents) => {
+  //   createZipFromFolder()
+  // });
+};
+
 module.exports = {
   checkSaved,
   removeProjectFile,
@@ -280,4 +294,5 @@ module.exports = {
   saveProject,
   registFileChannel,
   closeWindow,
+  exportProject,
 };

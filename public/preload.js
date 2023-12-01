@@ -1,5 +1,5 @@
 const { contextBridge, ipcRenderer } = require('electron');
-const { isMac, isWindows } = require('./detect-platform');
+const { isMac, isWindows } = require('./controller/detect-platform');
 
 contextBridge.exposeInMainWorld('electron', {
   // ...other APIs to expose to renderer process
@@ -7,4 +7,5 @@ contextBridge.exposeInMainWorld('electron', {
   isMac,
   isWindows,
   PRIVATE_KEY: process.env.PRIVATE_KEY,
+  CUSTOM_PROTOCOL: process.env.CUSTOM_PROTOCOL,
 });

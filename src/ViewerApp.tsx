@@ -8,7 +8,7 @@ export const store = configureStore();
 function App() {
   return (
     <Provider store={store}>
-      <CodeFlowLabViewer />
+      <CodeFlowLabViewer isOnlyViewer />
     </Provider>
   );
 }

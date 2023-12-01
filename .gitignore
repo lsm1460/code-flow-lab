@@ -140,7 +140,7 @@ dist
 
 # production
 /build
-/public/viewer
+/temp-viewer
 
 # misc
 .DS_Store

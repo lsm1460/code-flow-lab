@@ -1,6 +1,5 @@
 import { ChartImageItem, TriggerProps, ViewerItem } from '@/consts/types/codeFlowLab';
 import { CSSProperties, RefObject } from 'react';
-import CUSTOM_PROTOCOL from '@/consts/protocol.js';
 
 interface ImageViewerItem extends ViewerItem {
   src?: ChartImageItem['src'];
@@ -18,7 +17,7 @@ function ViewerImageBlock({ elRef, viewerItem, triggerProps, addedStyle }: Props
       ref={elRef}
       style={{ ...viewerItem.styles, ...addedStyle }}
       {...triggerProps}
-      src={`${CUSTOM_PROTOCOL}://${viewerItem.src}`}
+      src={`${window.electron.CUSTOM_PROTOCOL}://${viewerItem.src}`}
     />
   );
 }

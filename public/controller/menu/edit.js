@@ -7,7 +7,7 @@ const {
   REQUEST_CHANGE_ROOT,
   REQUEST_ADD_MEMO,
   REQUEST_DELETE,
-} = require('../../consts/channel');
+} = require('../../channel');
 
 const requestUndo = (_mainWindow) => {
   _mainWindow.webContents.send(REQUEST_UNDO);

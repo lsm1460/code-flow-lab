@@ -1,5 +1,5 @@
 const { ipcMain } = require('electron');
-const { REQUEST_MINIMIZE, REQUEST_MAXIMIZE, CLOSE_WINDOW } = require('../../consts/channel');
+const { REQUEST_MINIMIZE, REQUEST_MAXIMIZE, CLOSE_WINDOW } = require('../../channel');
 
 const _file = require('./file');
 const _edit = require('./edit');
@@ -39,6 +39,13 @@ const getMenuTemplate = (_mainWindow, _app) => {
           label: 'Save',
           accelerator: 'CommandOrControl+S',
           click: () => _file.saveProject(_mainWindow),
+        },
+        {
+          type: 'separator',
+        },
+        {
+          label: 'Export to Zip File...',
+          click: () => _file.exportProject(_mainWindow),
         },
         {
           type: 'separator',

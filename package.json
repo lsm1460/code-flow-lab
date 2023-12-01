@@ -34,15 +34,52 @@
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
-  "main": "src/electron/index.js",
+  "main": "public/electron.js",
   "homepage": "./",
   "scripts": {
     "react-start": "craco start",
-    "react-build:viewer": "ONLY_VIEWER=true craco build --config ./craco.viewer.config.js; node move-viewer.js",
+    "react-build:viewer": "craco build --config ./craco.viewer.config.js",
     "react-build": "npx yarn react-build:viewer && craco build",
     "start": "concurrently \"cross-env NODE_ENV=development BROWSER=none npx yarn react-start\" \"wait-on http://localhost:3000 && electron .\"",
-    "build": "npx yarn react-build && electron-builder",
+    "build": "npx yarn react-build && electron-builder --mac",
     "release": "npx yarn react-build && electron-builder --publish=always"
+  },
+  "build": {
+    "productName": "Start Electron",
+    "appId": "net.jetalab.ex.startelectron",
+    "asar": true,
+    "mac": {
+      "target": [
+        "default"
+      ]
+    },
+    "dmg": {
+      "title": "Start Electron"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true
+    },
+    "directories": {
+      "buildResources": "./resources/installer/",
+      "output": "./dist/",
+      "app": "."
+    },
+    "extraResources": [
+      "./temp-viewer/**"
+    ]
   },
   "eslintConfig": {
     "extends": [

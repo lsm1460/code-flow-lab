@@ -6,7 +6,7 @@ const {
   REQUEST_RESET_ZOOM,
   REQUEST_ZOOMIN,
   REQUEST_ZOOMOUT,
-} = require('../../consts/channel');
+} = require('../../channel');
 
 const onFullscreen = (_mainWindow) => {
   _mainWindow.setFullScreen(true);

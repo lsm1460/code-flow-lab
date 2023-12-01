@@ -14,8 +14,10 @@ import { shallowEqual, useSelector } from 'react-redux';
 import { getBlockType } from '../editor/flowChart/utils';
 import ViewerElBlock from './viewerElBlock';
 
-interface Props {}
-function FlowChartViewer({}: Props) {
+interface Props {
+  isOnlyViewer?: boolean;
+}
+function FlowChartViewer({ isOnlyViewer }: Props) {
   const { groupRootId, sceneOrder, chartItems, sceneItemIds, selectedGroupId, group } = useSelector(
     (state: RootState) => {
       const sceneId = getSceneId(state.contentDocument.scene, state.sceneOrder, state.selectedGroupId);
