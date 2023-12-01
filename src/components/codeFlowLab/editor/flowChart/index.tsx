@@ -4,6 +4,7 @@ import {
   REQUEST_MAKE_GROUP,
   REQUEST_UNGROUP,
   REQUEST_ADD_MEMO,
+  REQUEST_DELETE,
 } from '@/consts/channel.js';
 import {
   CHART_ELEMENT_ITEMS,
@@ -675,6 +676,18 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
   }, [chartItems, selectedChartItem, itemsPos, selectedSceneId, sceneItemIds, selectedGroupId, scale, transX, transY]);
 
   useEffect(() => {
+    const handleRequestDelete = (_e, _idList) => {
+      deleteItems(null, _idList);
+    };
+
+    ipcRenderer.on(REQUEST_DELETE, handleRequestDelete);
+
+    return () => {
+      ipcRenderer.removeAllListeners(REQUEST_DELETE);
+    };
+  }, [multiSelectedItemList]);
+
+  useEffect(() => {
     if (selectedItemId.current) {
       totalDelta.current = {
         x: totalDelta.current.x + itemMoveDelta.x / scale,
@@ -1172,7 +1185,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
 
   const handleContextMenu = () => {
     sendContextOpen({
-      ableDelete: (selectedItemId.current || []).length > 0,
+      selectedIdList: Object.keys(multiSelectedItemList),
     });
   };
 
@@ -1203,7 +1216,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
             key={_itemInfo.id}
             chartItems={selectedChartItem}
             itemInfo={_itemInfo}
-            isSelected={Object.keys(multiSelectedItemList).includes(_itemInfo.id)}
+            selectedIdList={Object.keys(multiSelectedItemList)}
             handleItemMoveStart={handleItemMoveStart}
             handlePointConnectStart={handlePointConnectStart}
           />

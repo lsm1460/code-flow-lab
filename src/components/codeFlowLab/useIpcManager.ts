@@ -79,7 +79,7 @@ const useIpcManager = (_ableReceive: boolean = true) => {
     groupId?: string;
     isGroup?: boolean;
     isRoot?: boolean;
-    ableDelete?: boolean;
+    selectedIdList?: string[];
   }) => {
     ipcRenderer.send(REQUEST_CONTEXT, _payload);
   };

@@ -3,7 +3,7 @@ const _edit = require('./menu/edit');
 const { REQUEST_CONTEXT } = require('../consts/channel');
 
 const registRightClick = (_mainWindow) => {
-  const getDefaultMenu = ([_ableDelete]) => [
+  const getDefaultMenu = ({ selectedIdList }) => [
     {
       label: 'Add Memo',
       click: () => _edit.requestAddMemo(_mainWindow),
@@ -16,8 +16,8 @@ const registRightClick = (_mainWindow) => {
     { role: 'paste' },
     {
       label: 'Delete',
-      enabled: _ableDelete,
-      click: () => _edit.requestDelete(_mainWindow),
+      enabled: (selectedIdList || []).length > 0,
+      click: () => _edit.requestDelete(_mainWindow, selectedIdList),
     },
     {
       label: 'Group',
@@ -45,8 +45,8 @@ const registRightClick = (_mainWindow) => {
   ];
 
   ipcMain.on(REQUEST_CONTEXT, (_event, _payload) => {
-    const { itemId, groupId, isGroup, isRoot, ableDelete } = _payload || {};
-    let _menu = [...getDefaultMenu([ableDelete])];
+    const { itemId, groupId, isGroup, isRoot, selectedIdList } = _payload || {};
+    let _menu = [...getDefaultMenu({ selectedIdList })];
 
     if (isGroup) {
       _menu = [

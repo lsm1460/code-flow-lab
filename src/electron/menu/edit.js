@@ -6,6 +6,7 @@ const {
   REQUEST_EDIT_GROUP,
   REQUEST_CHANGE_ROOT,
   REQUEST_ADD_MEMO,
+  REQUEST_DELETE,
 } = require('../../consts/channel');
 
 const requestUndo = (_mainWindow) => {
@@ -36,8 +37,8 @@ const requestAddMemo = (_mainWindow) => {
   _mainWindow.webContents.send(REQUEST_ADD_MEMO);
 };
 
-const requestDelete = (_mainWindow) => {
-  console.log('delete');
+const requestDelete = (_mainWindow, _ids) => {
+  _mainWindow.webContents.send(REQUEST_DELETE, _ids);
 };
 
 module.exports = {

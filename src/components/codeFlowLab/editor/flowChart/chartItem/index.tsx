@@ -25,11 +25,11 @@ const cx = classNames.bind(styles);
 interface Props {
   chartItems: CodeFlowChartDoc['items'];
   itemInfo: ChartItems;
-  isSelected: boolean;
+  selectedIdList: string[];
   handleItemMoveStart: (_event: MouseEvent, _selectedItem: ChartItems) => void;
   handlePointConnectStart: MouseEventHandler<HTMLSpanElement>;
 }
-function ChartItem({ chartItems, itemInfo, isSelected, handleItemMoveStart, handlePointConnectStart }: Props) {
+function ChartItem({ chartItems, itemInfo, selectedIdList, handleItemMoveStart, handlePointConnectStart }: Props) {
   const dispatch = useDispatch();
 
   const { sendContextOpen } = useIpcManager(false);
@@ -192,21 +192,21 @@ function ChartItem({ chartItems, itemInfo, isSelected, handleItemMoveStart, hand
   };
 
   const handleContextMenu = (_event) => {
-    _event.stopPropagation();
+    const _idList = selectedIdList.length > 0 ? selectedIdList : [itemInfo.id];
 
     sendContextOpen({
       itemId: itemInfo.id,
       groupId: selectedGroupId,
       isGroup: itemInfo.elType === ChartItemType.group,
       isRoot,
-      ableDelete: !isRoot,
+      selectedIdList: !isRoot && _idList,
     });
   };
 
   return (
     <div
       className={cx('chart-item', getBlockType(itemInfo.elType, true), {
-        selected: isSelected,
+        selected: selectedIdList.includes(itemInfo.id),
         delete: multiDeleteDelay > -1,
       })}
       data-id={itemInfo.id}
