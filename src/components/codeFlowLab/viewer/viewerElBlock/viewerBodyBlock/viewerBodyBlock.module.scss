@@ -4,4 +4,9 @@
   background-color: #ffffff;
   width: $viewer-width;
   overflow: auto;
+
+  &.in-viewer {
+    margin: 0 auto;
+    aspect-ratio: 9/19.5;
+  }
 }

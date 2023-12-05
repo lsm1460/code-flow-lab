@@ -14,15 +14,22 @@ interface Props {
   viewerItem: ViewerItem;
   triggerProps: TriggerProps;
   addedStyle: CSSProperties;
+  isOnlyViewer: boolean;
 }
-function ViewerBodyBlock({ elRef, viewerItem, triggerProps }: Props) {
+function ViewerBodyBlock({ elRef, viewerItem, triggerProps, isOnlyViewer }: Props) {
+  console.log('isOnlyViewer', isOnlyViewer);
   const addedStyle = useSelector(
     (state: RootState) => state.addedStyles[`${ROOT_BLOCK_ID}-${state.sceneOrder}`],
     shallowEqual
   );
 
   return (
-    <div ref={elRef} className={cx('viewer-wrap')} style={{ ...viewerItem.styles, ...addedStyle }} {...triggerProps}>
+    <div
+      ref={elRef}
+      className={cx('viewer-wrap', { 'in-viewer': isOnlyViewer })}
+      style={{ ...viewerItem.styles, ...addedStyle }}
+      {...triggerProps}
+    >
       {viewerItem.children.map((_item) => (
         <ViewerElBlock key={_item.id} viewerItem={_item} />
       ))}

@@ -15,7 +15,31 @@ const {
   OPEN_PROJECT,
   DEBUG,
 } = require('../../channel');
+const isDev = require('electron-is-dev');
 const { createZipFromFolder } = require('../zip-folder');
+
+const EXCLUDE_VIEWER_FILE_LIST = [
+  '.DS_Store',
+  'manifest.json',
+  'asset-manifest.json',
+  'channel.js',
+  'controller/detect-platform.js',
+  'controller/menu/edit.js',
+  'controller/menu/file.js',
+  'controller/menu/index.js',
+  'controller/menu/view.js',
+  'controller/rightClickRegister.js',
+  'controller/shortcutRegister.js',
+  'controller/viewerRegister.js',
+  'controller/zip-folder.js',
+  'electron.js',
+  'favicon.ico',
+  'google-material-icon.woff2',
+  'logo192.png',
+  'logo512.png',
+  'preload.js',
+  'robots.txt',
+];
 
 const checkSaved = (_mainWindow) =>
   new Promise((resolve) => {
@@ -189,6 +213,25 @@ const openProject = async (_mainWindow, _filePath) => {
   });
 };
 
+const addImageFileToZip = async (_zip, _contents) => {
+  const imageFolder = _zip.folder('images');
+  const _imgItemList = Object.values(_contents.items).filter((_item) => _item.elType === 'image' && _item.src);
+
+  for (let _item of _imgItemList) {
+    const _imgFileName = path.basename(_item.src);
+
+    let _imgBuffer = fs.readFileSync(_item.src);
+
+    _imgBuffer = await sharp(_imgBuffer, { failOn: 'truncated' })
+      .resize({ width: 500, withoutEnlargement: true })
+      .toBuffer();
+
+    imageFolder.file(_imgFileName, _imgBuffer, { binary: true });
+  }
+
+  return _zip;
+};
+
 const saveProject = (_mainWindow) => {
   return new Promise((resolve, reject) => {
     if (global.isOpenDialog) {
@@ -199,23 +242,10 @@ const saveProject = (_mainWindow) => {
       _mainWindow.webContents.send(REQUEST_PROJECT, null);
 
       ipcMain.once(SAVE_FILE, async (event, _contents) => {
-        const zip = new JSZip();
+        let zip = new JSZip();
         zip.file('data.json', JSON.stringify(_contents));
 
-        const imageFolder = zip.folder('images');
-        const _imgItemList = Object.values(_contents.items).filter((_item) => _item.elType === 'image' && _item.src);
-
-        for (let _item of _imgItemList) {
-          const _imgFileName = path.basename(_item.src);
-
-          let _imgBuffer = fs.readFileSync(_item.src);
-
-          _imgBuffer = await sharp(_imgBuffer, { failOn: 'truncated' })
-            .resize({ width: 500, withoutEnlargement: true })
-            .toBuffer();
-
-          imageFolder.file(_imgFileName, _imgBuffer, { binary: true });
-        }
+        zip = await addImageFileToZip(zip, _contents);
 
         const _buffer = await zip.generateAsync({ type: 'nodebuffer' });
 
@@ -274,16 +304,50 @@ const registFileChannel = (_mainWindow) => {
   });
 };
 
-const exportProject = (_mainWindow) => {
-  const tt = path.join(process.resourcesPath, '/temp-viewer');
-  const res = fs.existsSync(tt);
+const exportProject = async (_mainWindow) => {
+  if (global.isOpenDialog) {
+    return;
+  }
 
-  _mainWindow.webContents.send(DEBUG, { tt, res });
-  // _mainWindow.webContents.send(REQUEST_PROJECT, null);
+  global.isOpenDialog = true;
 
-  // ipcMain.once(SAVE_FILE, async (event, _contents) => {
-  //   createZipFromFolder()
-  // });
+  const { canceled, filePath } = await dialog.showSaveDialog();
+
+  global.isOpenDialog = false;
+
+  if (canceled) {
+    return;
+  }
+
+  let viewerPath;
+
+  if (isDev) {
+    viewerPath = path.join(__dirname, '../../../temp-viewer');
+  } else {
+    viewerPath = path.join(process.resourcesPath, '/temp-viewer');
+  }
+
+  // _mainWindow.webContents.send(DEBUG, { viewerPath, res });
+  _mainWindow.webContents.send(REQUEST_PROJECT, null);
+
+  ipcMain.once(SAVE_FILE, async (event, _contents) => {
+    let zip = await createZipFromFolder(viewerPath, EXCLUDE_VIEWER_FILE_LIST);
+
+    zip.file('data.js', `var data = ${JSON.stringify(_contents)}`);
+
+    zip = await addImageFileToZip(zip, _contents);
+
+    const _buffer = await zip.generateAsync({ type: 'nodebuffer' });
+
+    fs.writeFile(`${filePath}.zip`, _buffer, (_err) => {
+      if (_err) {
+        console.log('make error..');
+        //tasks to perform in case of error
+
+        return;
+      }
+    });
+  });
 };
 
 module.exports = {

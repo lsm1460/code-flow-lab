@@ -50,11 +50,17 @@ const getFilePathsRecursively = async (dir) => {
  * @param {string} dir
  * @returns {Promise<JSZip>}
  */
-const createZipFromFolder = async (dir) => {
+const createZipFromFolder = async (dir, excludePath = []) => {
   const absRoot = path.resolve(dir);
   const filePaths = await getFilePathsRecursively(dir);
 
   return filePaths.reduce((z, filePath) => {
+    for (let _p of excludePath) {
+      if (filePath.endsWith(_p)) {
+        return z;
+      }
+    }
+
     const relative = filePath.replace(absRoot, '');
 
     return z.file(relative, fs.createReadStream(filePath));

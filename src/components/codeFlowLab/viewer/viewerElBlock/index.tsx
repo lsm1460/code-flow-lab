@@ -47,8 +47,9 @@ interface Props {
   mapItem?: {
     [id: string]: number | string;
   };
+  isOnlyViewer?: boolean;
 }
-function ViewerElBlock({ viewerItem, mapItem }: Props) {
+function ViewerElBlock({ viewerItem, mapItem, isOnlyViewer }: Props) {
   const dispatch = useDispatch();
 
   const { items, addedStyle, sceneOrder, scene } = useSelector(
@@ -290,7 +291,7 @@ function ViewerElBlock({ viewerItem, mapItem }: Props) {
     <>
       {
         {
-          [ChartItemType.body]: <ViewerBodyBlock {...childProps} />,
+          [ChartItemType.body]: <ViewerBodyBlock {...childProps} isOnlyViewer={isOnlyViewer} />,
           [ChartItemType.div]: <ViewerDivBlock {...childProps} />,
           [ChartItemType.button]: <ViewerButtonBlock {...childProps} />,
           [ChartItemType.paragraph]: <ViewerParagraphBlock {...childProps} />,

@@ -3,14 +3,16 @@ import {
   ChartItem,
   ChartItemType,
   ChartStyleItem,
+  CodeFlowChartDoc,
   ConnectPoint,
   ViewerItem,
 } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
+import { setDocumentAction } from '@/reducers/contentWizard/mainDocument';
 import { getChartItem, getSceneId } from '@/utils/content';
 import _ from 'lodash';
-import React, { useMemo } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
+import React, { useEffect, useMemo } from 'react';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { getBlockType } from '../editor/flowChart/utils';
 import ViewerElBlock from './viewerElBlock';
 
@@ -18,6 +20,8 @@ interface Props {
   isOnlyViewer?: boolean;
 }
 function FlowChartViewer({ isOnlyViewer }: Props) {
+  const dispatch = useDispatch();
+
   const { groupRootId, sceneOrder, chartItems, sceneItemIds, selectedGroupId, group } = useSelector(
     (state: RootState) => {
       const sceneId = getSceneId(state.contentDocument.scene, state.sceneOrder, state.selectedGroupId);
@@ -33,6 +37,19 @@ function FlowChartViewer({ isOnlyViewer }: Props) {
     },
     shallowEqual
   );
+
+  useEffect(() => {
+    if (isOnlyViewer) {
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+
+      document.body.appendChild(script);
+      script.onload = () => {
+        dispatch(setDocumentAction(window.data));
+      };
+      script.src = './data.js';
+    }
+  }, [isOnlyViewer]);
 
   const selectedChartItem = useMemo(
     () => getChartItem(sceneItemIds, chartItems, selectedGroupId, group),
@@ -105,7 +122,7 @@ function FlowChartViewer({ isOnlyViewer }: Props) {
     return makeViewerDocument(chartItems[rootId]);
   }, [selectedChartItem, sceneOrder, chartItems, groupRootId]);
 
-  return <ViewerElBlock viewerItem={templateDocument} />;
+  return <ViewerElBlock viewerItem={templateDocument} isOnlyViewer={isOnlyViewer} />;
 }
 
 export default React.memo(FlowChartViewer);

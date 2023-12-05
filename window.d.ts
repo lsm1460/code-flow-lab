@@ -1,3 +1,4 @@
 interface Window {
   electron;
+  data;
 }
