@@ -3,7 +3,6 @@ import {
   ChartItem,
   ChartItemType,
   ChartStyleItem,
-  CodeFlowChartDoc,
   ConnectPoint,
   ViewerItem,
 } from '@/consts/types/codeFlowLab';
@@ -44,6 +43,7 @@ function FlowChartViewer({ isOnlyViewer }: Props) {
       script.type = 'text/javascript';
 
       document.body.appendChild(script);
+
       script.onload = () => {
         dispatch(setDocumentAction(window.data));
       };

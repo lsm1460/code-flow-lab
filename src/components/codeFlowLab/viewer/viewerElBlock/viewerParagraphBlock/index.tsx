@@ -8,12 +8,13 @@ interface Props {
   triggerProps: TriggerProps;
   addedStyle: CSSProperties;
   mapItem;
+  isOnlyViewer: boolean;
 }
-function ViewerParagraphBlock({ elRef, viewerItem, triggerProps, addedStyle, mapItem }: Props) {
+function ViewerParagraphBlock({ elRef, viewerItem, triggerProps, addedStyle, mapItem, isOnlyViewer }: Props) {
   return (
     <p ref={elRef} style={{ ...viewerItem.styles, ...addedStyle }} {...triggerProps}>
       {viewerItem.children.map((_item) => (
-        <ViewerElBlock key={_item.id} viewerItem={_item} mapItem={mapItem} />
+        <ViewerElBlock key={_item.id} viewerItem={_item} mapItem={mapItem} isOnlyViewer={isOnlyViewer} />
       ))}
     </p>
   );

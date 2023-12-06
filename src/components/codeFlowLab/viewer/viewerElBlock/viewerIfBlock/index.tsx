@@ -8,8 +8,9 @@ interface Props {
     [x: string]: any;
   };
   mapItem;
+  isOnlyViewer: boolean;
 }
-function ViewerIfBlock({ viewerItem, variables, mapItem }: Props) {
+function ViewerIfBlock({ viewerItem, variables, mapItem, isOnlyViewer }: Props) {
   const condition = useMemo(
     () => variables[viewerItem.connectionVariables[0]?.connectParentId],
     [variables, viewerItem]
@@ -18,7 +19,9 @@ function ViewerIfBlock({ viewerItem, variables, mapItem }: Props) {
   return (
     <React.Fragment>
       {!!condition &&
-        viewerItem.children.map((_item) => <ViewerElBlock key={_item.id} viewerItem={_item} mapItem={mapItem} />)}
+        viewerItem.children.map((_item) => (
+          <ViewerElBlock key={_item.id} viewerItem={_item} mapItem={mapItem} isOnlyViewer={isOnlyViewer} />
+        ))}
     </React.Fragment>
   );
 }

@@ -10,14 +10,15 @@ interface Props {
   viewerItem: ImageViewerItem;
   triggerProps: TriggerProps;
   addedStyle: CSSProperties;
+  isOnlyViewer: boolean;
 }
-function ViewerImageBlock({ elRef, viewerItem, triggerProps, addedStyle }: Props) {
+function ViewerImageBlock({ elRef, viewerItem, triggerProps, addedStyle, isOnlyViewer }: Props) {
   return (
     <img
       ref={elRef}
       style={{ ...viewerItem.styles, ...addedStyle }}
       {...triggerProps}
-      src={`${window.electron.CUSTOM_PROTOCOL}://${viewerItem.src}`}
+      src={`${isOnlyViewer ? '' : 'local://'}${viewerItem.src}`}
     />
   );
 }

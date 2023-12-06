@@ -13,8 +13,9 @@ interface Props {
   triggerProps: TriggerProps;
   addedStyle: CSSProperties;
   mapItem;
+  isOnlyViewer: boolean;
 }
-function ViewerLinkBlock({ elRef, viewerItem, triggerProps, addedStyle, mapItem }: Props) {
+function ViewerLinkBlock({ elRef, viewerItem, triggerProps, addedStyle, mapItem, isOnlyViewer }: Props) {
   const { sendOpenBrowser } = useIpcManager(false);
 
   useEffect(() => {
@@ -40,7 +41,7 @@ function ViewerLinkBlock({ elRef, viewerItem, triggerProps, addedStyle, mapItem 
       target="_blank"
     >
       {viewerItem.children.map((_item) => (
-        <ViewerElBlock key={_item.id} viewerItem={_item} mapItem={mapItem} />
+        <ViewerElBlock key={_item.id} viewerItem={_item} mapItem={mapItem} isOnlyViewer={isOnlyViewer} />
       ))}
     </a>
   );

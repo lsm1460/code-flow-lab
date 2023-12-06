@@ -105,6 +105,23 @@ const createProject = async (_mainWindow) => {
   }
 };
 
+const adjustImagePath = (_document, _path) => {
+  return {
+    ..._document,
+    items: {
+      ..._document.items,
+      ..._.chain(_document.items)
+        .pickBy((_item) => _item.elType === 'image' && _item.src)
+        .mapValues((_item) => {
+          const _imgName = path.basename(_item.src);
+
+          return { ..._item, src: `${_path}/images/${_imgName}` };
+        })
+        .value(),
+    },
+  };
+};
+
 const openProject = async (_mainWindow, _filePath) => {
   if (global.isOpenDialog) {
     return;
@@ -192,20 +209,7 @@ const openProject = async (_mainWindow, _filePath) => {
     }
 
     let _document = JSON.parse(fs.readFileSync(`${_path}/data.json`, 'utf8'));
-    _document = {
-      ..._document,
-      items: {
-        ..._document.items,
-        ..._.chain(_document.items)
-          .pickBy((_item) => _item.elType === 'image' && _item.src)
-          .mapValues((_item) => {
-            const _imgName = path.basename(_item.src);
-
-            return { ..._item, src: `${_path}/images/${_imgName}` };
-          })
-          .value(),
-      },
-    };
+    _document = adjustImagePath(_document, _path);
 
     global.projectPath = { path: _pathArray.join('/'), fileName: _fileName };
 
@@ -333,7 +337,9 @@ const exportProject = async (_mainWindow) => {
   ipcMain.once(SAVE_FILE, async (event, _contents) => {
     let zip = await createZipFromFolder(viewerPath, EXCLUDE_VIEWER_FILE_LIST);
 
-    zip.file('data.js', `var data = ${JSON.stringify(_contents)}`);
+    let _document = adjustImagePath(_contents, '.');
+
+    zip.file('data.js', `var data = ${JSON.stringify(_document)}`);
 
     zip = await addImageFileToZip(zip, _contents);
 

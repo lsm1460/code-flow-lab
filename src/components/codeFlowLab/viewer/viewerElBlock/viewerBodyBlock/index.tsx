@@ -17,7 +17,6 @@ interface Props {
   isOnlyViewer: boolean;
 }
 function ViewerBodyBlock({ elRef, viewerItem, triggerProps, isOnlyViewer }: Props) {
-  console.log('isOnlyViewer', isOnlyViewer);
   const addedStyle = useSelector(
     (state: RootState) => state.addedStyles[`${ROOT_BLOCK_ID}-${state.sceneOrder}`],
     shallowEqual
@@ -31,7 +30,7 @@ function ViewerBodyBlock({ elRef, viewerItem, triggerProps, isOnlyViewer }: Prop
       {...triggerProps}
     >
       {viewerItem.children.map((_item) => (
-        <ViewerElBlock key={_item.id} viewerItem={_item} />
+        <ViewerElBlock key={_item.id} viewerItem={_item} isOnlyViewer={isOnlyViewer} />
       ))}
     </div>
   );

@@ -35,7 +35,7 @@ function ImageEditBlock({ id, src }: Props) {
       <label>
         <input type="file" accept="image/png, image/jpeg" onChange={handleChangeImageSrc} />
         {!src && <span className="material-symbols-outlined">add_photo_alternate</span>}
-        {src && <img src={`${window.electron.CUSTOM_PROTOCOL}://${src}`} />}
+        {src && <img src={`local://${src}`} />}
       </label>
     </div>
   );

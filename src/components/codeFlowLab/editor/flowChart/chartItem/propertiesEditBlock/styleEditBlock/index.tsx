@@ -43,6 +43,13 @@ const CSS_PROPERTIES = {
   opacity: 1,
   aspectRatio: '1',
   zIndex: 0,
+  width: '',
+  minWidth: '',
+  maxWidth: '',
+  height: '',
+  minHeight: '',
+  maxHeight: '',
+  userSelect: ['auto', 'none', 'all', 'text'],
 };
 interface Props {
   id: string;

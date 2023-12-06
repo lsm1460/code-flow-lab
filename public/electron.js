@@ -39,7 +39,7 @@ function createWindow() {
 
   mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
 
-  if (true) {
+  if (isDev) {
     mainWindow.webContents.openDevTools({ mode: 'detach' });
   }
 
@@ -132,7 +132,7 @@ app.whenReady().then(() => {
   });
 
   protocol.handle(
-    process.env.CUSTOM_PROTOCOL,
+    'local',
     (_req) => net.fetch(`file://${new URL(_req.url).pathname}`),
     (error) => {
       if (error) console.error('프로토콜 등록 실패');

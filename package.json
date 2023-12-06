@@ -1,6 +1,6 @@
 {
   "name": "code-flow-lab",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "@craco/craco": "^7.1.0",
@@ -45,7 +45,7 @@
     "release": "npx yarn react-build && electron-builder --publish=always"
   },
   "build": {
-    "productName": "Start Electron",
+    "productName": "Code Flow Lab",
     "appId": "net.jetalab.ex.startelectron",
     "asar": true,
     "mac": {
@@ -54,7 +54,7 @@
       ]
     },
     "dmg": {
-      "title": "Start Electron"
+      "title": "Code Flow Lab"
     },
     "win": {
       "target": [

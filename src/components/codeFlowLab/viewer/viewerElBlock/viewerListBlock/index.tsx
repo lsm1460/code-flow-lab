@@ -17,8 +17,9 @@ interface Props {
   };
   addedStyle: CSSProperties;
   mapItem;
+  isOnlyViewer: boolean;
 }
-function ViewerListBlock({ elRef, viewerItem, triggerProps, variables, addedStyle, mapItem }: Props) {
+function ViewerListBlock({ elRef, viewerItem, triggerProps, variables, addedStyle, mapItem, isOnlyViewer }: Props) {
   const arrayVariable = useMemo(() => {
     const __var = variables[viewerItem.connectionVariables[0]?.connectParentId];
     if (__var !== undefined && !_.isArray(__var)) {
@@ -37,6 +38,7 @@ function ViewerListBlock({ elRef, viewerItem, triggerProps, variables, addedStyl
               key={_item.id}
               viewerItem={_item}
               mapItem={{ ...mapItem, [viewerItem.id]: viewerItem.useIndex ? _index : _var }}
+              isOnlyViewer={isOnlyViewer}
             />
           ))}
         </React.Fragment>

@@ -1,6 +1,6 @@
 import configureStore from '@/reducers/configureStore';
 import { Provider } from 'react-redux';
-import CodeFlowLabViewer from './components/codeFlowLab/viewer';
+import FlowChartViewer from './components/codeFlowLab/viewer';
 import './globals.css';
 
 export const store = configureStore();
@@ -8,7 +8,7 @@ export const store = configureStore();
 function App() {
   return (
     <Provider store={store}>
-      <CodeFlowLabViewer isOnlyViewer />
+      <FlowChartViewer isOnlyViewer />
     </Provider>
   );
 }

@@ -34,6 +34,7 @@ import styles from './flowChart.module.scss';
 import { doPolygonsIntersect, getBlockType, getCanvasLineColor, getRectPoints, makeNewItem } from './utils';
 import useIpcManager from '../../useIpcManager';
 
+const PRIVATE_KEY = 'codeflowlabcopypastekey';
 const cx = classNames.bind(styles);
 
 type PathInfo = { pos: string; prev: string; prevList: string[] };
@@ -279,7 +280,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
               group: _.pickBy(group, (_idList, _groupId) => idList.includes(_groupId)),
               'copy-by': 'code-flow-lab',
             }),
-            window.electron.PRIVATE_KEY
+            PRIVATE_KEY
           ).toString()
         );
       }
@@ -309,7 +310,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
 
       let clipText = await navigator.clipboard.readText();
 
-      clipText = CryptoJS.AES.decrypt(clipText, window.electron.PRIVATE_KEY).toString(CryptoJS.enc.Utf8);
+      clipText = CryptoJS.AES.decrypt(clipText, PRIVATE_KEY).toString(CryptoJS.enc.Utf8);
 
       try {
         const objects = JSON.parse(clipText);
