@@ -14,12 +14,12 @@ const {
 const { requestFullscreenOff, registViewChannel } = require('./controller/menu/view');
 const registRightClick = require('./controller/rightClickRegister');
 
-let mainWindow, preloadPath;
+let preloadPath;
 
-function createWindow() {
+function createWindow(_preloadPath) {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
-  mainWindow = new BrowserWindow({
+  const mainWindow = new BrowserWindow({
     width,
     height,
     minWidth: 900,
@@ -51,8 +51,8 @@ function createWindow() {
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
 
-    if (preloadPath) {
-      openProject(mainWindow, preloadPath);
+    if (_preloadPath || preloadPath) {
+      openProject(mainWindow, _preloadPath || preloadPath);
 
       preloadPath = null;
     }
@@ -72,6 +72,7 @@ function createWindow() {
       if (_isSaved) {
         if (mainWindow) {
           mainWindow.hide();
+          mainWindow.destroy();
           mainWindow = null;
         } else {
           app.exit();
@@ -97,10 +98,12 @@ function createWindow() {
           // 저장 후 종료
           const res = await saveProject(mainWindow);
           mainWindow.hide();
+          mainWindow.destroy();
           mainWindow = null;
         } else if (response === 2) {
           // 그냥 종료
           mainWindow.hide();
+          mainWindow.destroy();
           mainWindow = null;
         }
       }
@@ -138,6 +141,8 @@ app.whenReady().then(() => {
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
+      console.log('test...2');
+
       createWindow();
     }
   });
@@ -154,12 +159,10 @@ app.whenReady().then(() => {
 app.on('open-file', (_event, _path) => {
   _event.preventDefault();
 
-  if (!mainWindow) {
+  if (BrowserWindow.getAllWindows().length === 0) {
     preloadPath = _path;
   } else {
-    openProject(mainWindow, _path);
-
-    mainWindow.focus();
+    createWindow(_path);
   }
 });
 
@@ -170,7 +173,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-  if (mainWindow === null) {
+  if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
 });
