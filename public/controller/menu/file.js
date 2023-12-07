@@ -99,6 +99,8 @@ const createProject = async (_mainWindow) => {
   if (resetFlag) {
     _mainWindow.webContents.send(CREATE_DOCUMENT, null);
 
+    _mainWindow.setTitle('New Project');
+
     if (global.projectPath.path) {
       removeProjectFile();
     }
@@ -214,6 +216,8 @@ const openProject = async (_mainWindow, _filePath) => {
     global.projectPath = { path: _pathArray.join('/'), fileName: _fileName };
 
     _mainWindow.webContents.send(SET_DOCUMENT, _document);
+
+    _mainWindow.setTitle(path.basename(_filePath, '.cdfl'));
   });
 };
 
@@ -268,6 +272,8 @@ const saveProject = (_mainWindow) => {
             path: _pathArray.join('/'),
             fileName,
           };
+
+          _mainWindow.setTitle(path.basename(_filePath, '.cdfl'));
 
           resolve(true);
         });

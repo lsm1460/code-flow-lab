@@ -4,12 +4,17 @@ const isDev = require('electron-is-dev');
 const { getMenuTemplate, registWindowChannelFunc } = require('./controller/menu');
 const registViwerChannelFunc = require('./controller/viewerRegister');
 const registShortcut = require('./controller/shortcutRegister');
-const { removeProjectFile, checkSaved, saveProject, registFileChannel } = require('./controller/menu/file');
+const {
+  removeProjectFile,
+  checkSaved,
+  saveProject,
+  registFileChannel,
+  openProject,
+} = require('./controller/menu/file');
 const { requestFullscreenOff, registViewChannel } = require('./controller/menu/view');
 const registRightClick = require('./controller/rightClickRegister');
-require('dotenv/config');
 
-let mainWindow;
+let mainWindow, preloadPath;
 
 function createWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -45,6 +50,12 @@ function createWindow() {
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
+
+    if (preloadPath) {
+      openProject(mainWindow, preloadPath);
+
+      preloadPath = null;
+    }
   });
 
   const menuTemplate = getMenuTemplate(mainWindow, app);
@@ -138,6 +149,18 @@ app.whenReady().then(() => {
       if (error) console.error('프로토콜 등록 실패');
     }
   );
+});
+
+app.on('open-file', (_event, _path) => {
+  _event.preventDefault();
+
+  if (!mainWindow) {
+    preloadPath = _path;
+  } else {
+    openProject(mainWindow, _path);
+
+    mainWindow.focus();
+  }
 });
 
 app.on('window-all-closed', () => {

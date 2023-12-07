@@ -70,7 +70,8 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": false,
-      "createDesktopShortcut": true
+      "createDesktopShortcut": true,
+      "perMachine": true
     },
     "directories": {
       "buildResources": "./resources/installer/",
@@ -79,6 +80,13 @@
     },
     "extraResources": [
       "./temp-viewer/**"
+    ],
+    "fileAssociations": [
+      {
+        "ext": "cdfl",
+        "name": "Code Flow Lab File",
+        "role": "Editor"
+      }
     ]
   },
   "eslintConfig": {
