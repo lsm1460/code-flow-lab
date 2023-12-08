@@ -285,17 +285,21 @@ const saveProject = (_mainWindow) => {
     } else {
       global.isOpenDialog = true;
 
-      dialog.showSaveDialog().then(({ filePath, canceled }) => {
-        global.isOpenDialog = false;
+      dialog
+        .showSaveDialog({
+          filters: [{ name: 'Code Flow Lab File', extensions: 'cdfl' }],
+        })
+        .then(({ filePath, canceled }) => {
+          global.isOpenDialog = false;
 
-        if (!canceled) {
-          if (filePath) {
-            saveFile(filePath);
-          } else {
-            reject('no file name..');
+          if (!canceled) {
+            if (filePath) {
+              saveFile(filePath);
+            } else {
+              reject('no file name..');
+            }
           }
-        }
-      });
+        });
     }
   });
 };

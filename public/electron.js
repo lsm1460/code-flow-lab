@@ -14,6 +14,8 @@ const {
 const { requestFullscreenOff, registViewChannel } = require('./controller/menu/view');
 const registRightClick = require('./controller/rightClickRegister');
 
+const gotTheLock = app.requestSingleInstanceLock();
+
 let preloadPath;
 
 function createWindow(_preloadPath) {
@@ -136,26 +138,6 @@ function createWindow(_preloadPath) {
   mainWindow.focus();
 }
 
-app.whenReady().then(() => {
-  createWindow();
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      console.log('test...2');
-
-      createWindow();
-    }
-  });
-
-  protocol.handle(
-    'local',
-    (_req) => net.fetch(`file://${new URL(_req.url).pathname}`),
-    (error) => {
-      if (error) console.error('프로토콜 등록 실패');
-    }
-  );
-});
-
 app.on('open-file', (_event, _path) => {
   _event.preventDefault();
 
@@ -165,6 +147,35 @@ app.on('open-file', (_event, _path) => {
     createWindow(_path);
   }
 });
+
+if (!gotTheLock) {
+  log.info('single..');
+  log.info(process.argv);
+  app.quit();
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    log.info('double..');
+    log.info(commandLine);
+  });
+
+  app.whenReady().then(() => {
+    createWindow();
+
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow();
+      }
+    });
+
+    protocol.handle(
+      'local',
+      (_req) => net.fetch(`file://${new URL(_req.url).pathname}`),
+      (error) => {
+        if (error) console.error('프로토콜 등록 실패');
+      }
+    );
+  });
+}
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
