@@ -58,7 +58,7 @@ function createWindow(_preloadPath) {
     }
   });
 
-  const menuTemplate = getMenuTemplate(mainWindow, app);
+  const menuTemplate = getMenuTemplate(mainWindow);
 
   const menu = Menu.buildFromTemplate(menuTemplate);
   Menu.setApplicationMenu(menu);

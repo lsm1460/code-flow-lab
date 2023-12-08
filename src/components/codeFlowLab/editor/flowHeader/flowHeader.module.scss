@@ -39,6 +39,17 @@
     }
   }
 
+  .header-menu {
+    margin-right: 10px;
+    color: #ddd;
+    border-radius: 3px;
+    padding: 3px;
+
+    i {
+      font-size: 20px;
+    }
+  }
+
   &.mac {
     padding-left: 80px;
   }
@@ -133,6 +144,10 @@
         -webkit-app-region: no-drag;
         pointer-events: none;
         font-size: 17px;
+      }
+
+      &.maximize {
+        transform: scaleX(-1);
       }
     }
   }

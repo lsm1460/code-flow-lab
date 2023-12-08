@@ -13,6 +13,7 @@ import {
   REQUEST_MAXIMIZE,
   CLOSE_WINDOW,
   REQUEST_CONTEXT,
+  OPEN_MENU,
   DEBUG,
 } from '@/consts/channel.js';
 import { RootState } from '@/reducers';
@@ -79,6 +80,10 @@ const useIpcManager = (_ableReceive: boolean = true) => {
     ipcRenderer.send(CLOSE_WINDOW);
   };
 
+  const sendOpenHeaderMenu = () => {
+    ipcRenderer.send(OPEN_MENU);
+  };
+
   const sendContextOpen = (_payload?: {
     itemId?: string;
     groupId?: string;
@@ -97,6 +102,7 @@ const useIpcManager = (_ableReceive: boolean = true) => {
     sendMaximizeRequest,
     sendCloseRequest,
     sendContextOpen,
+    sendOpenHeaderMenu,
   };
 };
 

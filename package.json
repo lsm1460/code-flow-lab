@@ -41,7 +41,8 @@
     "react-build:viewer": "craco build --config ./craco.viewer.config.js",
     "react-build": "npx yarn react-build:viewer && craco build",
     "start": "concurrently \"cross-env NODE_ENV=development BROWSER=none npx yarn react-start\" \"wait-on http://localhost:3000 && electron .\"",
-    "build": "npx yarn react-build && electron-builder --mac",
+    "build:mac": "npx yarn react-build && electron-builder --mac",
+    "build:win": "npx yarn react-build && electron-builder --win",
     "release": "npx yarn react-build && electron-builder --publish=always"
   },
   "build": {

@@ -44,15 +44,15 @@ export const getImageSize = (_src: string): Promise<imageSize> => {
   });
 };
 
-type makeDocumentParams = {
+type MakeDocumentParams = {
   document: any;
   keys: string[];
   value: any;
   debug: string;
   count?: number;
 };
-type makeNewDocument = (makeDocumentParams: makeDocumentParams) => CodeFlowChartDoc;
-export const makeNewDocument: makeNewDocument = ({
+type MakeNewDocument = (makeDocumentParams: MakeDocumentParams) => CodeFlowChartDoc;
+export const makeNewDocument: MakeNewDocument = ({
   document: _document,
   keys: _keys,
   value: _value,

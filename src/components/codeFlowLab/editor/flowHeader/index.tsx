@@ -1,4 +1,4 @@
-import { REQUEST_UNDO, REQUEST_REDO } from '@/consts/channel.js';
+import { REQUEST_REDO, REQUEST_UNDO } from '@/consts/channel.js';
 import { RootState } from '@/reducers';
 import { setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
 import { getHistory, getNextHistory, getPrevHistory } from '@/utils/history';
@@ -17,6 +17,7 @@ function FlowHeader() {
     sendMinimizeRequest: handleMinimize,
     sendMaximizeRequest,
     sendCloseRequest: handleClose,
+    sendOpenHeaderMenu: handleWindowMenu,
   } = useIpcManager(false);
 
   const [historyNow, setHistoryNow] = useState(0);
@@ -66,6 +67,11 @@ function FlowHeader() {
 
   return (
     <header className={cx('header', { mac: window.electron.isMac })}>
+      {!window.electron.isMac && (
+        <button className={cx('header-menu')} onClick={handleWindowMenu}>
+          <i className="material-symbols-outlined">menu</i>
+        </button>
+      )}
       <span className={cx('logo')}>CODE_FLOW_LAB。</span>
       <ul className={cx('history-buttons')}>
         <li className={historyNow < 0 ? cx('disable') : ''}>
@@ -91,7 +97,7 @@ function FlowHeader() {
             <i className="material-symbols-outlined">minimize</i>
           </button>
           <button className={cx('maximize')} onClick={handleMaximize}>
-            <i className="material-symbols-outlined">{isMaximize ? 'close_fullscreen' : 'open_in_full'}</i>
+            <i className="material-symbols-outlined">{isMaximize ? 'stack' : 'crop_square'}</i>
           </button>
           <button className={cx('close')} onClick={handleClose}>
             <span>

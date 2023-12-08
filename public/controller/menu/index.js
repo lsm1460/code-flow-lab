@@ -1,24 +1,12 @@
-const { ipcMain } = require('electron');
-const { REQUEST_MINIMIZE, REQUEST_MAXIMIZE, CLOSE_WINDOW } = require('../../channel');
+const { ipcMain, Menu } = require('electron');
+const { REQUEST_MINIMIZE, REQUEST_MAXIMIZE, CLOSE_WINDOW, OPEN_MENU } = require('../../channel');
 
 const _file = require('./file');
 const _edit = require('./edit');
 const _view = require('./view');
 
-const getMenuTemplate = (_mainWindow, _app) => {
-  return [
-    {
-      label: '',
-      submenu: [
-        {
-          label: 'About Code Flow Lab',
-        },
-        {
-          type: 'separator',
-        },
-        { role: 'quit' },
-      ],
-    },
+const getMenuTemplate = (_mainWindow, _isMac = true) => {
+  let menu = [
     {
       label: 'File',
       submenu: [
@@ -107,6 +95,26 @@ const getMenuTemplate = (_mainWindow, _app) => {
       ],
     },
   ];
+
+  if (_isMac) {
+    menu = [
+      {
+        label: '',
+        submenu: [
+          {
+            label: 'About Code Flow Lab',
+          },
+          {
+            type: 'separator',
+          },
+          { role: 'quit' },
+        ],
+      },
+      ...menu,
+    ];
+  }
+
+  return menu;
 };
 
 const registWindowChannelFunc = (_mainWindow) => {
@@ -124,6 +132,14 @@ const registWindowChannelFunc = (_mainWindow) => {
 
   ipcMain.on(CLOSE_WINDOW, () => {
     _file.closeWindow(_mainWindow);
+  });
+
+  ipcMain.on(OPEN_MENU, () => {
+    const menuTemplate = getMenuTemplate(_mainWindow, false);
+
+    const editorMenu = Menu.buildFromTemplate(menuTemplate);
+
+    editorMenu.popup(_mainWindow);
   });
 };
 
