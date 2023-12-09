@@ -16,6 +16,7 @@ const {
 } = require('../../channel');
 const isDev = require('electron-is-dev');
 const { createZipFromFolder } = require('../zip-folder');
+const hidefile = require('hidefile');
 
 const EXCLUDE_VIEWER_FILE_LIST = [
   '.DS_Store',
@@ -154,9 +155,9 @@ const openProject = async (_mainWindow, _filePath) => {
     return;
   }
 
-  const _dirPath = path.dirname(_filePath);  
-  const _fileName = path.basename(_filePath, '.cdfl')
-  const _path = path.join(_dirPath, `/.${_fileName}`)
+  const _dirPath = path.dirname(_filePath);
+  const _fileName = path.basename(_filePath, '.cdfl');
+  const _path = path.join(_dirPath, `/.${_fileName}`);
 
   fs.mkdir(_path, { recursive: true }, (err) => {
     if (err) throw err;
@@ -187,8 +188,10 @@ const openProject = async (_mainWindow, _filePath) => {
       }
     }
 
-    let _document = JSON.parse(fs.readFileSync(`${_path}/data.json`, 'utf8'));
-    _document = adjustImagePath(_document, _path);
+    const _newPath = hidefile.hideSync(_path);
+
+    let _document = JSON.parse(fs.readFileSync(`${_newPath}/data.json`, 'utf8'));
+    _document = adjustImagePath(_document, _newPath);
 
     global.projectPath = {
       ...global.projectPath,
