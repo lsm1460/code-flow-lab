@@ -18,6 +18,7 @@ export type DocumentState = {
   isSaved: boolean;
   openTime: number;
   isFullscreen: boolean;
+  browserId: string;
 };
 
 export interface Operation {

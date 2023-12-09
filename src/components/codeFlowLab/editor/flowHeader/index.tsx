@@ -1,4 +1,4 @@
-import { REQUEST_REDO, REQUEST_UNDO } from '@/consts/channel.js';
+import { REQUEST_REDO, REQUEST_UNDO, CHECK_SAVED } from '@/consts/channel.js';
 import { RootState } from '@/reducers';
 import { setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
 import { getHistory, getNextHistory, getPrevHistory } from '@/utils/history';
@@ -12,6 +12,8 @@ const cx = classNames.bind(styles);
 
 function FlowHeader() {
   const dispatch = useDispatch();
+  const { ipcRenderer } = window.electron;
+
   const {
     sendDocumentForSave: handleSaveButton,
     sendMinimizeRequest: handleMinimize,
@@ -24,14 +26,12 @@ function FlowHeader() {
   const [history, setHistory] = useState([]);
   const [isMaximize, setIsMaximize] = useState(true);
 
-  const { flowDoc, isSaved } = useSelector(
-    (state: RootState) => ({ flowDoc: state.contentDocument, isSaved: state.isSaved }),
+  const { flowDoc, isSaved, browserId } = useSelector(
+    (state: RootState) => ({ flowDoc: state.contentDocument, isSaved: state.isSaved, browserId: state.browserId }),
     shallowEqual
   );
 
   useEffect(() => {
-    const { ipcRenderer } = window.electron;
-
     ipcRenderer.on(REQUEST_UNDO, (e, msg) => {
       prev();
     });
@@ -47,6 +47,14 @@ function FlowHeader() {
     setHistoryNow(now);
     setHistory(history);
   }, [flowDoc]);
+
+  useEffect(() => {
+    ipcRenderer.send(`${browserId}:${CHECK_SAVED}`, isSaved);
+
+    return () => {
+      ipcRenderer.removeAllListeners(`${browserId}:${CHECK_SAVED}`);
+    };
+  }, [isSaved, browserId]);
 
   const prev = () => {
     const historyOp = getPrevHistory();

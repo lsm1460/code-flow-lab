@@ -44,7 +44,7 @@ const registRightClick = (_mainWindow) => {
     },
   ];
 
-  ipcMain.on(REQUEST_CONTEXT, (_event, _payload) => {
+  ipcMain.on(`${_mainWindow.id}:${REQUEST_CONTEXT}`, (_event, _payload) => {
     const { itemId, groupId, isGroup, isRoot, selectedIdList } = _payload || {};
     let _menu = [...getDefaultMenu({ selectedIdList })];
 

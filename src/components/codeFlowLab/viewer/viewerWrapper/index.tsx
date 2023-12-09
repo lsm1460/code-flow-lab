@@ -19,9 +19,10 @@ function ViewerWrapper() {
   const [isMinimize, setIsMinimize] = useState(true);
   const [isActive, setIsActive] = useState(true);
 
-  const { selectedGroupId, isFullscreen } = useSelector((state: RootState) => ({
+  const { selectedGroupId, isFullscreen, browserId } = useSelector((state: RootState) => ({
     selectedGroupId: state.selectedGroupId,
     isFullscreen: state.isFullscreen,
+    browserId: state.browserId,
   }));
 
   useEffect(() => {
@@ -43,7 +44,7 @@ function ViewerWrapper() {
     dispatch(setSceneOrderAction(1));
     dispatch(setIsFullscreenAction(true));
 
-    ipcRenderer.send(REQUEST_FULLSCREEN_ON);
+    ipcRenderer.send(`${browserId}:${REQUEST_FULLSCREEN_ON}`);
   };
 
   return (

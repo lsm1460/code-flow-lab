@@ -1,4 +1,4 @@
-const { dialog, ipcMain } = require('electron');
+const { dialog, ipcMain, BrowserWindow } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const JSZip = require('jszip');
@@ -9,7 +9,6 @@ const {
   SAVE_FILE,
   SET_DOCUMENT,
   CREATE_DOCUMENT,
-  REQUEST_SAVE_STATE,
   CHECK_SAVED,
   REQUEST_SAVE,
   OPEN_PROJECT,
@@ -41,30 +40,14 @@ const EXCLUDE_VIEWER_FILE_LIST = [
   'robots.txt',
 ];
 
-const checkSaved = (_mainWindow) =>
-  new Promise((resolve) => {
-    ipcMain.once(CHECK_SAVED, async (event, _isSaved) => {
-      resolve(_isSaved);
-    });
-
-    if (_mainWindow?.webContents) {
-      _mainWindow.webContents.send(REQUEST_SAVE_STATE, null);
-    } else {
-      resolve(true);
-    }
-  });
-
-const removeProjectFile = () => {
-  if (!global.projectPath.path) {
+const removeProjectFile = (_id) => {
+  if (!global.projectPath[_id].path) {
     return;
   }
 
-  fs.rmSync(`${global.projectPath.path}/.${global.projectPath.fileName}`, { recursive: true, force: true });
+  fs.rmSync(`${global.projectPath[_id].path}/.${global.projectPath[_id].fileName}`, { recursive: true, force: true });
 
-  global.projectPath = {
-    path: '',
-    fileName: '',
-  };
+  delete global.projectPath[_id];
 };
 
 const createProject = async (_mainWindow) => {
@@ -72,11 +55,9 @@ const createProject = async (_mainWindow) => {
     return;
   }
 
-  const isSaved = await checkSaved(_mainWindow);
-
   let resetFlag = true;
 
-  if (!isSaved) {
+  if (!global.isSaved[_mainWindow.id]) {
     const options = {
       type: 'question',
       buttons: ['Cancel', 'Yes'],
@@ -101,8 +82,8 @@ const createProject = async (_mainWindow) => {
 
     _mainWindow.setTitle('New Project');
 
-    if (global.projectPath.path) {
-      removeProjectFile();
+    if (global.projectPath[_mainWindow.id]?.path) {
+      removeProjectFile(_mainWindow.id);
     }
   }
 };
@@ -129,9 +110,7 @@ const openProject = async (_mainWindow, _filePath) => {
     return;
   }
 
-  const isSaved = await checkSaved(_mainWindow);
-
-  if (!isSaved) {
+  if (!global.isSaved[_mainWindow.id]) {
     const options = {
       type: 'question',
       buttons: ['Cancel', 'Yes'],
@@ -165,8 +144,8 @@ const openProject = async (_mainWindow, _filePath) => {
     _filePath = filePaths[0];
   }
 
-  if (global.projectPath.path) {
-    removeProjectFile();
+  if (global.projectPath[_mainWindow.id]?.path) {
+    removeProjectFile(_mainWindow.id);
   }
 
   const _extension = _filePath.split('.').pop();
@@ -213,7 +192,13 @@ const openProject = async (_mainWindow, _filePath) => {
     let _document = JSON.parse(fs.readFileSync(`${_path}/data.json`, 'utf8'));
     _document = adjustImagePath(_document, _path);
 
-    global.projectPath = { path: _pathArray.join('/'), fileName: _fileName };
+    global.projectPath = {
+      ...global.projectPath,
+      [_mainWindow.id]: {
+        path: _pathArray.join('/'),
+        fileName: _fileName,
+      },
+    };
 
     _mainWindow.webContents.send(SET_DOCUMENT, _document);
 
@@ -269,8 +254,11 @@ const saveProject = (_mainWindow) => {
           const fileName = _pathArray.pop();
 
           global.projectPath = {
-            path: _pathArray.join('/'),
-            fileName,
+            ...global.projectPath,
+            [_mainWindow.id]: {
+              path: _pathArray.join('/'),
+              fileName,
+            },
           };
 
           _mainWindow.setTitle(path.basename(_filePath, '.cdfl'));
@@ -309,12 +297,20 @@ const closeWindow = (_mainWindow) => {
 };
 
 const registFileChannel = (_mainWindow) => {
-  ipcMain.on(REQUEST_SAVE, () => {
+  ipcMain.on(`${_mainWindow.id}:${REQUEST_SAVE}`, () => {
     saveProject(_mainWindow);
   });
 
-  ipcMain.on(OPEN_PROJECT, (_event, _path) => {
+  ipcMain.on(`${_mainWindow.id}:${OPEN_PROJECT}`, (_event, _path) => {
     openProject(_mainWindow, _path);
+  });
+
+  ipcMain.on(`${_mainWindow.id}:${CHECK_SAVED}`, (event, _isSaved) => {
+    const current = BrowserWindow.getFocusedWindow();
+
+    if (current) {
+      global.isSaved[current.id] = _isSaved;
+    }
   });
 };
 
@@ -367,7 +363,6 @@ const exportProject = async (_mainWindow) => {
 };
 
 module.exports = {
-  checkSaved,
   removeProjectFile,
   createProject,
   openProject,

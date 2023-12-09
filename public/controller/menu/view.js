@@ -17,7 +17,7 @@ const requestFullscreenOff = (_mainWindow) => {
 };
 
 const registViewChannel = (_mainWindow) => {
-  ipcMain.on(REQUEST_FULLSCREEN_ON, () => {
+  ipcMain.on(`${_mainWindow.id}:${REQUEST_FULLSCREEN_ON}`, () => {
     onFullscreen(_mainWindow);
   });
 };

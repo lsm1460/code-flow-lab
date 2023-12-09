@@ -9,6 +9,7 @@ import {
   RESET_FLOW_LOG,
   RESET_OPTION_MODAL_INFO,
   SET_ADDED_STYLES,
+  SET_BROWSER_ID,
   SET_DELETE_ANIMATION_ID_LIST,
   SET_DELETE_TARGET_ID_LIST,
   SET_DOCUMENT,
@@ -60,6 +61,7 @@ const initialState: DocumentState = {
   isSaved: true,
   openTime: new Date().getTime(),
   isFullscreen: false,
+  browserId: '',
 };
 
 const documentReducer = createReducer<DocumentState, DocumentAction>(initialState, {
@@ -94,6 +96,7 @@ const documentReducer = createReducer<DocumentState, DocumentAction>(initialStat
   },
   [RESET_DOCUMENT_VALUE]: (state) => ({
     ...initialState,
+    browserId: state.browserId,
     openTime: new Date().getTime(),
   }),
   [SET_DELETE_TARGET_ID_LIST]: (state) => state,
@@ -183,6 +186,7 @@ const documentReducer = createReducer<DocumentState, DocumentAction>(initialStat
   [SET_SELECTED_GROUP_ID]: (state, { payload }) => ({ ...state, selectedGroupId: payload }),
   [SET_OPENED_GROUP_ID_LIST]: (state, { payload }) => ({ ...state, openedGroupIdList: _.uniq(payload) }),
   [SET_IS_FULLSCREEN]: (state, { payload }) => ({ ...state, isFullscreen: payload }),
+  [SET_BROWSER_ID]: (state, { payload }) => ({ ...state, browserId: payload }),
 });
 
 export default documentReducer;

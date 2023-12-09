@@ -1,18 +1,13 @@
-const { app, BrowserWindow, screen, Menu, dialog, protocol, net, globalShortcut } = require('electron');
+const { app, BrowserWindow, screen, Menu, dialog, protocol, net, globalShortcut, ipcMain } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
 const { getMenuTemplate, registWindowChannelFunc } = require('./controller/menu');
 const registViwerChannelFunc = require('./controller/viewerRegister');
 const registShortcut = require('./controller/shortcutRegister');
-const {
-  removeProjectFile,
-  checkSaved,
-  saveProject,
-  registFileChannel,
-  openProject,
-} = require('./controller/menu/file');
+const { removeProjectFile, saveProject, registFileChannel, openProject } = require('./controller/menu/file');
 const { requestFullscreenOff, registViewChannel } = require('./controller/menu/view');
 const registRightClick = require('./controller/rightClickRegister');
+const channel = require('./channel');
 
 const gotTheLock = app.requestSingleInstanceLock();
 
@@ -21,7 +16,7 @@ let preloadPath;
 function createWindow(_preloadPath) {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
-  const mainWindow = new BrowserWindow({
+  let mainWindow = new BrowserWindow({
     width,
     height,
     minWidth: 900,
@@ -39,9 +34,17 @@ function createWindow(_preloadPath) {
   });
 
   global.isOpenDialog = false;
+  global.isSaved = {
+    ...(global.isSaved || {}),
+    [mainWindow.id]: true,
+  };
+
   global.projectPath = {
-    path: '',
-    fileName: '',
+    ...(global.projectPath || {}),
+    [mainWindow.id]: {
+      path: '',
+      fileName: '',
+    },
   };
 
   mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
@@ -52,6 +55,7 @@ function createWindow(_preloadPath) {
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
+    mainWindow.webContents.send(channel.SET_BROWSER_ID, mainWindow.id);
 
     if (_preloadPath || preloadPath) {
       openProject(mainWindow, _preloadPath || preloadPath);
@@ -68,56 +72,39 @@ function createWindow(_preloadPath) {
   mainWindow.setResizable(true);
 
   mainWindow.on('close', (_event) => {
-    _event.preventDefault();
+    if (!global.isSaved[mainWindow.id]) {
+      const options = {
+        type: 'question',
+        buttons: ['Cancel', 'Yes'],
+        title: 'Question',
+        message: '종료하시겠습니까?',
+        detail: '저장되지 않은 내용은 지워집니다.',
+      };
 
-    checkSaved(mainWindow).then(async (_isSaved) => {
-      if (_isSaved) {
-        if (mainWindow) {
-          mainWindow.hide();
-          mainWindow.destroy();
-          mainWindow = null;
-        } else {
-          app.exit();
-        }
-      } else {
-        const options = {
-          type: 'question',
-          buttons: ['Cancel', 'Yes', 'No'],
-          title: 'Question',
-          message: '종료하기 전 프로젝트를 저장하시겠습니까?',
-          detail: '저장되지 않은 내용은 지워집니다.',
-        };
+      global.isOpenDialog = true;
 
-        global.isOpenDialog = true;
-
-        const { response } = await dialog.showMessageBox(null, options);
-
+      dialog.showMessageBox(null, options).then(({ response }) => {
         global.isOpenDialog = false;
-
         if (response === 0) {
           // 취소
-        } else if (response === 1) {
-          // 저장 후 종료
-          const res = await saveProject(mainWindow);
-          mainWindow.hide();
-          mainWindow.destroy();
-          mainWindow = null;
-        } else if (response === 2) {
-          // 그냥 종료
-          mainWindow.hide();
-          mainWindow.destroy();
-          mainWindow = null;
+          _event.preventDefault();
         }
-      }
-    });
+      });
+    }
   });
 
   mainWindow.on('closed', () => {
-    mainWindow = null;
+    delete global.isSaved[mainWindow.id];
 
-    if (global.projectPath.path) {
-      removeProjectFile();
+    Object.values(channel).forEach((_channelVal) => {
+      ipcMain.removeAllListeners(`${mainWindow.id}:${_channelVal}`);
+    });
+
+    if (global.projectPath[mainWindow.id]?.path) {
+      removeProjectFile(mainWindow.id);
     }
+
+    mainWindow = null;
   });
 
   mainWindow.on('leave-full-screen', () => {
@@ -148,17 +135,27 @@ app.on('open-file', (_event, _path) => {
   }
 });
 
+const dockMenu = Menu.buildFromTemplate([
+  {
+    label: 'New Window',
+    click: () => createWindow(),
+  },
+]);
+
 if (!gotTheLock) {
-  log.info('single..');
-  log.info(process.argv);
   app.quit();
 } else {
   app.on('second-instance', (event, commandLine, workingDirectory) => {
-    log.info('double..');
-    log.info(commandLine);
+    if (process.platform !== 'darwin') {
+      // window open project..
+    }
   });
 
   app.whenReady().then(() => {
+    if (process.platform === 'darwin') {
+      app.dock.setMenu(dockMenu);
+    }
+
     createWindow();
 
     app.on('activate', () => {

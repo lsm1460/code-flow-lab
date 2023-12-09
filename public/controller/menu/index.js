@@ -118,11 +118,11 @@ const getMenuTemplate = (_mainWindow, _isMac = true) => {
 };
 
 const registWindowChannelFunc = (_mainWindow) => {
-  ipcMain.on(REQUEST_MINIMIZE, (_event) => {
+  ipcMain.on(`${_mainWindow.id}:${REQUEST_MINIMIZE}`, (_event) => {
     _mainWindow.minimize();
   });
 
-  ipcMain.on(REQUEST_MAXIMIZE, (_event) => {
+  ipcMain.on(`${_mainWindow.id}:${REQUEST_MAXIMIZE}`, (_event) => {
     if (_mainWindow.isMaximized()) {
       _mainWindow.unmaximize();
     } else {
@@ -130,11 +130,11 @@ const registWindowChannelFunc = (_mainWindow) => {
     }
   });
 
-  ipcMain.on(CLOSE_WINDOW, () => {
+  ipcMain.on(`${_mainWindow.id}:${CLOSE_WINDOW}`, () => {
     _file.closeWindow(_mainWindow);
   });
 
-  ipcMain.on(OPEN_MENU, () => {
+  ipcMain.on(`${_mainWindow.id}:${OPEN_MENU}`, () => {
     const menuTemplate = getMenuTemplate(_mainWindow, false);
 
     const editorMenu = Menu.buildFromTemplate(menuTemplate);

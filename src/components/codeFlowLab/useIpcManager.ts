@@ -1,24 +1,24 @@
 import { store } from '@/App';
 import {
-  CHECK_SAVED,
+  CLOSE_WINDOW,
   CREATE_DOCUMENT,
+  DEBUG,
   OPEN_BROWSER,
+  OPEN_MENU,
   OPEN_PROJECT,
+  REQUEST_CONTEXT,
+  REQUEST_MAXIMIZE,
+  REQUEST_MINIMIZE,
   REQUEST_PROJECT,
   REQUEST_SAVE,
-  REQUEST_SAVE_STATE,
   SAVE_FILE,
   SET_DOCUMENT,
-  REQUEST_MINIMIZE,
-  REQUEST_MAXIMIZE,
-  CLOSE_WINDOW,
-  REQUEST_CONTEXT,
-  OPEN_MENU,
-  DEBUG,
+  SET_BROWSER_ID,
 } from '@/consts/channel.js';
 import { RootState } from '@/reducers';
 import {
   resetDocumentValueAction,
+  setBrowserIdAction,
   setDocumentAction,
   setIsSaveStateAction,
 } from '@/reducers/contentWizard/mainDocument';
@@ -30,6 +30,10 @@ const useIpcManager = (_ableReceive: boolean = true) => {
   const { ipcRenderer } = window.electron;
 
   if (_ableReceive) {
+    ipcRenderer.on(SET_BROWSER_ID, (e, _id) => {
+      dispatch(setBrowserIdAction(_id));
+    });
+
     ipcRenderer.on(REQUEST_PROJECT, (e, msg) => {
       const { contentDocument }: RootState = store.getState();
 
@@ -45,43 +49,51 @@ const useIpcManager = (_ableReceive: boolean = true) => {
       dispatch(resetDocumentValueAction());
     });
 
-    ipcRenderer.on(REQUEST_SAVE_STATE, () => {
-      const { isSaved }: RootState = store.getState();
-
-      ipcRenderer.send(CHECK_SAVED, isSaved);
-    });
-
     ipcRenderer.on(DEBUG, (e, msg) => {
       alert(JSON.stringify(msg));
     });
   }
 
   const sendDocumentForSave = () => {
-    ipcRenderer.send(REQUEST_SAVE);
+    const { browserId }: RootState = store.getState();
+
+    ipcRenderer.send(`${browserId}:${REQUEST_SAVE}`);
   };
 
   const sendOpenBrowser = (_link) => {
-    ipcRenderer.send(OPEN_BROWSER, _link);
+    const { browserId }: RootState = store.getState();
+
+    ipcRenderer.send(`${browserId}:${OPEN_BROWSER}`, _link);
   };
 
   const sendOpenProject = (_path) => {
-    ipcRenderer.send(OPEN_PROJECT, _path);
+    const { browserId }: RootState = store.getState();
+
+    ipcRenderer.send(`${browserId}:${OPEN_PROJECT}`, _path);
   };
 
   const sendMinimizeRequest = () => {
-    ipcRenderer.send(REQUEST_MINIMIZE);
+    const { browserId }: RootState = store.getState();
+
+    ipcRenderer.send(`${browserId}:${REQUEST_MINIMIZE}`);
   };
 
   const sendMaximizeRequest = () => {
-    ipcRenderer.send(REQUEST_MAXIMIZE);
+    const { browserId }: RootState = store.getState();
+
+    ipcRenderer.send(`${browserId}:${REQUEST_MAXIMIZE}`);
   };
 
   const sendCloseRequest = () => {
-    ipcRenderer.send(CLOSE_WINDOW);
+    const { browserId }: RootState = store.getState();
+
+    ipcRenderer.send(`${browserId}:${CLOSE_WINDOW}`);
   };
 
   const sendOpenHeaderMenu = () => {
-    ipcRenderer.send(OPEN_MENU);
+    const { browserId }: RootState = store.getState();
+
+    ipcRenderer.send(`${browserId}:${OPEN_MENU}`);
   };
 
   const sendContextOpen = (_payload?: {
@@ -91,7 +103,9 @@ const useIpcManager = (_ableReceive: boolean = true) => {
     isRoot?: boolean;
     selectedIdList?: string[];
   }) => {
-    ipcRenderer.send(REQUEST_CONTEXT, _payload);
+    const { browserId }: RootState = store.getState();
+
+    ipcRenderer.send(`${browserId}:${REQUEST_CONTEXT}`, _payload);
   };
 
   return {
