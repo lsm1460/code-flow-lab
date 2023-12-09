@@ -82,7 +82,7 @@ const createProject = async (_mainWindow) => {
 
     _mainWindow.setTitle('New Project');
 
-    if (global.projectPath[_mainWindow.id]?.path) {
+    if (global.projectPath[_mainWindow.id]) {
       removeProjectFile(_mainWindow.id);
     }
   }
@@ -144,21 +144,19 @@ const openProject = async (_mainWindow, _filePath) => {
     _filePath = filePaths[0];
   }
 
-  if (global.projectPath[_mainWindow.id]?.path) {
+  if (global.projectPath[_mainWindow.id]) {
     removeProjectFile(_mainWindow.id);
   }
 
-  const _extension = _filePath.split('.').pop();
+  const _extension = path.extname(_filePath);
 
-  if (_extension !== 'cdfl') {
+  if (_extension !== '.cdfl') {
     return;
   }
 
-  const _pathArray = _filePath.split('/');
-  const _fileName = _pathArray.pop().split('.')[0];
-
-  const clonedFolderPath = [..._pathArray, `.${_fileName}`];
-  const _path = clonedFolderPath.join('/');
+  const _dirPath = path.dirname(_filePath);  
+  const _fileName = path.basename(_filePath, '.cdfl')
+  const _path = path.join(_dirPath, `/.${_fileName}`)
 
   fs.mkdir(_path, { recursive: true }, (err) => {
     if (err) throw err;
@@ -195,7 +193,7 @@ const openProject = async (_mainWindow, _filePath) => {
     global.projectPath = {
       ...global.projectPath,
       [_mainWindow.id]: {
-        path: _pathArray.join('/'),
+        path: _dirPath,
         fileName: _fileName,
       },
     };
@@ -250,26 +248,28 @@ const saveProject = (_mainWindow) => {
             return;
           }
 
-          const _pathArray = _filePath.split('/');
-          const fileName = _pathArray.pop();
+          const _dirPath = path.dirname(_filePath);
+          const fileName = path.basename(_filePath, '.cdfl');
 
           global.projectPath = {
             ...global.projectPath,
             [_mainWindow.id]: {
-              path: _pathArray.join('/'),
+              path: _dirPath,
               fileName,
             },
           };
 
-          _mainWindow.setTitle(path.basename(_filePath, '.cdfl'));
+          _mainWindow.setTitle(fileName);
 
           resolve(true);
         });
       });
     };
 
-    if (global.projectPath.path) {
-      saveFile(`${global.projectPath.path}/${global.projectPath.fileName}`);
+    if (global.projectPath[_mainWindow.id]) {
+      const { path, fileName } = global.projectPath[_mainWindow.id];
+
+      saveFile(`${path}/${fileName}`);
     } else {
       global.isOpenDialog = true;
 

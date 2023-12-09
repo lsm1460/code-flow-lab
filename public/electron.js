@@ -142,12 +142,24 @@ const dockMenu = Menu.buildFromTemplate([
   },
 ]);
 
+const findFilePathInCmd = (_cmdLine) => {
+  for (let _line of _cmdLine) {
+    if (_line.endsWith('.cdfl')) {
+      return _line;
+    }
+  }
+}
+
 if (!gotTheLock) {
   app.quit();
 } else {
   app.on('second-instance', (event, commandLine, workingDirectory) => {
     if (process.platform !== 'darwin') {
       // window open project..
+
+      const filePath = findFilePathInCmd(commandLine)
+
+      createWindow(filePath)
     }
   });
 
@@ -156,7 +168,9 @@ if (!gotTheLock) {
       app.dock.setMenu(dockMenu);
     }
 
-    createWindow();
+    const filePath = findFilePathInCmd(process.argv)
+
+    createWindow(filePath);
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {
