@@ -83,7 +83,7 @@ const createProject = async (_mainWindow) => {
 
     _mainWindow.setTitle('New Project');
 
-    if (global.projectPath[_mainWindow.id]) {
+    if (global.projectPath[_mainWindow.id]?.path) {
       removeProjectFile(_mainWindow.id);
     }
   }
@@ -145,7 +145,7 @@ const openProject = async (_mainWindow, _filePath) => {
     _filePath = filePaths[0];
   }
 
-  if (global.projectPath[_mainWindow.id]) {
+  if (global.projectPath[_mainWindow.id]?.path) {
     removeProjectFile(_mainWindow.id);
   }
 
@@ -242,10 +242,9 @@ const saveProject = (_mainWindow) => {
         zip = await addImageFileToZip(zip, _contents);
 
         const _buffer = await zip.generateAsync({ type: 'nodebuffer' });
-
         fs.writeFile(`${_filePath}.cdfl`, _buffer, (_err) => {
           if (_err) {
-            console.log('make error..');
+            console.log('make error..1');
             //tasks to perform in case of error
 
             return;
@@ -269,7 +268,7 @@ const saveProject = (_mainWindow) => {
       });
     };
 
-    if (global.projectPath[_mainWindow.id]) {
+    if (global.projectPath[_mainWindow.id]?.path) {
       const { path, fileName } = global.projectPath[_mainWindow.id];
 
       saveFile(`${path}/${fileName}`);
@@ -356,7 +355,7 @@ const exportProject = async (_mainWindow) => {
 
     fs.writeFile(`${filePath}.zip`, _buffer, (_err) => {
       if (_err) {
-        console.log('make error..');
+        console.log('make error..2');
         //tasks to perform in case of error
 
         return;
