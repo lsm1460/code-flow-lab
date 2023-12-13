@@ -251,24 +251,3 @@ export const getCanvasLineColor = (_originElType: ChartItemType, _nextElType: Ch
     return 'red';
   }
 };
-
-export const getOperationsForGroup = (_operations: Operation | Operation[], _selectedGroupId): Operation[] => {
-  // group이 열려있을때 오퍼레이션을 확인하여 앞에 group이 없을 때 추가함!!
-
-  let operations;
-
-  if (!_.isArray(_operations)) {
-    operations = [{ ..._operations }];
-  } else {
-    operations = _.map(_operations, (operation) => ({
-      ...operation,
-    }));
-  }
-
-  return operations
-    .filter((_op) => (_selectedGroupId ? !_op.key.startsWith('scene') : true))
-    .map((_op) => ({
-      ..._op,
-      key: _selectedGroupId && _op.key.startsWith('items') ? `group.${_selectedGroupId}.` + _op.key : _op.key,
-    }));
-};

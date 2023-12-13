@@ -100,7 +100,7 @@ function* handleDeleteBlock({ payload }: { type: string; payload: string[] }) {
     key: `group`,
     value: _.mapValues(
       _.pickBy(group, (_v, _groupId) => !_idList.includes(_groupId)),
-      (_list) => _list.filter((_itemId) => !_idList.includes(_itemId))
+      (_list) => _list.filter((_itemId) => !payload.includes(_itemId))
     ),
   });
 

@@ -22,7 +22,7 @@ import {
   setOpenedGroupIdListAction,
   setSelectedGroupIdAction,
 } from '@/reducers/contentWizard/mainDocument';
-import { getChartItem, getGroupItemIdList, getSceneId, makePasteOperations } from '@/utils/content';
+import { getChartItem, getGroupItemIdList, getRandomId, getSceneId, makePasteOperations } from '@/utils/content';
 import classNames from 'classnames/bind';
 import CryptoJS from 'crypto-js';
 import _ from 'lodash';
@@ -74,6 +74,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
     selectedSceneId,
     deleteTargetIdList,
     chartItems,
+    flowScene,
     sceneItemIds,
     itemsPos,
   } = useSelector((state: RootState) => {
@@ -86,6 +87,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
       deleteTargetIdList: state.deleteTargetIdList,
       chartItems: state.contentDocument.items,
       itemsPos: state.contentDocument.itemsPos,
+      flowScene: state.contentDocument.scene,
       sceneItemIds: state.contentDocument.scene[selectedSceneId]?.itemIds,
       group: state.contentDocument.group,
     };
@@ -511,6 +513,26 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
     };
 
     const handleRequestUngroup = (_e, _groupId) => {
+      let count = Object.values(flowScene).reduce((_acc, _cur) => {
+        if (_cur.itemIds.includes(_groupId)) {
+          return _acc + 1;
+        }
+
+        return _acc;
+      }, 0);
+
+      count = _.reduce(
+        group,
+        (_acc, _cur, _key) => {
+          if (_cur.includes(_groupId)) {
+            return _acc + 1;
+          } else {
+            return _acc;
+          }
+        },
+        count
+      );
+
       const groupedItemIdList = group[_groupId];
       const { rootId, connectionIds } = chartItems[_groupId] as ChartGroupItem;
       const connectedIdList = Object.values(connectionIds).reduce(
@@ -518,26 +540,30 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
         []
       );
 
-      const operations: Operation[] = [
-        {
-          key: `group`,
-          value: _.mapValues(
-            _.pickBy(group, (_var, __id) => _groupId !== __id),
-            (_itemIdList, __groupId) => {
-              if (__groupId === selectedGroupId) {
-                return [..._itemIdList, ...groupedItemIdList].filter((_id) => _id !== _groupId);
-              }
+      let operations: Operation[] = [];
 
-              return _itemIdList;
+      if (count > 1) {
+        // 기존에 그릅에 있는 아이템들을 새로 만들어서 현재장면에 붙여넣어야함!
+        const newIds = groupedItemIdList.reduce((_acc, _cur) => ({ ..._acc, [_cur]: getRandomId() }), {});
+
+        // 1. group에서 groupId와 일치하는 그룹을 제거해야함 + 새로 붙여넣어야 하는 아이템 아이디 리스트를 집어넣어야함
+        operations.push({
+          key: 'group',
+          value: _.mapValues(group, (_itemIdList, __groupId) => {
+            if (__groupId === selectedGroupId) {
+              return [..._itemIdList, ...Object.values(newIds)].filter((_id) => _id !== _groupId);
             }
-          ),
-        },
-        {
+
+            return _itemIdList;
+          }),
+        });
+
+        // 2. group[_groupId]의 아이템 아이디 리스트를 가져와 chartItems과 엮어 새로운 아이템을 추가해야함. 그룹 내 그룹이 있는 경우 딥카피해서 만들 필요 없음
+        operations.push({
           key: 'items',
-          value: _.mapValues(
-            _.pickBy(chartItems, (_item, _itemId) => _itemId !== _groupId),
-            (_item, _itemId) => {
-              if (connectedIdList.includes(_itemId)) {
+          value: {
+            ..._.mapValues(chartItems, (_item, _itemId) => {
+              if (connectedIdList.includes(_itemId) && Object.keys(selectedChartItem).includes(_itemId)) {
                 return {
                   ..._item,
                   connectionIds: _.mapValues(_item.connectionIds, (_connectPoints, _dir) =>
@@ -545,7 +571,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
                       if (_point.connectParentId === _groupId) {
                         return {
                           ..._point,
-                          connectParentId: rootId,
+                          connectParentId: newIds[rootId],
                         };
                       } else {
                         return _point;
@@ -553,30 +579,152 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
                     })
                   ),
                 };
-              } else if (_itemId === rootId) {
-                return {
-                  ..._item,
-                  connectionIds: _.mapValues(_item.connectionIds, (_connectPoints, _dir) => {
-                    return _.uniqBy([..._connectPoints, ...(connectionIds[_dir] || [])], 'connectParentId');
-                  }),
-                };
               }
 
               return _item;
-            }
-          ),
-        },
-        {
-          key: `itemsPos`,
-          value: _.mapValues(itemsPos, (_itemPos) => _.pickBy(_itemPos, (_pos, _sceneId) => _sceneId !== _groupId)),
-        },
-      ];
+            }),
+            ...Object.keys(newIds).reduce((_acc, _oldId) => {
+              return {
+                ..._acc,
+                [newIds[_oldId]]: {
+                  ...chartItems[_oldId],
+                  id: newIds[_oldId],
+                  connectionIds: _.mapValues(chartItems[_oldId].connectionIds, (_connectPoints, _dir) => {
+                    let pointList = [..._connectPoints];
 
-      if (!selectedGroupId) {
-        operations.push({
-          key: `scene.${selectedSceneId}.itemIds`,
-          value: [...sceneItemIds.filter((_id) => _groupId !== _id), ...group[_groupId]],
+                    if (_oldId === rootId) {
+                      pointList = [...pointList, ...(connectionIds[_dir] || [])];
+                    }
+
+                    return pointList.map((_point) => ({
+                      ..._point,
+                      parentId: newIds[_oldId],
+                      connectParentId: newIds[_point.connectParentId]
+                        ? newIds[_point.connectParentId]
+                        : _point.connectParentId,
+                    }));
+                  }),
+                },
+              };
+            }, {}),
+          },
         });
+
+        // 3. 기존 itemsPos에서 group[_groupId]의 아이템 아이디 리스트의 pos를 복사하여 새로운 itemsPos를 추가함, 기존 값을 삭제할 필요는 없음
+        operations.push({
+          key: 'itemsPos',
+          value: {
+            ...itemsPos,
+            ...Object.keys(newIds).reduce((_acc, _oldId) => {
+              let _itemPos = itemsPos[_oldId];
+              const _sceneList = Object.keys(_itemPos);
+
+              if (_sceneList.includes(_groupId) && _sceneList.includes(selectedSceneId)) {
+                // 위치정보에 현재 언그룹하는 groupId가 있다면 배제해야함
+                _itemPos = _.pickBy(_itemPos, (_pos, _sceneId) => _sceneId !== _groupId);
+              } else if (_sceneList.includes(_groupId) && !_sceneList.includes(selectedSceneId)) {
+                // 위치정보에 현재 장면에 관한 위치 정보가 없다면 추가해야함
+                _itemPos = {
+                  ..._itemPos,
+                  [selectedSceneId]: Object.values(_itemPos)[0],
+                };
+              } else {
+                // 위의 경우가 아닐 경우
+              }
+
+              return {
+                ..._acc,
+                [newIds[_oldId]]: _itemPos,
+              };
+            }, {}),
+          },
+        });
+        // 4. selectedGroupId의 값이 없다면 현재 보고 있는 장면에 새로 붙여넣어야 하는 아이디 리스트를 추가함 + groupId는 제거
+        if (!selectedGroupId) {
+          operations.push({
+            key: `scene.${selectedSceneId}.itemIds`,
+            value: [...sceneItemIds.filter((_id) => _groupId !== _id), ...Object.values(newIds)],
+          });
+        }
+      } else {
+        // 다른 장면에서 사용중이지 않는 그룹이라면 그룹을 해제함
+
+        operations = [
+          {
+            key: `group`,
+            value: _.mapValues(
+              _.pickBy(group, (_var, __id) => _groupId !== __id),
+              (_itemIdList, __groupId) => {
+                if (__groupId === selectedGroupId) {
+                  return [..._itemIdList, ...groupedItemIdList].filter((_id) => _id !== _groupId);
+                }
+
+                return _itemIdList;
+              }
+            ),
+          },
+          {
+            key: 'items',
+            value: _.mapValues(
+              _.pickBy(chartItems, (_item, _itemId) => _itemId !== _groupId),
+              (_item, _itemId) => {
+                if (connectedIdList.includes(_itemId)) {
+                  return {
+                    ..._item,
+                    connectionIds: _.mapValues(_item.connectionIds, (_connectPoints, _dir) =>
+                      _connectPoints.map((_point) => {
+                        if (_point.connectParentId === _groupId) {
+                          return {
+                            ..._point,
+                            connectParentId: rootId,
+                          };
+                        } else {
+                          return _point;
+                        }
+                      })
+                    ),
+                  };
+                } else if (_itemId === rootId) {
+                  return {
+                    ..._item,
+                    connectionIds: _.mapValues(_item.connectionIds, (_connectPoints, _dir) => {
+                      return _.uniqBy([..._connectPoints, ...(connectionIds[_dir] || [])], 'connectParentId');
+                    }),
+                  };
+                }
+
+                return _item;
+              }
+            ),
+          },
+          {
+            key: `itemsPos`,
+            value: _.mapValues(itemsPos, (_itemPos) => {
+              const _sceneList = Object.keys(_itemPos);
+
+              if (_sceneList.includes(_groupId) && _sceneList.includes(selectedSceneId)) {
+                // 위치정보에 현재 언그룹하는 groupId가 있다면 배제해야함
+                return _.pickBy(_itemPos, (_pos, _sceneId) => _sceneId !== _groupId);
+              } else if (_sceneList.includes(_groupId) && !_sceneList.includes(selectedSceneId)) {
+                // 위치정보에 현재 장면에 관한 위치 정보가 없다면 추가해야함
+                return {
+                  ..._itemPos,
+                  [selectedSceneId]: Object.values(_itemPos)[0],
+                };
+              } else {
+                // 위의 경우가 아닐 경우
+                return _itemPos;
+              }
+            }),
+          },
+        ];
+
+        if (!selectedGroupId) {
+          operations.push({
+            key: `scene.${selectedSceneId}.itemIds`,
+            value: [...sceneItemIds.filter((_id) => _groupId !== _id), ...group[_groupId]],
+          });
+        }
       }
 
       dispatch(setOpenedGroupIdListAction(openedGroupIdList.filter((_id) => _groupId !== _id)));

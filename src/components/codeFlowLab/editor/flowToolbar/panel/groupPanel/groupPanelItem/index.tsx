@@ -54,7 +54,11 @@ function GroupPanelItem({ chartItem }: Props) {
 
   const alreadyHas = useMemo(() => {
     if (selectedGroupId) {
-      return group[selectedGroupId].includes(chartItem.id);
+      if (chartItem.id === selectedGroupId) {
+        return true;
+      } else {
+        return group[selectedGroupId].includes(chartItem.id);
+      }
     } else {
       return sceneItemIds.includes(chartItem.id);
     }

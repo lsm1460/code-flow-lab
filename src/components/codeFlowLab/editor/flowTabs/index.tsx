@@ -1,4 +1,3 @@
-import { ChartItemType } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
 import {
   Operation,
@@ -13,7 +12,7 @@ import _ from 'lodash';
 import { useMemo } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { ReactSortable } from 'react-sortablejs';
-import { getOperationsForGroup, makeNewRoot } from '../flowChart/utils';
+import { makeNewRoot } from '../flowChart/utils';
 import styles from './flowTabs.module.scss';
 const cx = classNames.bind(styles);
 
@@ -88,7 +87,7 @@ function FlowTabs() {
       },
     ];
 
-    dispatch(setDocumentValueAction(getOperationsForGroup(operations, selectedGroupId)));
+    dispatch(setDocumentValueAction(operations));
 
     dispatch(setSceneOrderAction(newSceneOrder));
   };
@@ -125,7 +124,7 @@ function FlowTabs() {
     // 순서를 먼저 변경하고 삭제과정 처리 진행
     dispatch(setSceneOrderAction(Math.max(1, sceneOrder - 1)));
 
-    dispatch(setDocumentValueAction(getOperationsForGroup(operations, selectedGroupId)));
+    dispatch(setDocumentValueAction(operations));
   };
 
   const setList = (
