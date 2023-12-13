@@ -18,7 +18,10 @@ interface Props {
 function VariablePanel({ isSubOpen, setIsSubOpen }: Props) {
   const globalVariables = useSelector(
     (state: RootState) =>
-      _.pickBy(state.contentDocument.items, (_item) => _item.elType === ChartItemType.variable && !_item.sceneId),
+      _.pickBy(
+        state.contentDocument.items,
+        (_item) => [ChartItemType.variable, ChartItemType.array].includes(_item.elType) && !_.get(_item, 'sceneId')
+      ),
     shallowEqual
   );
 

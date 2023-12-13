@@ -3,6 +3,7 @@ import { ZOOM_AREA_ELEMENT_ID } from '@/consts/codeFlowLab/items';
 import { ChartGroupItem } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
 import {
+  Operation,
   setDeleteTargetIdListAction,
   setDocumentValueAction,
   setOpenedGroupIdListAction,
@@ -50,6 +51,66 @@ function GroupPanelItem({ chartItem }: Props) {
       }, [] as number[]),
     [flowScene]
   );
+
+  const alreadyHas = useMemo(() => {
+    if (selectedGroupId) {
+      return group[selectedGroupId].includes(chartItem.id);
+    } else {
+      return sceneItemIds.includes(chartItem.id);
+    }
+  }, [sceneItemIds, group, selectedGroupId, chartItem]);
+
+  const usedGroupList = useMemo(
+    () =>
+      _.reduce(
+        group,
+        (_acc, _cur, _key) => {
+          if (_cur.includes(chartItem.id)) {
+            return [..._acc, { id: _key, name: chartItems[_key].name }];
+          } else {
+            return _acc;
+          }
+        },
+        []
+      ),
+    [group, chartItems, chartItem]
+  );
+
+  const handleImportGroup = () => {
+    const zoomArea = document.getElementById(ZOOM_AREA_ELEMENT_ID);
+
+    const newPos = getNewPos(itemsPos, sceneId, getCenterPos(zoomArea));
+
+    const operations: Operation[] = [
+      {
+        key: `itemsPos.${chartItem.id}`,
+        value: {
+          ...itemsPos[chartItem.id],
+          ...(selectedGroupId
+            ? {
+                [selectedGroupId]: newPos,
+              }
+            : {
+                [sceneId]: newPos,
+              }),
+        },
+      },
+    ];
+
+    if (selectedGroupId) {
+      operations.push({
+        key: `group.${selectedGroupId}`,
+        value: [...group[selectedGroupId], chartItem.id],
+      });
+    } else {
+      operations.push({
+        key: `scene.${sceneId}.itemIds`,
+        value: [...sceneItemIds, chartItem.id],
+      });
+    }
+
+    dispatch(setDocumentValueAction(operations));
+  };
 
   const handleMakeNewGroup = () => {
     const zoomArea = document.getElementById(ZOOM_AREA_ELEMENT_ID);
@@ -111,6 +172,11 @@ function GroupPanelItem({ chartItem }: Props) {
 
       <ul className={cx('btn-list')}>
         <li>
+          <button onClick={handleImportGroup} disabled={alreadyHas}>
+            Import to this Scene
+          </button>
+        </li>
+        <li>
           <button onClick={handleMakeNewGroup}>Use as a new group</button>
         </li>
         <li>
@@ -122,10 +188,13 @@ function GroupPanelItem({ chartItem }: Props) {
       </ul>
 
       <div className={cx('panel-desc')}>
-        <p className={cx('scene-list-title')}>used scene index list</p>
+        <p className={cx('scene-list-title')}>used list</p>
         <ul className={cx('scene-list')}>
           {sceneOrderList.map((_order) => (
             <li key={_order}>scene-{_order}</li>
+          ))}
+          {(usedGroupList || []).map(({ id, name }) => (
+            <li key={id}>{name}</li>
           ))}
         </ul>
       </div>

@@ -39,6 +39,7 @@ export const CHART_VARIABLE_ITEMS = [
   ChartItemType.get,
   ChartItemType.sceneOrder,
   ChartItemType.calculator,
+  ChartItemType.replace,
 ];
 
 export const CHART_TEXT_ITEMS = [ChartItemType.span, ChartItemType.listEl];
@@ -312,6 +313,13 @@ export const FLOW_CHART_ITEMS_STYLE: {
       right: [],
     },
   },
+  [ChartItemType.replace]: {
+    width: 200,
+    connectionTypeList: {
+      left: [ChartItemType.variable],
+      right: [],
+    },
+  },
 };
 
 export const FLOW_ITEM_DEFAULT_INFO = {
@@ -438,6 +446,12 @@ export const FLOW_ITEM_ADDITIONAL_INFO = {
       width: 200,
       height: 100,
     },
+  },
+  [ChartItemType.replace]: {
+    connectionVariables: [],
+    text: '',
+    asIndex: false,
+    key: '',
   },
 };
 

@@ -148,7 +148,7 @@ export const getRandomId = (_length = 8) => {
   return 'fI_' + nanoid(_length);
 };
 
-const getSize = (_target: number | string | string[], _id: string, _key: string | number) => {
+const getSize = (_target: number | string | string[], _key: string | number) => {
   _target = typeof _target === 'number' ? `${_target}` : _target;
 
   if (_key && typeof _target === 'string') {
@@ -162,6 +162,25 @@ const getSize = (_target: number | string | string[], _id: string, _key: string 
     return 0;
   } else {
     return `${_target}`.length;
+  }
+};
+
+const getReplaced = (_target: string | string[], _key: string, _value: string, _asIndex: boolean) => {
+  const _targetKey = _asIndex ? parseInt(_key) || 0 : _key;
+  if (_asIndex && typeof _target === 'string') {
+    let _targetArray = _target.split('');
+
+    _targetArray[_targetKey] = _value;
+
+    return _targetArray.join('');
+  } else if (!_asIndex && typeof _target === 'string') {
+    return _target.replaceAll(_key, _value);
+  } else if (_asIndex && typeof _target !== 'string') {
+    return _target.map((_var, _i) => (_i === _targetKey ? _value : _var));
+  } else if (!_asIndex && typeof _target !== 'string') {
+    return _target.map((_var, _i) => (_var === _targetKey ? _value : _var));
+  } else {
+    return _.cloneDeep(_target);
   }
 };
 
@@ -236,6 +255,12 @@ export const makeVariables = (
           return _item.textList[_index];
         } else if (_item.elType === ChartItemType.calculator) {
           return _item.textList[_index];
+        } else if (_item.elType === ChartItemType.replace) {
+          if (_index === 1) {
+            return _item.text;
+          } else {
+            return _item.key;
+          }
         } else {
           return _item.text;
         }
@@ -251,11 +276,16 @@ export const makeVariables = (
       case ChartItemType.get:
         return __var?.[__text];
       case ChartItemType.size:
-        return getSize(__var, _targetId, __text);
+        return getSize(__var, __text);
       case ChartItemType.includes:
         return (typeof __var === 'number' ? `${__var}` : __var).includes(`${__text}`) ? 1 : 0;
       case ChartItemType.indexOf:
         return (typeof __var === 'number' ? `${__var}` : __var).indexOf(`${__text}`);
+      case ChartItemType.replace:
+        const _keyId = _item.connectionVariables[2]?.connectParentId;
+        const __targetkey = setVal(_keyId, 2);
+        const ___v = getReplaced(__var, __targetkey, __text, _item.asIndex);
+        return ___v;
       case ChartItemType.condition:
       case ChartItemType.calculator:
         const _values = [__var, __text];
@@ -326,6 +356,7 @@ export const makeVariables = (
       case ChartItemType.includes:
       case ChartItemType.indexOf:
       case ChartItemType.get:
+      case ChartItemType.replace:
         return searchUtilsVariableLoop(_items, _item, _sceneOrder);
       case ChartItemType.sceneOrder:
         return `${_sceneOrder}`;
@@ -350,6 +381,37 @@ export const getGroupItemIdList = (_group: CodeFlowChartDoc['group'], _idList: s
       }
     })
   );
+};
+
+export const filterDeleteTargetId = (
+  chartItems: CodeFlowChartDoc['items'],
+  group: CodeFlowChartDoc['group'],
+  scene: CodeFlowChartDoc['scene'],
+  _idList: string[]
+) => {
+  return _idList.filter((_itemId) => {
+    if ([ChartItemType.variable, ChartItemType.array, ChartItemType.group].includes(chartItems[_itemId]?.elType)) {
+      let count = Object.values(scene).reduce((_acc, _cur) => {
+        if (_cur.itemIds.includes(_itemId)) {
+          return ++_acc;
+        }
+
+        return _acc;
+      }, 0);
+
+      count = Object.values(group).reduce((_acc, _cur) => {
+        if (_cur.includes(_itemId)) {
+          return ++_acc;
+        }
+
+        return _acc;
+      }, count);
+
+      return count === 1;
+    }
+
+    return true;
+  });
 };
 
 export const makePasteOperations = (

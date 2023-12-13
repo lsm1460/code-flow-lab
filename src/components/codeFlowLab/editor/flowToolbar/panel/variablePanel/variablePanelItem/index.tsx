@@ -1,4 +1,4 @@
-import { ChartVariableItem } from '@/consts/types/codeFlowLab';
+import { ChartArrayItem, ChartItemType, ChartVariableItem } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
 import { Operation, setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
 import { getSceneId } from '@/utils/content';
@@ -11,7 +11,7 @@ import styles from './variablePanelItem.module.scss';
 const cx = classNames.bind(styles);
 
 interface Props {
-  chartItem: ChartVariableItem;
+  chartItem: ChartVariableItem | ChartArrayItem;
 }
 function VariablePanelItem({ chartItem }: Props) {
   const dispatch = useDispatch();
@@ -50,6 +50,16 @@ function VariablePanelItem({ chartItem }: Props) {
     return [..._sceneList, ..._grouplist];
   }, [flowScene, group, chartItems]);
 
+  const editBlock = useMemo(() => {
+    if (chartItem.elType === ChartItemType.array) {
+      return [...chartItem.list, ''].map((_var, _i) => (
+        <TextEditBlock key={_i} id={chartItem.id} text={_var} propertyKey={`list.${_i}`} />
+      ));
+    } else {
+      return <TextEditBlock id={chartItem.id} text={chartItem.var} propertyKey="var" />;
+    }
+  }, [chartItem]);
+
   const handleAddItemToCurrentScene = () => {
     if (flowScene[sceneId].itemIds.includes(chartItem.id)) {
       return;
@@ -84,16 +94,16 @@ function VariablePanelItem({ chartItem }: Props) {
 
   return (
     <div className={cx('panel-item')} onClick={handleAddItemToCurrentScene}>
-      <p className={cx('panel-title', chartItem.elType)}>
+      <p className={cx('panel-title', ChartItemType.variable)}>
         <span>{chartItem.name}</span>
       </p>
       <div className={cx('panel-desc')}>
-        <TextEditBlock id={chartItem.id} text={chartItem.var} propertyKey="var" />
+        {editBlock}
 
         <p className={cx('scene-list-title')}>used scene index list</p>
         <ul className={cx('scene-list')}>
           {sceneOrderList.map((_order) => (
-            <li key={_order}>scene-{_order}</li>
+            <li key={_order}>{_order}</li>
           ))}
         </ul>
       </div>

@@ -39,6 +39,7 @@ export enum ChartItemType {
   ifEl = 'if Element',
   calculator = 'calculator',
   group = 'group',
+  replace = 'replace',
 }
 
 interface FlowScene {
@@ -256,6 +257,13 @@ export interface ChartNoteItem extends ChartItem {
   };
 }
 
+export interface ChartReplaceItem extends ChartItem {
+  elType: ChartItemType.replace;
+  text: string;
+  asIndex: boolean;
+  key: string;
+}
+
 export type ChartItems =
   | ChartBodyItem
   | ChartButtonItem
@@ -289,7 +297,8 @@ export type ChartItems =
   | ChartIfElementItem
   | ChartCalculatorItem
   | ChartGroupItem
-  | ChartNoteItem;
+  | ChartNoteItem
+  | ChartReplaceItem;
 
 export type ChartUtilsItems =
   | ChartSizeItem
@@ -297,7 +306,8 @@ export type ChartUtilsItems =
   | ChartIndexOfItem
   | ChartGetItem
   | ChartConditionItem
-  | ChartCalculatorItem;
+  | ChartCalculatorItem
+  | ChartReplaceItem;
 
 export interface CodeFlowChartDoc {
   items: {

@@ -20,6 +20,7 @@ import ListEditBlock from './listEditBlock';
 import ListElEditBlock from './listElEditBlock';
 import VariableLinkBlock from './variableLinkBlock';
 import NoteEditBlock from './noteEditBlock';
+import ReplaceEditBlock from './replaceEditBlock';
 const cx = classNames.bind(styles);
 
 interface Props {
@@ -160,6 +161,17 @@ function PropertiesEditBlock({ chartItem, handlePointConnectStart }: Props) {
         );
       case ChartItemType.note:
         return <NoteEditBlock id={chartItem.id} text={chartItem.text} size={chartItem.size} />;
+      case ChartItemType.replace:
+        return (
+          <ReplaceEditBlock
+            id={chartItem.id}
+            targetKey={chartItem.key}
+            text={chartItem.text}
+            asIndex={chartItem.asIndex}
+            connectionVariables={chartItem.connectionVariables}
+            handlePointConnectStart={handlePointConnectStart}
+          />
+        );
       default:
         return <></>;
     }

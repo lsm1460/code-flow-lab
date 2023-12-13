@@ -1,0 +1,18 @@
+.variable-link-wrap {
+  margin-bottom: 12px;
+}
+
+.property-list {
+  margin-top: 12px;
+
+  li + li {
+    margin-top: 15px;
+  }
+
+  .property-title {
+    color: #9a9a9a;
+    font-size: 13px;
+    text-transform: capitalize;
+    margin-bottom: 6px;
+  }
+}

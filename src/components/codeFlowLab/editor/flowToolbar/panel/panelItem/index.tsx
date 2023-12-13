@@ -74,6 +74,7 @@ function PanelItem({ itemType }: Props) {
     [ChartItemType.ifEl]: '변수 블럭과 연결하여 하위 엘리먼트의 표시 여부를 결정할 수 있습니다.',
     [ChartItemType.calculator]:
       '선택된 연산자로 계산된 값을 반환합니다. 받은 변수가 숫자가 아닌 경우, 글자의 수 또는 아이템의 수가 계산에 사용됩니다.',
+    [ChartItemType.replace]: '선택된 변수 혹은 배열의 특정 부분을 수정하여 반환합니다.',
   };
 
   const handleMakeItem = () => {

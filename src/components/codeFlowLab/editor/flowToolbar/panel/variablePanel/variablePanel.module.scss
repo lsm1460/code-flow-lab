@@ -1,6 +1,6 @@
 @import '../../../../mixin';
 
-$label-height: 30px;
+$label-height: 35px;
 
 .variable-panel-wrap {
   height: 100%;
@@ -15,7 +15,7 @@ $label-height: 30px;
     }
 
     label {
-      padding: 0 10px;
+      padding: 5px 10px 0;
       font-family: sans-serif;
       font-size: 15px;
       font-weight: bold;

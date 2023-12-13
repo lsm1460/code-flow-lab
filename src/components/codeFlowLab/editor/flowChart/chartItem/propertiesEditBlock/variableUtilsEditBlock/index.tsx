@@ -15,7 +15,7 @@ interface Props {
 function VariableUtilsEditBlock({ id, text, connectionVariables, handlePointConnectStart }: Props) {
   return (
     <div>
-      <div className={cx('condition-box')}>
+      <div>
         <VariableLinkBlock
           label={'variable'}
           id={id}
