@@ -407,6 +407,14 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
         }
       }, []);
 
+      if (
+        !_rootCandidate[0] ||
+        [ChartItemType.body, ChartItemType.span, ChartItemType.listEl].includes(_items[_rootCandidate[0]].elType)
+      ) {
+        // 제외대상 설정
+        return;
+      }
+
       // group을 만들 때, 하위 그룹도 지원하기 위해서는 그룹 변경 명령을 먼저 보내야 함!!
       const operations: Operation[] = [
         {
@@ -480,7 +488,13 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
         {
           key: `itemsPos`,
           value: {
-            ..._.mapValues(itemsPos, (_itemPos, _itemId) => ({ ..._itemPos, [newItemId]: _itemPos[selectedSceneId] })),
+            ..._.mapValues(itemsPos, (_itemPos, _itemId) => {
+              if (selectedId.includes(_itemId)) {
+                return { ..._itemPos, [newItemId]: _itemPos[selectedSceneId] };
+              }
+
+              return _itemPos;
+            }),
             [newItemId]: _rootCandidate[0] ? itemsPos[_rootCandidate[0]] : pos,
           },
         },

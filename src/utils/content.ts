@@ -389,7 +389,7 @@ export const filterDeleteTargetId = (
   scene: CodeFlowChartDoc['scene'],
   _idList: string[]
 ) => {
-  return _idList.filter((_itemId) => {
+  let __list = _idList.filter((_itemId) => {
     if ([ChartItemType.variable, ChartItemType.array, ChartItemType.group].includes(chartItems[_itemId]?.elType)) {
       let count = Object.values(scene).reduce((_acc, _cur) => {
         if (_cur.itemIds.includes(_itemId)) {
@@ -412,6 +412,16 @@ export const filterDeleteTargetId = (
 
     return true;
   });
+
+  let __idList = [];
+
+  for (let _id of __list) {
+    if (chartItems[_id].elType === ChartItemType.group) {
+      __idList = [...__idList, ...filterDeleteTargetId(chartItems, group, scene, group[_id])];
+    }
+  }
+
+  return [...__list, ...__idList];
 };
 
 export const makePasteOperations = (

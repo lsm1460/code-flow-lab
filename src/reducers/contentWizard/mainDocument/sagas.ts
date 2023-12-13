@@ -10,7 +10,7 @@ import { Operation, SagaOperationParam } from './types';
 
 import { ConnectPoint } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
-import { getGroupItemIdList, getSceneId } from '@/utils/content';
+import { filterDeleteTargetId, getSceneId } from '@/utils/content';
 import { addHistory } from '@/utils/history';
 import _ from 'lodash';
 
@@ -63,9 +63,7 @@ function* handleDeleteBlock({ payload }: { type: string; payload: string[] }) {
   yield delay((payload.length + 1) * 100);
 
   const ops = [];
-
-  const _idList = getGroupItemIdList(group, payload);
-
+  const _idList = filterDeleteTargetId(items, group, scene, payload);
   const filterPoint = (_point: ConnectPoint) => !_idList.includes(_point.connectParentId);
 
   let newChartItems = _.pickBy(items, (_item) => !_idList.includes(_item.id));
@@ -89,15 +87,21 @@ function* handleDeleteBlock({ payload }: { type: string; payload: string[] }) {
   });
   ops.push({
     key: 'itemsPos',
-    value: _.pickBy(itemsPos, (_v, _itemId) => !_idList.includes(_itemId)),
+    value: _.mapValues(
+      _.pickBy(itemsPos, (_v, _itemId) => !_idList.includes(_itemId)),
+      (_v, _itemId) => _.pickBy(_v, (_pos, _sceneId) => !(payload.includes(_itemId) && selectedSceneId === _sceneId))
+    ),
   });
   ops.push({
     key: `scene.${selectedSceneId}.itemIds`,
-    value: sceneItemIds.filter((_id) => !_idList.includes(_id)),
+    value: sceneItemIds.filter((_id) => !payload.includes(_id)),
   });
   ops.push({
     key: `group`,
-    value: _.pickBy(group, (_v, _groupId) => !_idList.includes(_groupId)),
+    value: _.mapValues(
+      _.pickBy(group, (_v, _groupId) => !_idList.includes(_groupId)),
+      (_list) => _list.filter((_itemId) => !_idList.includes(_itemId))
+    ),
   });
 
   yield put({
