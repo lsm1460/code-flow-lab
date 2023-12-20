@@ -102,6 +102,19 @@ function FlowZoom({ children }: Props) {
     return ((originSize[1] * originSize[1]) / fullSize).toFixed(2);
   }, [scrollArea, originSize]);
 
+  const getNewScale = (_prev: number, _zoom: 'in' | 'out') => {
+    const _delta = 0.1;
+    let _val;
+
+    if (_zoom === 'in') {
+      _val = Math.min(_prev + _delta, 2);
+    } else {
+      _val = Math.max(_prev - _delta, 0.5);
+    }
+
+    return Math.round(_val * 10) / 10;
+  };
+
   useEffect(() => {
     const _transX = -1 * ((scrollArea[0] * horizonPos) / 100 - scrollArea[0] / 2);
 
@@ -122,11 +135,11 @@ function FlowZoom({ children }: Props) {
     };
 
     const zoomInScreen = () => {
-      setScale((_prev) => Math.min(_prev + 0.1, 2));
+      setScale((_prev) => getNewScale(_prev, 'in'));
     };
 
     const zoomOutScreen = () => {
-      setScale((_prev) => Math.max(_prev - 0.1, 0.5));
+      setScale((_prev) => getNewScale(_prev, 'out'));
     };
 
     ipcRenderer.on(REQUEST_RESET_ZOOM, resetZoom);
@@ -145,11 +158,7 @@ function FlowZoom({ children }: Props) {
 
     const zoomType = buttonEl.dataset.zoomType as 'in' | 'out';
 
-    if (zoomType === 'in') {
-      setScale((_prev) => Math.min(_prev + 0.1, 2));
-    } else {
-      setScale((_prev) => Math.max(_prev - 0.1, 0.5));
-    }
+    setScale((_prev) => getNewScale(_prev, zoomType));
   };
 
   const handleOnScroll = (_event: WheelEvent) => {
@@ -163,9 +172,9 @@ function FlowZoom({ children }: Props) {
 
       // todo: transform origin set..?
       if (_event.deltaY < 1) {
-        setScale((_prev) => Math.min(_prev + 0.1, 2));
+        setScale((_prev) => getNewScale(_prev, 'in'));
       } else {
-        setScale((_prev) => Math.max(_prev - 0.1, 0.5));
+        setScale((_prev) => getNewScale(_prev, 'out'));
       }
 
       return;

@@ -61,6 +61,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
 
   const selectedItemId = useRef<string>(null);
   const multiSelectedIdListClone = useRef<string[]>([]);
+  const movePos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const totalDelta = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const selectedConnectionPoint = useRef<PointPos>(null);
   const disconnectionPoint = useRef<PointPos>(null);
@@ -199,7 +200,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
     }
 
     setConnectedPointList(result);
-  }, [orderedChartItems]);
+  }, [multiSelectedItemList, selectedChartItem, scale]);
 
   useEffect(() => {
     scrollTransRef.current = {
@@ -218,7 +219,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
       connectedCanvas.width = connectedCanvas.parentElement.clientWidth;
       connectedCanvas.height = connectedCanvas.parentElement.clientHeight;
     }
-  }, [lineCanvasRef, connectedCanvasRef, windowSize]);
+  }, [lineCanvasRef, connectedCanvasRef, windowSize, scale]);
 
   useEffect(() => {
     if (lineCanvasRef.current && connectedCanvasRef.current) {
@@ -1172,6 +1173,11 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
       // 선택된 아이템을 기준으로 움직인다.
       selectedItemId.current = _selectedItem.id;
     }
+    movePos.current = {
+      x: _event.clientX,
+      y: _event.clientY,
+    };
+
     document.addEventListener('mousemove', handleMouseMoveItems);
     document.addEventListener('mouseup', handleMouseUpItems);
   }, []);
@@ -1228,11 +1234,19 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
     }
   };
 
-  const handleMouseMoveItems = (_event: MouseEvent) => {
-    if (selectedItemId.current) {
-      setItemMoveDelta({ x: _event.movementX, y: _event.movementY });
-    }
-  };
+  const handleMouseMoveItems = useCallback(
+    _.throttle((_event: MouseEvent) => {
+      if (selectedItemId.current) {
+        setItemMoveDelta({ x: _event.clientX - movePos.current.x, y: _event.clientY - movePos.current.y });
+
+        movePos.current = {
+          x: _event.clientX,
+          y: _event.clientY,
+        };
+      }
+    }, 15),
+    [selectedItemId]
+  );
 
   const handleMouseMovePoint = (_event: MouseEvent) => {
     if (selectedConnectionPoint.current) {
