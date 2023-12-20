@@ -2,13 +2,18 @@ import { SCROLL_CLASS_PREFIX } from '@/consts/codeFlowLab/items';
 import { ChartCalculatorItem, ChartConditionItem, ChartItemType, ConnectPoint } from '@/consts/types/codeFlowLab';
 import { setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
 import classNames from 'classnames/bind';
-import { MouseEventHandler } from 'react';
+import { MouseEventHandler, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import TextEditBlock from '../textEditBlock';
 import styles from './operatorEditBlock.module.scss';
+import OptionSelector from '@/components/common/optionSelector';
 const cx = classNames.bind(styles);
 //
 
+const operators = {
+  [ChartItemType.condition]: ['==', '!=', '&&', '||', '>', '>=', '<', '<='],
+  [ChartItemType.calculator]: ['+', '-', '*', '/', '%'],
+};
 interface Props {
   id: string;
   elType: ChartItemType;
@@ -20,19 +25,11 @@ interface Props {
 function OperatorEditBlock({ id, elType, textList, operator, connectionVariables, handlePointConnectStart }: Props) {
   const dispatch = useDispatch();
 
-  const toggleLogical = (_index: number) => {
-    let _list;
+  const optionList = useMemo(() => {
+    return (operators[elType] || []).map((_op) => ({ label: _op, value: _op }));
+  }, [elType]);
 
-    if (elType === ChartItemType.condition) {
-      _list = ['==', '!=', '&&', '||'];
-    } else {
-      _list = ['+', '-', '*', '/', '%'];
-    }
-
-    const _conIndex = _list.indexOf(operator);
-
-    const _nextCon = _conIndex + 1 > _list.length - 1 ? _list[0] : _list[_conIndex + 1];
-
+  const handleChangeKey = (_nextCon) => {
     dispatch(
       setDocumentValueAction({
         key: `items.${id}.operator`,
@@ -46,9 +43,15 @@ function OperatorEditBlock({ id, elType, textList, operator, connectionVariables
       {textList.map((_text, _i) => (
         <div className={cx('property-wrap')} key={_i}>
           {_i > 0 && (
-            <button className={cx('logical', { [SCROLL_CLASS_PREFIX]: true })} onClick={() => toggleLogical(_i - 1)}>
-              {operator}
-            </button>
+            <div className={cx('logical', { [SCROLL_CLASS_PREFIX]: true })}>
+              <OptionSelector
+                optionList={optionList}
+                defaultValue={operator}
+                isSearchable
+                onChange={handleChangeKey}
+                style={{ fontSize: 15, padding: 3 }}
+              />
+            </div>
           )}
 
           <TextEditBlock

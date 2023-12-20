@@ -132,7 +132,7 @@ export interface ChartIfItem extends ChartItem {
 export interface ChartConditionItem extends ChartItem {
   elType: ChartItemType.condition;
   textList: string[];
-  operator: '==' | '!=' | '&&' | '||';
+  operator: '==' | '!=' | '&&' | '||' | '>' | '>=' | '<' | '<=';
 }
 
 export interface ChartCalculatorItem extends ChartItem {

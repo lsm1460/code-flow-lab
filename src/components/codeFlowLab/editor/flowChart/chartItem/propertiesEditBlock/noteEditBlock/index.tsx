@@ -1,12 +1,11 @@
-import { SCROLL_CLASS_PREFIX } from '@/consts/codeFlowLab/items';
+import { SCROLL_CLASS_PREFIX, ZOOM_AREA_ELEMENT_ID } from '@/consts/codeFlowLab/items';
+import { ChartNoteItem } from '@/consts/types/codeFlowLab';
 import { setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
 import { useDebounceSubmitText } from '@/utils/content';
 import classNames from 'classnames/bind';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styles from './noteEditBlock.module.scss';
-import _ from 'lodash';
-import { ChartNoteItem } from '@/consts/types/codeFlowLab';
 const cx = classNames.bind(styles);
 //
 
@@ -56,29 +55,21 @@ function NoteEditBlock({ id, text, size }: Props) {
     }
   };
 
-  useEffect(() => {
-    const handleResize = _.debounce(() => {
-      const { width, height } = noteRef.current.getBoundingClientRect();
+  const handleResize = () => {
+    const zoomArea = document.getElementById(ZOOM_AREA_ELEMENT_ID);
+    const { scale } = zoomArea.dataset;
+    const _scale = parseFloat(scale);
 
-      dispatch(
-        setDocumentValueAction({
-          key: `items.${id}.size`,
-          value: { width, height },
-          isSkip: true,
-        })
-      );
-    }, 100);
+    const { width, height } = noteRef.current.getBoundingClientRect();
 
-    if (noteRef.current) {
-      const contentViewerSizeObserver = new ResizeObserver(handleResize);
-
-      contentViewerSizeObserver.observe(noteRef.current);
-
-      return () => {
-        contentViewerSizeObserver.disconnect();
-      };
-    }
-  }, [noteRef]);
+    dispatch(
+      setDocumentValueAction({
+        key: `items.${id}.size`,
+        value: { width: width / _scale, height: height / _scale },
+        isSkip: true,
+      })
+    );
+  };
 
   return (
     <div className={cx('text-input-wrap')}>
@@ -90,6 +81,7 @@ function NoteEditBlock({ id, text, size }: Props) {
         value={selectedText}
         onChange={handleTitleInput}
         onMouseDown={(_event) => _event.stopPropagation()}
+        onMouseUp={handleResize}
         placeholder="insert something.."
         rows={6}
         onBlur={(_event) => {

@@ -177,29 +177,32 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
   }, []);
 
   useEffect(() => {
-    const connected = [],
-      result = [];
+    // 오브젝트가 많을 때 위치가 살짝 일그러지는 현상이 나타나 의도적으로 25ms만큼 선이 그려지는 시간을 늦춤
+    setTimeout(() => {
+      const connected = [],
+        result = [];
 
-    const pointList = document.querySelectorAll(`.${CONNECT_POINT_CLASS}[data-connect-parent-id]`);
+      const pointList = document.querySelectorAll(`.${CONNECT_POINT_CLASS}[data-connect-parent-id]`);
 
-    for (let _i = 0; _i < pointList.length; _i++) {
-      const pointEl = pointList[_i] as HTMLElement;
+      for (let _i = 0; _i < pointList.length; _i++) {
+        const pointEl = pointList[_i] as HTMLElement;
 
-      const connedtedIds = [pointEl.dataset.parentId, pointEl.dataset.connectParentId].sort().join('-');
+        const connedtedIds = [pointEl.dataset.parentId, pointEl.dataset.connectParentId].sort().join('-');
 
-      if (connected.includes(connedtedIds)) {
-        continue;
-      } else {
-        connected.push(connedtedIds);
+        if (connected.includes(connedtedIds)) {
+          continue;
+        } else {
+          connected.push(connedtedIds);
 
-        const connectedEl = document.querySelector(
-          `[data-parent-id=${pointEl.dataset.connectParentId}][data-connect-parent-id=${pointEl.dataset.parentId}]`
-        ) as HTMLElement;
-        result.push([makePointPosByEl(pointEl), makePointPosByEl(connectedEl)]);
+          const connectedEl = document.querySelector(
+            `[data-parent-id=${pointEl.dataset.connectParentId}][data-connect-parent-id=${pointEl.dataset.parentId}]`
+          ) as HTMLElement;
+          result.push([makePointPosByEl(pointEl), makePointPosByEl(connectedEl)]);
+        }
       }
-    }
 
-    setConnectedPointList(result);
+      setConnectedPointList(result);
+    }, 25);
   }, [multiSelectedItemList, selectedChartItem, scale]);
 
   useEffect(() => {

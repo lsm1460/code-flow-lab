@@ -5,11 +5,9 @@ $option-arrow-size: 4px;
   position: relative;
   color: $option-color;
   font-size: 13px;
+  padding: 8px;
 
   .selected-option {
-    padding: 8px;
-    position: relative;
-
     &:after {
       content: '';
       width: 0;
@@ -18,7 +16,8 @@ $option-arrow-size: 4px;
       border-right: $option-arrow-size solid transparent;
       border-top: $option-arrow-size solid $option-color;
       position: absolute;
-      top: 11px;
+      top: 50%;
+      transform: translateY(-50%);
       right: 8px;
     }
   }

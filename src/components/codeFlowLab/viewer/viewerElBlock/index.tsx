@@ -263,7 +263,7 @@ function ViewerElBlock({ viewerItem, mapItem, isOnlyViewer }: Props) {
     if (triggerProps.load) {
       triggerProps.load();
     }
-  }, []);
+  }, [sceneOrder]);
 
   useEffect(() => {
     if (isVisible) {
