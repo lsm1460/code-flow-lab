@@ -2,7 +2,7 @@ import OptionSelector from '@/components/common/optionSelector';
 import { SCROLL_CLASS_PREFIX } from '@/consts/codeFlowLab/items';
 import classNames from 'classnames/bind';
 import _ from 'lodash';
-import { KeyboardEventHandler, useCallback, useRef } from 'react';
+import { KeyboardEventHandler, useCallback } from 'react';
 import styles from './propertyBlock.module.scss';
 const cx = classNames.bind(styles);
 //
@@ -22,15 +22,11 @@ interface Props {
   onDelete?: (_key: string) => void;
 }
 function PropertyBlock({ id, propertyKey, value, propertyKeyList, valueList, onChangeValue, onDelete }: Props) {
-  const valueInputRef = useRef<HTMLInputElement>(null);
-
   const handleChangeKey = (_afterKey) => {
     propertyKeyList.onChangeKey(propertyKey, _afterKey);
   };
 
   const changeValue = (_val: string | number) => {
-    valueInputRef.current && valueInputRef.current.blur();
-
     onChangeValue(propertyKey, _val);
   };
 
@@ -83,7 +79,6 @@ function PropertyBlock({ id, propertyKey, value, propertyKeyList, valueList, onC
         />
       ) : (
         <input
-          ref={valueInputRef}
           className={cx('value-input', SCROLL_CLASS_PREFIX)}
           defaultValue={value}
           onChange={handleOnChange}

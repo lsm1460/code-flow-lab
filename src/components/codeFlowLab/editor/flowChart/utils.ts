@@ -117,7 +117,7 @@ export const getBlockType = (_elType, _isDeep = false) => {
 
   // 트리거는 function만 붙일 수 있도록 예외처리 추가
   if ([...CHART_ELEMENT_ITEMS, ChartItemType.group].includes(_elType)) {
-    if ((_isDeep && _elType === ChartItemType.span) || _elType === ChartItemType.listEl) {
+    if (_isDeep && [ChartItemType.span, ChartItemType.listEl].includes(_elType)) {
       return ChartItemType.span;
     }
 

@@ -27,7 +27,7 @@ function FlowOptionModal() {
   const [searchValue, setSearchValue] = useState('');
 
   const filteredOptions = useMemo(
-    () => optionList.filter((option) => option.label.toLowerCase().includes(searchValue.toLowerCase())),
+    () => optionList.filter((option) => `${option.label}`.toLowerCase().includes(searchValue.toLowerCase())),
     [optionList, searchValue]
   );
 

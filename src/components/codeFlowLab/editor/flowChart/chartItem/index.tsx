@@ -156,11 +156,6 @@ function ChartItem({ chartItems, itemInfo, selectedIdList, handleItemMoveStart, 
   };
 
   const handleTitleInput = (_event) => {
-    if (_event.target.value.length < 1) {
-      alert('최소 한 글자 이상 입력해주세요.');
-      return;
-    }
-
     setIsTyping(true);
 
     setItemName(_event.target.value);
@@ -291,6 +286,11 @@ function ChartItem({ chartItems, itemInfo, selectedIdList, handleItemMoveStart, 
             onBlur={(_event) => {
               setIsReadOnly(true);
               setIsTyping(false);
+
+              if (_event.target.value.length < 1) {
+                emitText(itemInfo.name);
+                return;
+              }
 
               emitText(_event.target.value);
             }}

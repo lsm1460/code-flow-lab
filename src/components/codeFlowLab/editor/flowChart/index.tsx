@@ -340,7 +340,9 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
         );
 
         dispatch(setDocumentValueAction(operations));
-      } catch (e) {}
+      } catch (e) {
+        console.log(e);
+      }
     };
 
     document.addEventListener('paste', handleRequestPaste);
@@ -455,7 +457,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
                   ),
                   ...(_item.connectionVariables && {
                     connectionVariables: _item.connectionVariables.filter(
-                      (_point) => !selectedId.includes(_point.connectParentId)
+                      (_point) => !selectedId.includes(_point?.connectParentId)
                     ),
                   }),
                 };
@@ -467,7 +469,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
                   ),
                   ...(_item.connectionVariables && {
                     connectionVariables: _item.connectionVariables.filter((_point) =>
-                      selectedId.includes(_point.connectParentId)
+                      selectedId.includes(_point?.connectParentId)
                     ),
                   }),
                 };
@@ -884,6 +886,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
         const targetPoint = makePointPosByEl(pointMove.el);
 
         const isAbleConnect = checkConnectable(selectedConnectionPoint.current.el, targetPoint.el);
+
         if (isAbleConnect) {
           connectedPoint = targetPoint;
         }
@@ -894,7 +897,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
   }, [pointMove, selectedConnectionPoint, lineCanvasCtx, lineCanvasRef, selectedChartItem, scale]);
 
   const deleteItems = (_event: KeyboardEvent, _targetIdList: string[] = null) => {
-    if (_event?.code === 'Delete' || _targetIdList) {
+    if ((_event?.code === 'Delete' && (_event.target as HTMLElement).tagName !== 'INPUT') || _targetIdList) {
       _targetIdList = _targetIdList || Object.keys(multiSelectedItemList);
 
       const deleteTargetIdList = _targetIdList.filter((_itemId) => {
@@ -1055,8 +1058,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
     const _elType = selectedChartItem[originParentId].elType;
     const _targetType = selectedChartItem[targetParentId].elType;
 
-    const isOnlyConnectToVariable =
-      _.intersection([_elType, _targetType], [ChartItemType.changeValue, ChartItemType.input]).length > 0;
+    const isOnlyConnectToVariable = _.intersection([_elType, _targetType], [ChartItemType.input]).length > 0;
 
     if (isOnlyConnectToVariable) {
       // 변수 변경 블럭은 정말 변수만 연결되어야 한다.

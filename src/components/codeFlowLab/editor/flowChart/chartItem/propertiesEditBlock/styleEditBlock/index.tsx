@@ -2,7 +2,7 @@ import { SCROLL_CLASS_PREFIX } from '@/consts/codeFlowLab/items';
 import { Operation, setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
 import classNames from 'classnames/bind';
 import _ from 'lodash';
-import { CSSProperties, useMemo } from 'react';
+import { CSSProperties, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import PropertyBlock from '../propertyBlock';
 import styles from './styleEditBlock.module.scss';
@@ -14,16 +14,16 @@ const CSS_PROPERTIES = {
   color: '',
   fontSize: 10,
   textAlign: ['left', 'center', 'right'],
-  padding: 0,
-  paddingLeft: 0,
-  paddingTop: 0,
-  paddingRight: 0,
-  paddingBottom: 0,
-  margin: 0,
-  marginLeft: 0,
-  marginTop: 0,
-  marginRight: 0,
-  marginBottom: 0,
+  padding: '0',
+  paddingLeft: '0',
+  paddingTop: '0',
+  paddingRight: '0',
+  paddingBottom: '0',
+  margin: '0',
+  marginLeft: '0',
+  marginTop: '0',
+  marginRight: '0',
+  marginBottom: '0',
   background: '',
   backgroundColor: '',
   alignItems: ['baseline', 'center', 'flex-start', 'flex-end'],
@@ -36,10 +36,10 @@ const CSS_PROPERTIES = {
   overflowX: ['visible', 'hidden', 'clip', 'scroll', 'auto'],
   overflowY: ['visible', 'hidden', 'clip', 'scroll', 'auto'],
   position: ['static', 'relative', 'absolute', 'fixed', 'sticky'],
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
+  top: '0',
+  left: '0',
+  right: '0',
+  bottom: '0',
   opacity: 1,
   aspectRatio: '1',
   zIndex: 0,
@@ -50,12 +50,45 @@ const CSS_PROPERTIES = {
   minHeight: '',
   maxHeight: '',
   userSelect: ['auto', 'none', 'all', 'text'],
+  transform: '',
+  lineHeight: '0',
+  wordBreak: [
+    'normal',
+    'break-all',
+    'keep-all',
+    'break-word',
+
+    /* Global values */
+    'inherit',
+    'initial',
+    'revert',
+    'revert-layer',
+    'unset',
+  ],
+  border: '',
+  textTransform: [
+    'none',
+    'capitalize',
+    'uppercase',
+    'lowercase',
+    'full-width',
+    'full-size-kana',
+    /* Global values */
+    'inherit',
+    'initial',
+    'revert',
+    'revert-layer',
+    'unset',
+  ],
+  borderRadius: '',
+  fontWeight: ['100', '400', '500', '700'],
 };
 interface Props {
   id: string;
   styles: CSSProperties;
 }
 function StyleEditBlock({ id, styles }: Props) {
+  const scrollRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
 
   const cssPropertiesList = useMemo(
@@ -123,6 +156,10 @@ function StyleEditBlock({ id, styles }: Props) {
     const operation: Operation = { key: `items.${id}.styles`, value };
 
     dispatch(setDocumentValueAction(operation));
+
+    setTimeout(() => {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }, 10);
   };
 
   const onDelete = (_targetKey: string) => {
@@ -135,7 +172,7 @@ function StyleEditBlock({ id, styles }: Props) {
 
   return (
     <div>
-      <div className={cx('property-list', { [SCROLL_CLASS_PREFIX]: true })}>
+      <div className={cx('property-list', { [SCROLL_CLASS_PREFIX]: true })} ref={scrollRef}>
         {Object.keys(styles).map((_cssKey) => (
           <PropertyBlock
             key={`${id}-${_cssKey}`}

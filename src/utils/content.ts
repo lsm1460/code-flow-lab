@@ -176,9 +176,9 @@ const getReplaced = (_target: string | string[], _key: string, _value: string, _
   } else if (!_asIndex && typeof _target === 'string') {
     return _target.replaceAll(_key, _value);
   } else if (_asIndex && typeof _target !== 'string') {
-    return _target.map((_var, _i) => (_i === _targetKey ? _value : _var));
+    return (_target || []).map((_var, _i) => (_i === _targetKey ? _value : _var));
   } else if (!_asIndex && typeof _target !== 'string') {
-    return _target.map((_var, _i) => (_var === _targetKey ? _value : _var));
+    return (_target || []).map((_var, _i) => (_var === _targetKey ? _value : _var));
   } else {
     return _.cloneDeep(_target);
   }
@@ -221,7 +221,7 @@ export const makeVariables = (
 
       if (!searched[__id]) {
         if (__id && _items[__id].elType === ChartItemType.sceneOrder) {
-          return `${_sceneOrder}`;
+          return _sceneOrder;
         } else if (__id && _items[__id].elType === ChartItemType.array) {
           __result = (_items[__id] as ChartArrayItem).list;
 
@@ -359,7 +359,7 @@ export const makeVariables = (
       case ChartItemType.replace:
         return searchUtilsVariableLoop(_items, _item, _sceneOrder);
       case ChartItemType.sceneOrder:
-        return `${_sceneOrder}`;
+        return _sceneOrder;
       case ChartItemType.listEl:
         return searched[_item.elId];
       default:
@@ -482,13 +482,14 @@ export const makePasteOperations = (
               zIndex: sceneItemSize + _index + 1,
               ...(_cur.connectionVariables && {
                 connectionVariables: _cur.connectionVariables
-                  .map(
-                    (_point) =>
-                      changedIds[_point.connectParentId] && {
-                        ..._point,
-                        parentId: newItemId,
-                        connectParentId: changedIds[_point.connectParentId],
-                      }
+                  .map((_point) =>
+                    _point
+                      ? changedIds[_point.connectParentId] && {
+                          ..._point,
+                          parentId: newItemId,
+                          connectParentId: changedIds[_point.connectParentId],
+                        }
+                      : _point
                   )
                   .filter((_point) => _point),
               }),
