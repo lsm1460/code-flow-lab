@@ -8,6 +8,8 @@ import { useMemo } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import TextEditBlock from '../../../../flowChart/chartItem/propertiesEditBlock/textEditBlock';
 import styles from './variablePanelItem.module.scss';
+import { ZOOM_AREA_ELEMENT_ID } from '@/consts/codeFlowLab/items';
+import { getCenterPos, getNewPos } from '@/components/codeFlowLab/editor/flowChart/utils';
 const cx = classNames.bind(styles);
 
 interface Props {
@@ -61,18 +63,24 @@ function VariablePanelItem({ chartItem }: Props) {
   }, [chartItem]);
 
   const handleAddItemToCurrentScene = () => {
-    if (flowScene[sceneId].itemIds.includes(chartItem.id)) {
+    const isAlreadyFlag = selectedGroupId
+      ? group[selectedGroupId].includes(chartItem.id)
+      : flowScene[sceneId].itemIds.includes(chartItem.id);
+
+    if (isAlreadyFlag) {
       return;
     }
 
-    const _pos = Object.values(flowItemsPos[chartItem.id])[0];
+    const zoomArea = document.getElementById(ZOOM_AREA_ELEMENT_ID);
+
+    const newPos = getNewPos(flowItemsPos, sceneId, getCenterPos(zoomArea));
 
     const operation: Operation[] = [
       {
         key: `itemsPos.${chartItem.id}`,
         value: {
           ...flowItemsPos[chartItem.id],
-          [selectedGroupId || sceneId]: _pos,
+          [selectedGroupId || sceneId]: newPos,
         },
       },
     ];
