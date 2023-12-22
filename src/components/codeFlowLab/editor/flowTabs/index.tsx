@@ -35,7 +35,7 @@ function FlowTabs() {
   const sceneList = useMemo(
     () =>
       Object.keys(flowScene)
-        .map((_key, _i) => ({ id: _key, name: `scene-${_i + 1}`, order: flowScene[_key].order }))
+        .map((_key, _i) => ({ id: _key, name: flowScene[_key].name, order: flowScene[_key].order }))
         .sort((a, b) => a.order - b.order),
     [flowScene]
   );
@@ -52,7 +52,7 @@ function FlowTabs() {
     const _sceneId = getRandomId();
 
     const newSceneOrder = Object.keys(flowScene).length + 1;
-    const newRootBlock = makeNewRoot(newSceneOrder);
+    const newRootBlock = makeNewRoot();
 
     const operations = [
       {

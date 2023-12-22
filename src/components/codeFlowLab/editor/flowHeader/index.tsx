@@ -1,6 +1,6 @@
 import { REQUEST_REDO, REQUEST_UNDO, CHECK_SAVED } from '@/consts/channel.js';
 import { RootState } from '@/reducers';
-import { setDocumentValueAction } from '@/reducers/contentWizard/mainDocument';
+import { setDocumentValueAction, setSceneOrderAction } from '@/reducers/contentWizard/mainDocument';
 import { getHistory, getNextHistory, getPrevHistory } from '@/utils/history';
 import classNames from 'classnames/bind';
 import _ from 'lodash';
@@ -59,7 +59,17 @@ function FlowHeader() {
   const prev = () => {
     const historyOp = getPrevHistory();
 
-    !_.isEmpty(historyOp) && dispatch(setDocumentValueAction(historyOp));
+    if (!_.isEmpty(historyOp)) {
+      const sceneOp = historyOp.filter((_op) => _op.key === 'scene')[0];
+
+      if (sceneOp) {
+        if (Object.keys(flowDoc.scene) !== Object.keys(sceneOp.value)) {
+          dispatch(setSceneOrderAction(Math.max(Object.keys(flowDoc.scene).length - 1, 1)));
+        }
+      }
+
+      dispatch(setDocumentValueAction(historyOp));
+    }
   };
 
   const next = () => {

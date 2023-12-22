@@ -211,9 +211,9 @@ export const makeNewItem = (
   ];
 };
 
-export const makeNewRoot = (_sceneOrder: number): ChartBodyItem => {
+export const makeNewRoot = (): ChartBodyItem => {
   return {
-    id: `${ROOT_BLOCK_ID}-${_sceneOrder}`,
+    id: `${ROOT_BLOCK_ID}-${getRandomId()}`,
     name: 'root-name',
     elType: ChartItemType.body,
     zIndex: 1,

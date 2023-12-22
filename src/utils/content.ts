@@ -104,7 +104,7 @@ export const getSceneId = (_flowScene: CodeFlowChartDoc['scene'], _sceneOrder: n
     return _selectedGroupId;
   }
 
-  return Object.keys(_flowScene).filter((_sceneKey) => _flowScene[_sceneKey].order === _sceneOrder)?.[0] || '';
+  return Object.keys(_flowScene).filter((_sceneKey, _i) => _i + 1 === _sceneOrder)?.[0] || '';
 };
 
 export const getChartItem = (

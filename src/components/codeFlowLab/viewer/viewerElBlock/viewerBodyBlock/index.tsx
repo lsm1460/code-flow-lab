@@ -1,12 +1,13 @@
 import { ROOT_BLOCK_ID } from '@/consts/codeFlowLab/items';
-import { TriggerProps, ViewerItem } from '@/consts/types/codeFlowLab';
+import { ChartItemType, TriggerProps, ViewerItem } from '@/consts/types/codeFlowLab';
 import { RootState } from '@/reducers';
 import { CSSProperties, RefObject } from 'react';
 import { shallowEqual, useSelector } from 'react-redux';
 import ViewerElBlock from '..';
-
+import _ from 'lodash';
 import classNames from 'classnames/bind';
 import styles from './viewerBodyBlock.module.scss';
+import { getSceneId } from '@/utils/content';
 const cx = classNames.bind(styles);
 
 interface Props {
@@ -17,10 +18,16 @@ interface Props {
   isOnlyViewer: boolean;
 }
 function ViewerBodyBlock({ elRef, viewerItem, triggerProps, isOnlyViewer }: Props) {
-  const addedStyle = useSelector(
-    (state: RootState) => state.addedStyles[`${ROOT_BLOCK_ID}-${state.sceneOrder}`],
-    shallowEqual
-  );
+  const addedStyle = useSelector((state: RootState) => {
+    const sceneId = getSceneId(state.contentDocument.scene, state.sceneOrder, state.selectedGroupId);
+    const _idList = state.contentDocument.scene[sceneId]?.itemIds || [];
+    const rootItem = _.find(
+      state.contentDocument.items,
+      (_item) => _item.elType === ChartItemType.body && _idList.includes(_item.id)
+    );
+
+    return state.addedStyles[rootItem?.id] || {};
+  }, shallowEqual);
 
   return (
     <div

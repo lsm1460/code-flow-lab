@@ -203,7 +203,7 @@ function FlowChart({ scale, transX, transY, moveItems, connectPoints }: Props) {
 
       setConnectedPointList(result);
     }, 25);
-  }, [multiSelectedItemList, selectedChartItem, scale]);
+  }, [multiSelectedItemList, selectedChartItem, scale, windowSize]);
 
   useEffect(() => {
     scrollTransRef.current = {

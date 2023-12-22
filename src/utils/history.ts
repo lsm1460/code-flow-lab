@@ -1,3 +1,4 @@
+import { Operation } from '@/reducers/contentWizard/mainDocument';
 import _ from 'lodash';
 const MAX_HISTORY = 50;
 
@@ -49,7 +50,7 @@ export const addHistory = (_operations) => {
   sessionStorage.setItem('code-flow-history', JSON.stringify(newHistoryManger));
 };
 
-export const getPrevHistory = () => {
+export const getPrevHistory = (): Operation[] => {
   const historyManger = getHistory();
 
   const targetHistory = Math.max(historyManger.now - 1, -1);
