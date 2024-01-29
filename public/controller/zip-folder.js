@@ -61,7 +61,7 @@ const createZipFromFolder = async (dir, excludePath = []) => {
       }
     }
 
-    const relative = filePath.replace(absRoot, '');
+    const relative = filePath.replace(absRoot, '').replace(/\\/g, '/').replace(/^\//, '');
 
     return z.file(relative, fs.createReadStream(filePath));
   }, new JSZip());
