@@ -148,7 +148,7 @@ const findFilePathInCmd = (_cmdLine) => {
       return _line;
     }
   }
-}
+};
 
 if (!gotTheLock) {
   app.quit();
@@ -157,9 +157,9 @@ if (!gotTheLock) {
     if (process.platform !== 'darwin') {
       // window open project..
 
-      const filePath = findFilePathInCmd(commandLine)
+      const filePath = findFilePathInCmd(commandLine);
 
-      createWindow(filePath)
+      createWindow(filePath);
     }
   });
 
@@ -168,7 +168,7 @@ if (!gotTheLock) {
       app.dock.setMenu(dockMenu);
     }
 
-    const filePath = findFilePathInCmd(process.argv)
+    const filePath = findFilePathInCmd(process.argv);
 
     createWindow(filePath);
 
@@ -178,13 +178,13 @@ if (!gotTheLock) {
       }
     });
 
-    protocol.handle(
-      'local',
-      (_req) => net.fetch(`file://${new URL(_req.url).pathname}`),
-      (error) => {
-        if (error) console.error('프로토콜 등록 실패');
-      }
-    );
+    protocol.registerFileProtocol('local', (_req, _callback) => {
+      const url = _req.url.normalize();
+
+      const p = url.replace('local://', '');
+
+      _callback({ path: p });
+    });
   });
 }
 

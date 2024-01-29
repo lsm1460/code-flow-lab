@@ -23,6 +23,8 @@ const registViewChannel = (_mainWindow) => {
 };
 
 const requestPlay = (_mainWindow) => {
+  _mainWindow.setFullScreen(true);
+
   _mainWindow.webContents.send(REQUEST_PLAY);
 };
 
